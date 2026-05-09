@@ -81,8 +81,10 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 </div>
 
 <div style="text-align:center;margin-bottom:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-<button onclick="showPast=!showPast;render()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em" id="togglePast">👁️ Mostra mesi passati</button>
-<button onclick="if(confirm('Reset tutte le ferie?')){pto={};save();updateCounter();render()}" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🗑️ Reset ferie</button>
+<button onclick="showPast=!showPast;render()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em" id="togglePast">👁️ Mesi passati</button>
+<button onclick="if(confirm('Reset tutte le ferie?')){pto={};save();updateCounter();render()}" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🗑️ Reset</button>
+<button onclick="cloudLoad().then(()=>alert('✅ Sincronizzato!'))" style="background:rgba(50,200,50,.2);border:1px solid rgba(50,200,50,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🔄 Sync</button>
+<button onclick="let t=prompt('GitHub token (ghp_...):');if(t){setToken(t);cloudLoad().then(()=>alert('✅ Connesso!'))}" style="background:rgba(100,100,255,.2);border:1px solid rgba(100,100,255,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em" id="setupBtn">🔑 Setup Sync</button>
 </div>
 
 <div id="calendar"></div>
@@ -128,7 +130,26 @@ const monthEmojis=['❄️','💝','🌱','🌸','🌺','☀️','🔥','🏖️
 
 let pto = JSON.parse(localStorage.getItem('summer26_pto')||'{}');
 let showPast = false;
-function save(){localStorage.setItem('summer26_pto',JSON.stringify(pto))}
+const GIST_ID='17fedcdc8ee90458b9513999b55a4813';
+
+function getToken(){return localStorage.getItem('gh_token')}
+function setToken(t){localStorage.setItem('gh_token',t)}
+
+async function cloudSave(){
+  const t=getToken();if(!t)return;
+  try{await fetch(`https://api.github.com/gists/${GIST_ID}`,{method:'PATCH',headers:{'Authorization':`token ${t}`,'Content-Type':'application/json'},body:JSON.stringify({files:{'pto.json':{content:JSON.stringify(pto)}}})});}catch(e){}
+}
+
+async function cloudLoad(){
+  const t=getToken();if(!t)return;
+  try{const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers:{'Authorization':`token ${t}`}});
+  const d=await r.json();const content=d.files['pto.json'].content;
+  const remote=JSON.parse(content);
+  if(Object.keys(remote).length>0||Object.keys(pto).length===0){pto=remote;localStorage.setItem('summer26_pto',JSON.stringify(pto));updateCounter();render();}
+  }catch(e){}
+}
+
+function save(){localStorage.setItem('summer26_pto',JSON.stringify(pto));cloudSave()}
 
 function getEvent(y,m,d){
   let best=null,bestDur=Infinity;
@@ -226,6 +247,7 @@ function render(){
 
 updateCounter();
 render();
+if(getToken())cloudLoad();
 </script>
 </body>
 </html>
