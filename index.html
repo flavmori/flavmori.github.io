@@ -272,22 +272,21 @@ async function cloudLoad(){
 function save(){localStorage.setItem('summer26_pto',JSON.stringify(pto));cloudSave()}
 
 function getEvent(y,m,d){
-  let best=null,bestDur=Infinity;
   const cur=new Date(y,m-1,d);
   const wd=cur.getDay();
+  let matches=[];
   for(const e of events){
     if(e.weekdaysOnly&&(wd===0||wd===6))continue;
     const s=new Date(e.start[0],e.start[1]-1,e.start[2]);
     const en=new Date(e.end[0],e.end[1]-1,e.end[2]);
-    if(cur>=s&&cur<=en){const dur=en-s;if(dur<bestDur){best=e;bestDur=dur}}
+    if(cur>=s&&cur<=en)matches.push(e);
   }
-  if(best)return best;
   for(const e of customEvents){
     const s=new Date(e.start[0],e.start[1]-1,e.start[2]);
     const en=new Date(e.end[0],e.end[1]-1,e.end[2]);
-    if(cur>=s&&cur<=en)return{cls:'custom-ev',tag:'📌 '+e.name};
+    if(cur>=s&&cur<=en)matches.push({cls:'custom-ev',tag:'📌 '+e.name});
   }
-  return null;
+  return matches.length?matches:null;
 }
 
 function isHoliday(m,d){return holidays[`${m}-${d}`]||null}
@@ -339,21 +338,23 @@ function render(){
     for(let i=0;i<startDay;i++)grid.innerHTML+=`<div class="day empty"></div>`;
     const daysInMonth=new Date(YEAR,month,0).getDate();
     for(let d=1;d<=daysInMonth;d++){
-      const ev=getEvent(YEAR,month,d);
+      const evs=getEvent(YEAR,month,d);
       const hol=isHoliday(month,d);
       const dayIdx=(startDay+d-1)%7;
       const we=isWeekend(YEAR,month,d);
       const key=`${YEAR}-${month}-${d}`;
       const hasPto=pto[key];
       const isHalf=hasPto==='half'||(hasPto&&month===8&&new Date(YEAR,month-1,d).getDay()===5);
-      let cls=ev?ev.cls:'';
-      if(hol&&!ev)cls='holiday';
+      // Pick strongest event for background color (non-mare/wfr/wfm first)
+      const primary=evs?evs.find(e=>!['mare','wfr','wfm'].includes(e.cls))||evs[0]:null;
+      let cls=primary?primary.cls:'';
+      if(hol&&!primary)cls='holiday';
       if(we)cls+=' weekend';
       if(hasPto)cls+=isHalf?' half-pto':' pto';
       const el=document.createElement('div');
       el.className=`day ${cls}`;
       let tagHtml='';
-      if(ev)tagHtml=`<span class="tag">${ev.tag}</span>`;
+      if(evs)tagHtml=evs.map(e=>`<span class="tag">${e.tag}</span>`).join('');
       else if(hol)tagHtml=`<span class="tag">${hol}</span>`;
       el.innerHTML=`<span class="num">${d}</span><span class="dow">${dow[dayIdx]}</span>${tagHtml}`;
       if(!we&&!hol){
