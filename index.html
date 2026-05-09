@@ -65,7 +65,7 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 <div class="progress-wrap"><div class="progress-fill" id="progress" style="width:0%"></div></div>
 </div>
 
-<p class="tip">💡 Clicca su un giorno feriale per segnare ferie. Venerdì Agosto = ½ giornata. Bank holidays = gratis (non cliccabili). Clicca di nuovo per togliere.</p>
+<p class="tip">💡 Clicca: 1° click = giorno intero, 2° click = mezza giornata, 3° click = toglie. Ven Agosto = sempre ½. Bank holidays = gratis.</p>
 
 <div class="legend">
 <div class="legend-item"><div class="legend-dot" style="background:rgba(72,209,204,.5)"></div>Liguria 🫶</div>
@@ -139,7 +139,11 @@ function isHoliday(m,d){return holidays[`${m}-${d}`]||null}
 
 function getPtoCost(y,m,d){
   const dt=new Date(y,m-1,d);
+  // Friday in August always 0.5
   if(m===8 && dt.getDay()===5) return 0.5;
+  // Check stored value: true=1, 'half'=0.5
+  const key=`${y}-${m}-${d}`;
+  if(pto[key]==='half') return 0.5;
   return 1;
 }
 
@@ -153,7 +157,7 @@ function updateCounter(){
   for(const k in pto){
     if(!pto[k])continue;
     const[y,m,d]=k.split('-').map(Number);
-    used+=getPtoCost(y,m,d);
+    used+=pto[k]==='half'?0.5:getPtoCost(y,m,d);
   }
   document.getElementById('used').textContent=used%1===0?used:used.toFixed(1);
   const remaining=TOTAL_PTO-used;
@@ -183,11 +187,11 @@ function render(){
       const we=isWeekend(YEAR,month,d);
       const key=`${YEAR}-${month}-${d}`;
       const hasPto=pto[key];
-      const cost=getPtoCost(YEAR,month,d);
+      const isHalf=hasPto==='half'||(hasPto&&m===8&&new Date(YEAR,month-1,d).getDay()===5);
       let cls=ev?ev.cls:'';
       if(hol&&!ev)cls='holiday';
       if(we)cls+=' weekend';
-      if(hasPto)cls+=cost===0.5?' half-pto':' pto';
+      if(hasPto)cls+=isHalf?' half-pto':' pto';
       const el=document.createElement('div');
       el.className=`day ${cls}`;
       let tagHtml='';
@@ -196,7 +200,10 @@ function render(){
       el.innerHTML=`<span class="num">${d}</span><span class="dow">${dow[dayIdx]}</span>${tagHtml}`;
       if(!we&&!hol){
         el.onclick=()=>{
-          if(pto[key]){delete pto[key]}else{pto[key]=true}
+          // Cycle: off → full → half → off
+          if(!pto[key])pto[key]=true;
+          else if(pto[key]===true)pto[key]='half';
+          else delete pto[key];
           save();updateCounter();render();
         };
       }
