@@ -83,6 +83,11 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 .custom-events-list{margin-top:12px;font-size:.8em;opacity:.7}
 .custom-events-list span{margin-right:8px}
 .custom-events-list button{background:none;border:none;color:rgba(255,100,100,.7);cursor:pointer}
+.tabs{display:flex;justify-content:center;gap:0;margin-bottom:30px;background:rgba(255,255,255,.06);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+.tab{padding:14px 24px;cursor:pointer;font-size:1em;opacity:.5;transition:all .2s;flex:1;text-align:center}
+.tab.active{opacity:1;background:rgba(255,255,255,.1);font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
 </style>
 </head>
 <body>
@@ -93,45 +98,62 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 <div class="err" id="err"></div>
 </div>
 <div id="app">
-<h1>☀️ Estate 2026</h1>
-<p class="subtitle">Giugno · Luglio · Agosto · Settembre · + Bank Holidays tutto l'anno</p>
+<h1>☀️ Flavio's World</h1>
 
+<div class="tabs">
+<div class="tab active" onclick="switchTab('calendar')">📅 Calendario</div>
+<div class="tab" onclick="switchTab('todo')">📝 To Do</div>
+<div class="tab" onclick="switchTab('events')">📌 Eventi</div>
+</div>
+
+<!-- TAB: CALENDARIO -->
+<div class="tab-content active" id="tab-calendar">
 <div class="pto-bar">
 <div class="counter"><span id="used">0</span> / 25 giorni ferie usati</div>
 <div class="detail" id="detail">Rimanenti: 25 | Clicca sui giorni per segnare ferie</div>
 <div class="progress-wrap"><div class="progress-fill" id="progress" style="width:0%"></div></div>
 </div>
 
-<p class="tip">💡 Clicca: 1° click = giorno intero, 2° click = mezza giornata, 3° click = toglie. Ven Agosto = sempre ½. Bank holidays = gratis.</p>
+<p class="tip">💡 1° click = giorno intero, 2° = mezza giornata, 3° = toglie. Ven Agosto = ½. Bank holidays = gratis.</p>
 
 <div class="legend">
 <div class="legend-item"><div class="legend-dot" style="background:rgba(72,209,204,.5)"></div>Liguria 🫶</div>
 <div class="legend-item"><div class="legend-dot" style="background:rgba(255,215,0,.5)"></div>Compleanno 🎂</div>
-<div class="legend-item"><div class="legend-dot" style="background:rgba(0,150,255,.2);border:1px dashed rgba(0,150,255,.3)"></div>Circeo (disponibile) 🏠</div>
+<div class="legend-item"><div class="legend-dot" style="background:rgba(0,150,255,.2);border:1px dashed rgba(0,150,255,.3)"></div>Circeo 🏠</div>
 <div class="legend-item"><div class="legend-dot" style="background:rgba(255,0,100,.5)"></div>Mad Cool 🎵</div>
 <div class="legend-item"><div class="legend-dot" style="background:rgba(255,165,0,.5)"></div>Capri 🏝️</div>
-<div class="legend-item"><div class="legend-dot" style="background:rgba(168,85,247,.5)"></div>Ischia + Gazzelle 🎤</div>
-<div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,.4)"></div>Circeo 🏖️</div>
+<div class="legend-item"><div class="legend-dot" style="background:rgba(168,85,247,.5)"></div>Ischia 🎤</div>
 <div class="legend-item"><div class="legend-dot" style="background:rgba(255,182,193,.6)"></div>Matrimonio 👑💍</div>
 <div class="legend-item"><div class="legend-dot" style="background:rgba(255,100,100,.3);border:1px solid rgba(255,100,100,.5)"></div>Bank Holiday 🎉</div>
-<div class="legend-item"><div class="legend-dot" style="outline:2px solid #fbbf24;width:12px;height:12px"></div>Ferie 🏖️</div>
+<div class="legend-item"><div class="legend-dot" style="outline:2px solid #fbbf24;width:12px;height:12px"></div>Ferie</div>
+<div class="legend-item"><div class="legend-dot" style="border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.08)"></div>Custom 📌</div>
 </div>
 
 <div style="text-align:center;margin-bottom:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-<button onclick="showPast=!showPast;render()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em" id="togglePast">👁️ Mesi passati</button>
+<button onclick="showPast=!showPast;render()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">👁️ Mesi passati</button>
 <button onclick="if(confirm('Reset tutte le ferie?')){pto={};save();updateCounter();render()}" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🗑️ Reset</button>
 <button onclick="cloudLoad().then(()=>alert('✅ Sincronizzato!'))" style="background:rgba(50,200,50,.2);border:1px solid rgba(50,200,50,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🔄 Sync</button>
-<button onclick="let t=prompt('GitHub token (ghp_...):');if(t){setToken(t);cloudLoad().then(()=>alert('✅ Connesso!'))}" style="background:rgba(100,100,255,.2);border:1px solid rgba(100,100,255,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em" id="setupBtn">🔑 Setup Sync</button>
+<button onclick="let t=prompt('GitHub token (ghp_...):');if(t){setToken(t);cloudLoad().then(()=>alert('✅ Connesso!'))}" style="background:rgba(100,100,255,.2);border:1px solid rgba(100,100,255,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85em">🔑 Setup</button>
 </div>
 
+<div id="calendar"></div>
+<div class="stats" id="stats"></div>
+</div>
+
+<!-- TAB: TO DO -->
+<div class="tab-content" id="tab-todo">
 <div class="todo-section">
 <h3>📝 To Do</h3>
 <div class="todo-input"><input type="text" id="todoInput" placeholder="Aggiungi task..." onkeydown="if(event.key==='Enter')addTodo()"><button onclick="addTodo()">+</button></div>
 <ul class="todo-list" id="todoList"></ul>
 </div>
+</div>
 
+<!-- TAB: EVENTI -->
+<div class="tab-content" id="tab-events">
 <div class="add-event-section">
 <h3>📌 Aggiungi evento</h3>
+<p style="opacity:.6;font-size:.85em;margin-bottom:14px">Aggiungili qui, appaiono nel calendario come bozza. Con Kiro li rendiamo fighi!</p>
 <div class="add-event-form">
 <input type="text" id="evName" placeholder="Nome evento">
 <input type="date" id="evStart">
@@ -140,14 +162,22 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 </div>
 <div class="custom-events-list" id="customEventsList"></div>
 </div>
-
-<div id="calendar"></div>
-
-<div class="stats" id="stats"></div>
+</div>
 
 <script>
 const TOTAL_PTO = 25;
 const YEAR = 2026;
+
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.target.classList.add('active');
+  localStorage.setItem('fm_tab',name);
+}
+// Restore last tab
+const lastTab=localStorage.getItem('fm_tab');
+if(lastTab){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));document.getElementById('tab-'+lastTab)?.classList.add('active');document.querySelectorAll('.tab').forEach((el,i)=>{el.classList.remove('active');if(el.textContent.includes(lastTab==='calendar'?'Calendario':lastTab==='todo'?'To Do':'Eventi'))el.classList.add('active')})}
 
 const events = [
   // Turni Circeo (casa disponibile)
