@@ -371,14 +371,14 @@ function render(){
       // Pick strongest event for background color (non-mare/wfr/wfm first)
       const primary=evs?evs.find(e=>!['mare','wfr','wfm'].includes(e.cls))||evs[0]:null;
       let cls=primary?primary.cls:'';
-      if(hol&&!primary)cls='holiday';
-      if(we)cls+=' weekend';
+      if(hol)cls+=' holiday';
+      if(we&&!hol)cls+=' weekend';
       if(hasPto)cls+=isHalf?' half-pto':' pto';
       const el=document.createElement('div');
       el.className=`day ${cls}`;
       let tagHtml='';
-      if(evs)tagHtml=evs.map(e=>`<span class="tag">${e.tag}</span>`).join('');
-      else if(hol)tagHtml=`<span class="tag">${hol}</span>`;
+      if(hol)tagHtml+=`<span class="tag">${hol}</span>`;
+      if(evs)tagHtml+=evs.map(e=>`<span class="tag">${e.tag}</span>`).join('');
       el.innerHTML=`<span class="num">${d}</span><span class="dow">${dow[dayIdx]}</span>${tagHtml}`;
       if(!we&&!hol){
         el.onclick=()=>{
