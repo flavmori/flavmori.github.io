@@ -72,6 +72,17 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 .todo-item span{flex:1;font-size:.9em}
 .todo-item button{background:none;border:none;color:rgba(255,100,100,.7);cursor:pointer;font-size:1.1em}
 .todo-item .grip{cursor:grab;opacity:.4;font-size:1.1em;user-select:none}
+.custom-ev{background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25)}
+.custom-ev .tag{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+.add-event-section{margin-bottom:30px;background:rgba(255,255,255,.05);border-radius:16px;padding:20px;border:1px solid rgba(255,255,255,.1)}
+.add-event-section h3{margin-bottom:12px;font-size:1.2em}
+.add-event-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.add-event-form input,.add-event-form select{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.85em}
+.add-event-form input[type=date]{color-scheme:dark}
+.add-event-form button{padding:8px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,#f093fb,#f5576c);color:#fff;cursor:pointer;font-size:.85em}
+.custom-events-list{margin-top:12px;font-size:.8em;opacity:.7}
+.custom-events-list span{margin-right:8px}
+.custom-events-list button{background:none;border:none;color:rgba(255,100,100,.7);cursor:pointer}
 </style>
 </head>
 <body>
@@ -117,6 +128,17 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 <h3>📝 To Do</h3>
 <div class="todo-input"><input type="text" id="todoInput" placeholder="Aggiungi task..." onkeydown="if(event.key==='Enter')addTodo()"><button onclick="addTodo()">+</button></div>
 <ul class="todo-list" id="todoList"></ul>
+</div>
+
+<div class="add-event-section">
+<h3>📌 Aggiungi evento</h3>
+<div class="add-event-form">
+<input type="text" id="evName" placeholder="Nome evento">
+<input type="date" id="evStart">
+<input type="date" id="evEnd">
+<button onclick="addCustomEvent()">+ Aggiungi</button>
+</div>
+<div class="custom-events-list" id="customEventsList"></div>
 </div>
 
 <div id="calendar"></div>
@@ -190,6 +212,7 @@ async function cloudLoad(){
   const remote=JSON.parse(content);
   if(Object.keys(remote).length>0||Object.keys(pto).length===0){pto=remote;localStorage.setItem('summer26_pto',JSON.stringify(pto));updateCounter();render();}
   if(d.files['todos.json']){todos=JSON.parse(d.files['todos.json'].content);localStorage.setItem('fm_todos',JSON.stringify(todos));renderTodos();}
+  if(d.files['events.json']){customEvents=JSON.parse(d.files['events.json'].content);localStorage.setItem('fm_custom_events',JSON.stringify(customEvents));renderCustomEvents();render();}
   }catch(e){}
 }
 
@@ -203,7 +226,15 @@ function getEvent(y,m,d){
     const cur=new Date(y,m-1,d);
     if(cur>=s&&cur<=en){const dur=en-s;if(dur<bestDur){best=e;bestDur=dur}}
   }
-  return best;
+  if(best)return best;
+  // Check custom events (shown as subtle)
+  for(const e of customEvents){
+    const s=new Date(e.start[0],e.start[1]-1,e.start[2]);
+    const en=new Date(e.end[0],e.end[1]-1,e.end[2]);
+    const cur=new Date(y,m-1,d);
+    if(cur>=s&&cur<=en)return{cls:'custom-ev',tag:'📌 '+e.name};
+  }
+  return null;
 }
 
 function isHoliday(m,d){return holidays[`${m}-${d}`]||null}
@@ -288,6 +319,39 @@ function render(){
   }
   document.getElementById('stats').innerHTML='🎵 Mad Cool: Gio 9 Luglio (Melisa 8-12) | 🎂 Compleanno: Sab 20 Giugno | 👑 Matrimonio Valeria & Alex: Sab 5 Settembre | 🎉 Bank Holidays: 13 giorni';
 }
+
+// === CUSTOM EVENTS ===
+let customEvents = JSON.parse(localStorage.getItem('fm_custom_events')||'[]');
+
+function saveCustomEvents(){
+  localStorage.setItem('fm_custom_events',JSON.stringify(customEvents));
+  const t=getToken();if(!t)return;
+  fetch(`https://api.github.com/gists/${GIST_ID}`,{method:'PATCH',headers:{'Authorization':`token ${t}`,'Content-Type':'application/json'},body:JSON.stringify({files:{'pto.json':{content:JSON.stringify(pto)},'todos.json':{content:JSON.stringify(todos)},'events.json':{content:JSON.stringify(customEvents)}}})}).catch(()=>{});
+}
+
+function addCustomEvent(){
+  const name=document.getElementById('evName').value.trim();
+  const start=document.getElementById('evStart').value;
+  const end=document.getElementById('evEnd').value||start;
+  if(!name||!start)return;
+  const[sy,sm,sd]=start.split('-').map(Number);
+  const[ey,em,ed]=end.split('-').map(Number);
+  customEvents.push({name,start:[sy,sm,sd],end:[ey,em,ed]});
+  document.getElementById('evName').value='';
+  document.getElementById('evStart').value='';
+  document.getElementById('evEnd').value='';
+  saveCustomEvents();renderCustomEvents();render();
+}
+
+function deleteCustomEvent(i){customEvents.splice(i,1);saveCustomEvents();renderCustomEvents();render()}
+
+function renderCustomEvents(){
+  const el=document.getElementById('customEventsList');
+  if(!customEvents.length){el.innerHTML='<em>Nessun evento custom — aggiungili qui, poi con Kiro li rendiamo fighi!</em>';return;}
+  el.innerHTML=customEvents.map((e,i)=>`<span>📌 ${e.name} (${e.start[2]}/${e.start[1]} → ${e.end[2]}/${e.end[1]})</span><button onclick="deleteCustomEvent(${i})">✕</button><br>`).join('');
+}
+
+renderCustomEvents();
 
 // === TODO LIST ===
 let todos = JSON.parse(localStorage.getItem('fm_todos')||'[]');
