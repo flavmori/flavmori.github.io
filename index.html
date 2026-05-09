@@ -153,7 +153,7 @@ h1{text-align:center;font-size:2.5em;margin-bottom:10px;background:linear-gradie
 <div class="tab-content" id="tab-events">
 <div class="add-event-section">
 <h3>📌 Aggiungi evento</h3>
-<p style="opacity:.6;font-size:.85em;margin-bottom:14px">Aggiungili qui, appaiono nel calendario come bozza. Con Kiro li rendiamo fighi!</p>
+<p style="opacity:.6;font-size:.85em;margin-bottom:14px">Segna qui nuovi eventi — appariranno nel calendario.</p>
 <div class="add-event-form">
 <input type="text" id="evName" placeholder="Nome evento">
 <input type="date" id="evStart">
@@ -377,7 +377,7 @@ function deleteCustomEvent(i){customEvents.splice(i,1);saveCustomEvents();render
 
 function renderCustomEvents(){
   const el=document.getElementById('customEventsList');
-  if(!customEvents.length){el.innerHTML='<em>Nessun evento custom — aggiungili qui, poi con Kiro li rendiamo fighi!</em>';return;}
+  if(!customEvents.length){el.innerHTML='<em>Nessun evento aggiunto.</em>';return;}
   el.innerHTML=customEvents.map((e,i)=>`<span>📌 ${e.name} (${e.start[2]}/${e.start[1]} → ${e.end[2]}/${e.end[1]})</span><button onclick="deleteCustomEvent(${i})">✕</button><br>`).join('');
 }
 
