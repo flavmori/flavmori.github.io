@@ -129,6 +129,12 @@ input[type=number]{-moz-appearance:textfield}
 <div><label>Investment Cap (€)</label><input type="number" id="cfg_cap" step="100" oninput="saveCfg()"></div>
 <div><label>Satellite Cap (€)</label><input type="number" id="cfg_capSa" step="100" oninput="saveCfg()"></div>
 </div>
+<div class="sh">Unrealized gain (%)</div>
+<div class="g2">
+<div><label>Equity gain %</label><input type="number" id="cfg_gEq" step="1" oninput="saveCfg()"></div>
+<div><label>Bond gain %</label><input type="number" id="cfg_gBo" step="1" oninput="saveCfg()"></div>
+<div><label>Satellite gain %</label><input type="number" id="cfg_gSa" step="1" oninput="saveCfg()"></div>
+</div>
 <div class="sh">BTC Trade</div>
 <div class="g2">
 <div><label>Entry (€)</label><input type="number" id="btc_e" step="1000" oninput="saveB()"></div>
@@ -143,7 +149,7 @@ input[type=number]{-moz-appearance:textfield}
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
 let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
-let cfg={cap:2500,capSa:2500};
+let cfg={cap:2500,capSa:2500,gEq:0,gBo:0,gSa:0};
 let btc={entry:40000,sell:95000};
 let hist=[];
 
@@ -160,6 +166,7 @@ function init(){
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
   $('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca;
   $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
+  $('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0;
   $('btc_e').value=btc.entry;$('btc_s').value=btc.sell;
   $('ghToken').value=localStorage.getItem('ght')||'';
   calc();rH();
@@ -214,7 +221,7 @@ function calc(){
   if(invested>tInv+500&&surplus<-500){
     step++;
     const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
-    const taxCostLiq=Math.round(sellAmt*0.25*0.20);
+    const taxCostLiq=Math.round(sellAmt*(cfg.gEq/100/(1+cfg.gEq/100))*0.20);
     acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (invested ${pInv}%, liquid ${pLiq}%)</span><span class="av neg">€${fm(sellAmt)} needed</span></div>`;
     acts+=`<div class="act-note">Option A (free): stop investing, let salary rebuild liquid over time.</div>`;
     acts+=`<div class="act-note">Option B (now): sell €${fm(sellAmt)} from investments. Tax cost approx €${fm(taxCostLiq)}.</div>`;
@@ -226,7 +233,8 @@ function calc(){
     const from=actualEqR>idealEqR?'Equity':'Bond';
     const to=actualEqR>idealEqR?'Bond':'Equity';
     const sellAmt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
-    const taxCost=Math.round(sellAmt*0.25*0.20);
+    const gPct=actualEqR>idealEqR?cfg.gEq:cfg.gBo;
+    const taxCost=Math.round(sellAmt*(gPct/100/(1+gPct/100))*0.20);
     const tranchesToFix=cfg.cap>0?Math.ceil(sellAmt/cfg.cap):99;
     acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fm(sellAmt)} off</span></div>`;
     acts+=`<div class="act-note">Option A (free): invest next ${tranchesToFix} tranches 100% into ${to}. No tax, takes time.</div>`;
@@ -304,7 +312,7 @@ function upT(){
   $('m3').innerHTML=(T.r_mm+T.r_ca)!==100?'<span class="neg">'+(T.r_mm+T.r_ca)+'%</span>':'';
   localStorage.setItem('ft',JSON.stringify(T));calc();
 }
-function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
+function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500,gEq:+$('cfg_gEq').value||0,gBo:+$('cfg_gBo').value||0,gSa:+$('cfg_gSa').value||0};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
 function saveB(){btc={entry:+$('btc_e').value||40000,sell:+$('btc_s').value||95000};localStorage.setItem('fb',JSON.stringify(btc));calc()}
 
 function calcW(){
@@ -345,7 +353,7 @@ function calcW(){
   // 4. Bond
   if(remaining>0&&bo>0){
     const take=Math.min(remaining,bo);
-    const tax=Math.round(take*0.15*0.19);
+    const tax=Math.round(take*(cfg.gBo/100/(1+cfg.gBo/100))*0.19);
     steps.push({src:'Bond (Gov EUR)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}.`,color:'#10b981'});
     remaining-=take;
   }
@@ -353,7 +361,7 @@ function calcW(){
   // 5. Equity
   if(remaining>0&&eq>0){
     const take=Math.min(remaining,eq);
-    const tax=Math.round(take*0.30*0.20);
+    const tax=Math.round(take*(cfg.gEq/100/(1+cfg.gEq/100))*0.20);
     steps.push({src:'Equity (ACWI)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}. Avoid if possible.`,color:'#3b82f6'});
     remaining-=take;
   }
@@ -361,7 +369,7 @@ function calcW(){
   // 6. Satellite
   if(remaining>0&&sat>0){
     const take=Math.min(remaining,sat);
-    const tax=Math.round(take*0.40*0.21);
+    const tax=Math.round(take*(cfg.gSa/100/(1+cfg.gSa/100))*0.21);
     steps.push({src:'Satellite (BTC)',amt:take,note:`Sell on exchange, 1-3 days. Tax on gain: approx €${fm(tax)}.`,color:'#ef4444'});
     remaining-=take;
   }
