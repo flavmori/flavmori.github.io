@@ -65,6 +65,10 @@ input[type=number]{-moz-appearance:textfield}
 <div id="app" style="display:block"><div class="w">
 <div class="total" id="tot">-</div>
 <div class="total-d" id="totD"></div>
+<div class="sec" id="mktSec" style="display:none">
+<div class="sec-h">Market</div>
+<div id="mkt"></div>
+</div>
 
 <div class="sec">
 <div class="sec-h">Balances</div>
@@ -173,12 +177,32 @@ async function fetchPrices(){
   try{
     const fetches=Object.entries(SYMBOLS).map(([k,sym])=>
       fetch(`https://eodhd.com/api/real-time/${sym}?api_token=${API_KEY}&fmt=json`)
-        .then(r=>r.json()).then(d=>{if(d.close)prices[k]=parseFloat(d.close)})
+        .then(r=>r.json()).then(d=>{if(d.close&&d.close!=='NA'){prices[k]={close:parseFloat(d.close),change:parseFloat(d.change_p)||0,prev:parseFloat(d.previousClose)||0}}})
         .catch(()=>{})
     );
     await Promise.all(fetches);
+    renderMkt();
     calc();
   }catch(e){}
+}
+
+function renderMkt(){
+  const items=[
+    {k:'eq',name:'ACWI',cur:'€'},
+    {k:'bo',name:'Gov Bond',cur:'€'},
+    {k:'btc',name:'Bitcoin',cur:'$'},
+  ];
+  let h='';
+  items.forEach(i=>{
+    const p=prices[i.k];
+    if(!p)return;
+    const price=i.cur+(i.cur==='€'?fm(Math.round(p.close*100)/100):fm(Math.round(p.close)));
+    const chg=p.change;
+    const cls=chg>=0?'pos':'neg';
+    const sign=chg>=0?'+':'';
+    h+=`<div class="arow"><span class="l">${i.name}</span><span class="r"><span style="color:#f8fafc">${price}</span> <span class="${cls}">${sign}${chg.toFixed(2)}%</span></span></div>`;
+  });
+  if(h){$('mktSec').style.display='block';$('mkt').innerHTML=h}
 }
 function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
 
@@ -287,7 +311,7 @@ function calc(){
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
       const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fm(dynCap)} (x1.5). `:'';
-      const priceNote=prices.eq?` ACWI at €${prices.eq.toFixed(2)}.`:'';
+      const priceNote=prices.eq?` ACWI at €${prices.eq.close.toFixed(2)}.`:'';
       acts+=`<div class="act-note">${capNote}${priceNote} You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
@@ -316,7 +340,7 @@ function calc(){
   if(sat<tSat-100){
     step++;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
-    const btcLive=prices.btc;
+    const btcLive=prices.btc?prices.btc.close:null;
     const btcEur=btcLive?Math.round(btcLive*0.865):null; // USD to EUR approx
     let trancheNote='';
     if(btcEur){
@@ -332,7 +356,7 @@ function calc(){
     acts+=`<div class="act-note">${trancheNote}</div>`;
   }else if(sat>tSat+100){
     step++;
-    const btcLive2=prices.btc;
+    const btcLive2=prices.btc?prices.btc.close:null;
     const btcEur2=btcLive2?Math.round(btcLive2*0.865):null;
     let sellNote='';
     if(btcEur2){
