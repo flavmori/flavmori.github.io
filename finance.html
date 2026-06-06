@@ -198,18 +198,11 @@ function calc(){
   a+=`<div class="arow"><span class="l">Satellite</span><span class="r">€${fm(sat)} <span class="mu">${pSat}% → ${T.sat}%</span> <span class="gap">${gapH(gSat)}</span></span></div>`;
   $('alloc').innerHTML=a;
 
-  // Actions
+  // Actions — clear priority-based logic
   let acts='<div class="ah">Actions</div>';
   let any=false;
 
-  // Rebalance: Invested over target → sell to rebuild liquidity
-  if(invested>tInv+200&&liquid<tLiq-200){
-    const sellAmt=Math.min(invested-tInv,tLiq-liquid);
-    acts+=`<div class="act"><span>Sell invested → rebuild liquidity</span><span class="av neg">€${fm(Math.round(sellAmt))}</span></div>`;
-    any=true;
-  }
-
-  // Rebalance: Equity/Bond ratio drift >5pts
+  // Priority 1: Equity/Bond ratio drift (always check, independent of other actions)
   if(invested>0){
     const idealR=T.r_eq/(T.r_eq+T.r_bo)*100;
     const actualR=eq/invested*100;
@@ -217,61 +210,74 @@ function calc(){
       const from=actualR>idealR?'Equity':'Bond';
       const to=actualR>idealR?'Bond':'Equity';
       const amt=Math.round(Math.abs(eq-(idealR/100)*invested));
-      acts+=`<div class="act"><span>Rebalance: ${from} → ${to}</span><span class="av" style="color:#a78bfa">€${fm(amt)}</span></div>`;
+      acts+=`<div class="act"><span>Sell ${from}, buy ${to} <small>ratio ${Math.round(actualR)}/${Math.round(100-actualR)} → ${T.r_eq}/${T.r_bo}</small></span><span class="av" style="color:#a78bfa">€${fm(amt)}</span></div>`;
       any=true;
     }
   }
 
-  // Rebalance: MM/Cash ratio within liquid (only when liquid is near target)
-  if(liquid>0&&Math.abs(liquid-tLiq)<liquid*0.3){
-    const mmIdeal=T.r_mm/(T.r_mm+T.r_ca)*liquid;
-    const mmDrift=mm-mmIdeal;
-    if(Math.abs(mmDrift)>200){
-      if(mmDrift>0)acts+=`<div class="act"><span>Money Market → Cash</span><span class="av mu">€${fm(Math.round(mmDrift))}</span></div>`;
-      else acts+=`<div class="act"><span>Cash → Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(-mmDrift))}</span></div>`;
-      any=true;
-    }
-  }
+  // Priority 2: Determine if we have surplus (liquid > target) or deficit (liquid < target)
+  const surplus=liquid-tLiq;
 
-  // Invest: liquid over target
-  const surplus=Math.max(0,liquid-tLiq);
-  if(surplus>=300){
-    // First: if MM is below its target, fill it
+  if(surplus>300){
+    // We have excess liquidity — deploy it
+    // Step A: Fill Money Market to its target if needed
     const mmNeed=Math.max(0,tMm-mm);
-    if(mmNeed>50&&cash>tCa){
-      const moveToMm=Math.min(mmNeed,surplus);
-      acts+=`<div class="act"><span>Move to Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(moveToMm))}</span></div>`;
+    if(mmNeed>50){
+      acts+=`<div class="act"><span>Cash → Money Market <small>fill to ${T.r_mm}% of liquid target</small></span><span class="av" style="color:#f59e0b">€${fm(Math.round(mmNeed))}</span></div>`;
       any=true;
     }
-    // Then: invest remainder (capped)
-    const investable=Math.max(0,surplus-Math.max(0,mmNeed));
+    // Step B: Invest the rest (capped)
+    const investable=Math.max(0,surplus-mmNeed);
     if(investable>=300){
       if(any)acts+=`<div class="act-sep"></div>`;
       const amt=Math.min(investable,cfg.cap);
-      const invGap=Math.max(0,tEq-eq)+Math.max(0,tBo-bo);
       const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
+      const invGap=eqG+boG;
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
-      acts+=`<div class="act"><span>Equity <small>ACWI</small></span><span class="av" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
-      acts+=`<div class="act"><span>Bond <small>Gov EUR</small></span><span class="av" style="color:#10b981">€${fm(toBo)}</span></div>`;
-      if(investable>cfg.cap)acts+=`<div class="act-note">Remaining: €${fm(Math.round(investable-cfg.cap))}</div>`;
+      acts+=`<div class="act"><span>Invest: Equity <small>ACWI</small></span><span class="av" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
+      acts+=`<div class="act"><span>Invest: Bond <small>Gov EUR</small></span><span class="av" style="color:#10b981">€${fm(toBo)}</span></div>`;
+      if(investable>cfg.cap)acts+=`<div class="act-note">Remaining for next time: €${fm(Math.round(investable-cfg.cap))}</div>`;
       any=true;
     }
-  }else if(invested<tInv-200&&surplus<300){
-    acts+=`<div class="act"><span class="mu">Not enough surplus. Accumulate.</span><span></span></div>`;
+  }else if(surplus<-200&&invested>tInv+200){
+    // Liquid is below target AND invested is above target — sell to rebuild liquidity
+    const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
+    acts+=`<div class="act"><span>Sell invested → rebuild liquidity <small>liquid ${pLiq}% below ${T.liq}% target</small></span><span class="av neg">€${fm(sellAmt)}</span></div>`;
+    any=true;
+  }else if(surplus<-200){
+    // Liquid below target but invested also below — just accumulate
+    acts+=`<div class="act"><span class="mu">Liquidity below target. Accumulate cash before investing.</span><span></span></div>`;
     any=true;
   }
 
-  // Satellite
+  // Priority 3: MM/Cash rebalance (only when liquid is AT target, not when surplus exists)
+  if(Math.abs(surplus)<500&&liquid>0){
+    const mmIdeal=T.r_mm/100*tLiq;
+    const mmOff=mm-mmIdeal;
+    if(mmOff>200){
+      acts+=`<div class="act"><span>Money Market → Cash <small>MM over ${T.r_mm}% liquid target</small></span><span class="av mu">€${fm(Math.round(mmOff))}</span></div>`;
+      any=true;
+    }else if(mmOff<-200&&cash>tCa){
+      acts+=`<div class="act"><span>Cash → Money Market <small>MM below ${T.r_mm}% liquid target</small></span><span class="av" style="color:#f59e0b">€${fm(Math.round(-mmOff))}</span></div>`;
+      any=true;
+    }
+  }
+
+  // Priority 4: Satellite
   if(sat<tSat-50){
     if(any)acts+=`<div class="act-sep"></div>`;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
-    acts+=`<div class="act"><span>Satellite <small>BTC at ~€${fm(btc.entry)}</small></span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
+    acts+=`<div class="act"><span>Satellite <small>BTC — buy at ~€${fm(btc.entry)}</small></span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
     any=true;
   }else if(sat>tSat+100){
     if(any)acts+=`<div class="act-sep"></div>`;
-    acts+=`<div class="act"><span>Satellite over target — consider profit</span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
+    acts+=`<div class="act"><span>Satellite over target <small>consider taking profit</small></span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
+    any=true;
+  }
+
+  if(!any)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
     any=true;
   }
 
