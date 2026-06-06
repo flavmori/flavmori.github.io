@@ -254,8 +254,8 @@ function calc(){
     acts+=`<div class="act-note">Liquidity is below target (${pLiq}% vs ${T.liq}%). Wait for income before investing.</div>`;
   }
 
-  // Step: MM/Cash rebalance (only at regime — liquid near target)
-  if(Math.abs(surplus)<=500&&liquid>0){
+  // Priority 3: MM/Cash rebalance (only when liquid is AT target, not when surplus exists)
+  if(surplus>-500&&surplus<=300&&liquid>0){
     const mmIdeal=T.r_mm/100*tLiq;
     const mmOff=mm-mmIdeal;
     if(mmOff>200){
@@ -270,7 +270,7 @@ function calc(){
   }
 
   // Step: Satellite
-  if(sat<tSat-50){
+  if(sat<tSat-100){
     step++;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
     acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
