@@ -103,8 +103,8 @@ h1{text-align:center;font-size:1.5em;margin-bottom:4px;font-weight:700;color:#f8
 <div class="card">
 <div class="card-t">Configuration</div>
 <div class="cfg">
-<div class="f"><label>Investment Cap (% of portfolio)</label><input type="number" id="cap" value="5" step="0.5" oninput="calc()"></div>
-<div class="f"><label>Satellite Cap (% of portfolio)</label><input type="number" id="capSa" value="5" step="0.5" oninput="calc()"></div>
+<div class="f"><label>Investment Tranches (how many entries)</label><input type="number" id="cap" value="5" min="1" max="20" step="1" oninput="calc()"></div>
+<div class="f"><label>Satellite Tranches</label><input type="number" id="capSa" value="2" min="1" max="10" step="1" oninput="calc()"></div>
 </div>
 <div class="sett" id="sett">
 <div class="card-t" style="margin-top:0">Target Allocation (must sum to 100%)</div>
@@ -203,9 +203,7 @@ function calc(){
   $('bks').innerHTML=h;
 
   // Suggestions
-  // Suggestions
-  const capPct=parseFloat($('cap').value)||5;
-  const cap=Math.round(capPct/100*total);
+  const tranches=Math.max(1,parseInt($('cap').value)||5);
   const cashTarget=T.ca/100*total;
   const mmTarget=T.mm/100*total;
   const eqTarget=T.eq/100*total;
@@ -231,18 +229,19 @@ function calc(){
     }
   }
 
-  // 2. Invest (capped)
+  // 2. Invest (capped by tranches)
   const afterMm=Math.max(0,cashExcess-Math.max(0,mmGap));
+  const cap=afterMm>0?Math.round(afterMm/tranches):0;
   if(afterMm>=300){
     const amt=Math.min(afterMm,cap);
     const invGap=eqGap+boGap;
     let toEq,toBo;
     if(invGap>0){toEq=Math.round(amt*eqGap/invGap);toBo=amt-toEq}
     else{const r=T.eq/(T.eq+T.bo);toEq=Math.round(amt*r);toBo=amt-toEq}
-    sg+=`<div class="ss"><div class="sl">Invest (cap ${capPct}% = €${fm(cap)})</div>`;
+    sg+=`<div class="ss"><div class="sl">Invest (${tranches} tranches — €${fm(cap)} each)</div>`;
     if(toEq>0)sg+=`<div class="sr"><span>Equity <span class="sn">(ACWI)</span></span><span class="sv" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
     if(toBo>0)sg+=`<div class="sr"><span>Bond <span class="sn">(Gov EUR)</span></span><span class="sv" style="color:#10b981">€${fm(toBo)}</span></div>`;
-    if(afterMm>cap)sg+=`<div class="sr"><span class="sn">Remaining for next time</span><span class="mu">€${fm(afterMm-amt)}</span></div>`;
+    if(afterMm>cap)sg+=`<div class="sr"><span class="sn">Remaining (${tranches-1} more tranches)</span><span class="mu">€${fm(afterMm-amt)}</span></div>`;
     sg+=`</div>`;any=true;
   }else if(eqGap+boGap>0){
     sg+=`<div class="ss"><div class="sl">Invest</div><div class="sr"><span class="mu">Not enough surplus. Accumulate.</span><span></span></div></div>`;
@@ -251,12 +250,12 @@ function calc(){
 
   // 3. Satellite (own cap)
   if(saGap>0){
-    const capSaPct=parseFloat($('capSa').value)||5;
-    const capSa=Math.round(capSaPct/100*total);
-    const saAmt=Math.min(saGap,capSa);
-    sg+=`<div class="ss"><div class="sl">Satellite (${T.sa}% target, cap ${capSaPct}% = €${fm(capSa)})</div>`;
+    const saTranches=Math.max(1,parseInt($('capSa').value)||2);
+    const capSa=Math.round(saGap/saTranches);
+    const saAmt=capSa;
+    sg+=`<div class="ss"><div class="sl">Satellite (${saTranches} tranches — €${fm(capSa)} each)</div>`;
     sg+=`<div class="sr"><span>BTC <span class="sn">buy at ~€${fm(btc.entry)}</span></span><span class="sv" style="color:#ef4444">€${fm(saAmt)}</span></div>`;
-    if(saGap>capSa)sg+=`<div class="sr"><span class="sn">Remaining</span><span class="mu">€${fm(saGap-saAmt)}</span></div>`;
+    if(saGap>capSa)sg+=`<div class="sr"><span class="sn">Remaining (${saTranches-1} more)</span><span class="mu">€${fm(saGap-saAmt)}</span></div>`;
     sg+=`</div>`;
     any=true;
   }else if(sat>saTarget+100){
@@ -268,7 +267,7 @@ function calc(){
   $('sug').innerHTML=sg;
 
   localStorage.setItem('fs',JSON.stringify(s));
-  localStorage.setItem('fc',JSON.stringify({cap:parseFloat($('cap').value)||5,capSa:parseFloat($('capSa').value)||5}));
+  localStorage.setItem('fc',JSON.stringify({cap:parseInt($('cap').value)||5,capSa:parseInt($('capSa').value)||2}));
 }
 
 function tog(){const p=$('sett');p.style.display=p.style.display==='none'?'block':'none'}
@@ -319,7 +318,7 @@ async function frG(){
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.T){T=d.T;$('t_eq').value=T.eq;$('t_bo').value=T.bo;$('t_mm').value=T.mm;$('t_ca').value=T.ca;$('t_sa').value=T.sa}
   if(d.btc)btc=d.btc;
-  if(d.cfg){$('cap').value=d.cfg.cap||5;$('capSa').value=d.cfg.capSa||5}
+  if(d.cfg){$('cap').value=d.cfg.cap||5;$('capSa').value=d.cfg.capSa||2}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH();$('ss').textContent='Loaded'}catch(e){$('ss').textContent=e.message}
