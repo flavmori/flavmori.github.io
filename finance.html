@@ -94,9 +94,12 @@ h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spac
 <div class="grid3">
 <div class="field"><label>ACWI</label><input type="number" id="s_acwi" step=".01" oninput="calc()"></div>
 <div class="field"><label>Gov Bond</label><input type="number" id="s_gov" step=".01" oninput="calc()"></div>
+<div class="field"><label>Small Cap</label><input type="number" id="s_sc" step=".01" oninput="calc()"></div>
 <div class="field"><label>CSH2</label><input type="number" id="s_csh2" step=".01" oninput="calc()"></div>
 <div class="field"><label>Santander</label><input type="number" id="s_sant" step=".01" oninput="calc()"></div>
 <div class="field"><label>Saldo TR Cash</label><input type="number" id="s_trcash" step=".01" oninput="calc()"></div>
+</div>
+<div class="grid2" style="margin-top:12px">
 <div class="field"><label>BTC (0 se non comprato)</label><input type="number" id="s_btc" step=".01" oninput="calc()"></div>
 </div>
 </div>
@@ -115,12 +118,29 @@ h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spac
 
 <div class="btc-box" id="btcBox"></div>
 
+<div class="card" id="settingsCard" style="display:none">
+<div class="card-title">Impostazioni</div>
+<div class="grid2" style="margin-bottom:12px">
+<div class="field"><label>Target Investito %</label><input type="number" id="t_inv" step="1" oninput="updateTargets()"></div>
+<div class="field"><label>Target Liquidita %</label><input type="number" id="t_liq" step="1" oninput="updateTargets()"></div>
+<div class="field"><label>Target Buffer %</label><input type="number" id="t_buf" step="1" oninput="updateTargets()"></div>
+<div class="field"><label>Target Alto Rischio %</label><input type="number" id="t_risk" step="1" oninput="updateTargets()"></div>
+</div>
+<div class="grid3" style="margin-bottom:12px">
+<div class="field"><label>ACWI % (dell'investito)</label><input type="number" id="r_acwi" step="1" oninput="updateTargets()"></div>
+<div class="field"><label>Gov % (dell'investito)</label><input type="number" id="r_gov" step="1" oninput="updateTargets()"></div>
+<div class="field"><label>Small Cap % (dell'investito)</label><input type="number" id="r_sc" step="1" oninput="updateTargets()"></div>
+</div>
+<div id="settingsMsg" style="font-size:.78em;opacity:.5"></div>
+</div>
+
 <div class="card">
 <div class="card-title">Salva</div>
 <div class="actions">
 <button class="btn btn-primary" onclick="save()">Snapshot</button>
 <button class="btn btn-secondary" onclick="toGist()">Sync cloud</button>
 <button class="btn btn-secondary" onclick="fromGist()">Carica cloud</button>
+<button class="btn btn-secondary" onclick="toggleSettings()">Impostazioni</button>
 </div>
 <div class="sync-status" id="ss"></div>
 </div>
@@ -134,8 +154,9 @@ h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spac
 
 <script>
 const GIST_ID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
-const KS=['acwi','gov','csh2','sant','trcash','btc'];
-const T={investito:74,liquidita:14,buffer:7,rischio:5};
+const KS=['acwi','gov','sc','csh2','sant','trcash','btc'];
+let T={investito:74,liquidita:14,buffer:7,rischio:5};
+let R={acwi:80,gov:20,sc:0}; // ratio inside investito
 let hist=[],btcConf={budget:5000,entry:40000,sell:95000};
 
 function unlock(){if(document.getElementById('pw').value===PW){localStorage.setItem('fa','1');show();init()}else $('err').textContent='No'}
@@ -148,9 +169,14 @@ function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($(('s_'+k)).value)||0);re
 function init(){
   let s=J('fin_s')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
   btcConf=J('fin_btc')||btcConf;
+  T=J('fin_t')||T;
+  R=J('fin_r')||R;
   let cfg=J('fin_cfg')||{};
   if(cfg.cap)$('cfg_cap').value=cfg.cap;
   hist=J('fin_h')||[];
+  // Set settings fields
+  $('t_inv').value=T.investito;$('t_liq').value=T.liquidita;$('t_buf').value=T.buffer;$('t_risk').value=T.rischio;
+  $('r_acwi').value=R.acwi;$('r_gov').value=R.gov;$('r_sc').value=R.sc;
   calc();renderHist();
 }
 
@@ -160,14 +186,14 @@ function calc(){
   const btcOwned=s.btc;
   const btcRes=btcOwned>0?0:Math.min(btcConf.budget,s.trcash);
   const active=total; // everything counts, BTC is in the target system
-  const investito=s.acwi+s.gov;
+  const investito=s.acwi+s.gov+s.sc;
   const liquidita=s.csh2+s.sant;
   const buffer=s.trcash-btcRes;
 
   // Total display
   $('tot').textContent=total>0?'€'+fm(total):'-';
   if(total>0){
-    const r=investito>0?Math.round(s.acwi/investito*100)+'/'+Math.round(s.gov/investito*100):'—';
+    const r=investito>0?(R.sc>0?Math.round(s.acwi/investito*100)+'/'+Math.round(s.sc/investito*100)+'/'+Math.round(s.gov/investito*100):Math.round(s.acwi/investito*100)+'/'+Math.round(s.gov/investito*100)):'—';
     $('totSub').innerHTML=`Investito €${fm(investito)} (ratio ${r}) · Liquido €${fm(liquidita)} · Buffer €${fm(buffer)}`+(btcRes>0?` · BTC riservati €${fm(btcRes)}`:'')+(btcOwned>0?` · BTC €${fm(btcOwned)}`:'');
   }
   // Frozen BTC label
@@ -186,7 +212,7 @@ function calc(){
   // Buckets
   const btcVal=btcOwned>0?btcOwned:btcRes;
   const bks=[
-    {name:'Investito',sub:'ACWI+Gov 80/20',val:investito,tgt:T.investito,color:'#667eea'},
+    {name:'Investito',sub:R.sc>0?`ACWI/SC/Gov ${R.acwi}/${R.sc}/${R.gov}`:`ACWI/Gov ${R.acwi}/${R.gov}`,val:investito,tgt:T.investito,color:'#667eea'},
     {name:'Liquidita',sub:'CSH2+Santander',val:liquidita,tgt:T.liquidita,color:'#fbbf24'},
     {name:'Buffer',sub:'TR cash da investire',val:buffer,tgt:T.buffer,color:'#94a3b8'},
     {name:'Alto rischio',sub:'BTC / speculazione',val:btcVal,tgt:T.rischio,color:'#f59e0b'},
@@ -203,15 +229,15 @@ function calc(){
     const style=b.name==='Alto rischio'?'border-color:rgba(245,158,11,.15);background:rgba(245,158,11,.02)':'';
     bhtml+=`<div class="bucket" style="${style}"><div class="lbl">${b.name}<small>${b.sub}</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${bw}%;background:${b.color};opacity:.5"></div><div class="bar-marker" style="left:${mp}%"></div><div class="bar-pct">${pct.toFixed(0)}%/${b.tgt}%</div></div><div class="val">${gt}<br><span class="muted">€${fm(b.val)} / €${fm(tgtE)}</span></div></div>`;
   });
-  // Rebalance alert (80/20 ratio drift)
+  // Rebalance alert (ratio drift)
   if(investito>0){
     const acwiRatio=s.acwi/investito*100;
-    const drift=Math.abs(acwiRatio-80);
+    const drift=Math.abs(acwiRatio-R.acwi);
     if(drift>5){
-      const sellFrom=acwiRatio>80?'ACWI':'Gov Bond';
-      const buyInto=acwiRatio>80?'Gov Bond':'ACWI';
-      const moveAmt=Math.round(Math.abs(s.acwi-0.80*investito));
-      bhtml+=`<div class="bucket" style="border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div class="lbl" style="color:#a78bfa">Ribilancia<small>Ratio ${Math.round(acwiRatio)}/${Math.round(100-acwiRatio)} vs 80/20</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${acwiRatio}%;background:#a78bfa;opacity:.3"></div><div class="bar-marker" style="left:80%"></div><div class="bar-pct">${Math.round(acwiRatio)}% ACWI</div></div><div class="val"><span style="color:#a78bfa">Vendi €${fm(moveAmt)} ${sellFrom}</span><br><span class="muted">Compra ${buyInto}</span></div></div>`;
+      const sellFrom=acwiRatio>R.acwi?'ACWI':'Gov Bond';
+      const buyInto=acwiRatio>R.acwi?'Gov Bond'+(R.sc>0?' / Small Cap':''):'ACWI';
+      const moveAmt=Math.round(Math.abs(s.acwi-(R.acwi/100)*investito));
+      bhtml+=`<div class="bucket" style="border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div class="lbl" style="color:#a78bfa">Ribilancia<small>Ratio ${Math.round(acwiRatio)}% ACWI vs ${R.acwi}% target</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${acwiRatio}%;background:#a78bfa;opacity:.3"></div><div class="bar-marker" style="left:${R.acwi}%"></div><div class="bar-pct">${Math.round(acwiRatio)}%</div></div><div class="val"><span style="color:#a78bfa">Vendi €${fm(moveAmt)} ${sellFrom}</span><br><span class="muted">Compra ${buyInto}</span></div></div>`;
     }
   }
   $('buckets').innerHTML=bhtml;
@@ -235,22 +261,25 @@ function calc(){
     if(totalGap>0&&liqGap>0){toLiq=Math.min(amt,Math.round(amt*liqGap/totalGap));toInvest=amt-toLiq}
     if(liqGap<=0){toInvest=amt;toLiq=0}
 
-    const acwiTgt=0.80*investTarget;
-    const govTgt=0.20*investTarget;
+    const acwiTgt=(R.acwi/100)*investTarget;
+    const govTgt=(R.gov/100)*investTarget;
+    const scTgt=(R.sc/100)*investTarget;
     const acwiGap=Math.max(0,acwiTgt-s.acwi);
     const govGap=Math.max(0,govTgt-s.gov);
-    const ig=acwiGap+govGap;
-    let toA,toG;
-    if(ig>0){toA=Math.round(toInvest*acwiGap/ig);toG=toInvest-toA}
-    else{toA=Math.round(toInvest*0.80);toG=toInvest-toA}
+    const scGap=Math.max(0,scTgt-s.sc);
+    const ig=acwiGap+govGap+scGap;
+    let toA,toG,toSc;
+    if(ig>0){toA=Math.round(toInvest*acwiGap/ig);toSc=Math.round(toInvest*scGap/ig);toG=toInvest-toA-toSc}
+    else{toA=Math.round(toInvest*R.acwi/100);toSc=Math.round(toInvest*R.sc/100);toG=toInvest-toA-toSc}
 
     ahtml=`<div class="phase">Investibile: €${fm(investibile)}</div><div class="title">Suggerimento: €${fm(amt)}</div>`;
     if(toA>0)ahtml+=`<div class="action-row"><span>ACWI</span><span class="v" style="color:#667eea">€${fm(toA)}</span></div>`;
+    if(toSc>0)ahtml+=`<div class="action-row"><span>Small Cap</span><span class="v" style="color:#818cf8">€${fm(toSc)}</span></div>`;
     if(toG>0)ahtml+=`<div class="action-row"><span>Gov Bond</span><span class="v" style="color:#34d399">€${fm(toG)}</span></div>`;
     if(toLiq>0)ahtml+=`<div class="action-row"><span>CSH2 (liquidita)</span><span class="v" style="color:#fbbf24">€${fm(toLiq)}</span></div>`;
 
     const newInv=investito+toInvest;
-    const newR=newInv>0?Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100):'—';
+    const newR=newInv>0?(R.sc>0?Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.sc+toSc)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100):Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100)):'—';
     ahtml+=`<div class="after">Dopo: investito ${active>0?((newInv/active)*100).toFixed(1):'0'}% (ratio ${newR})`;
     if(investibile>cap)ahtml+=` · rimangono €${fm(investibile-amt)} per le prossime volte`;
     ahtml+=`</div>`;
@@ -273,6 +302,18 @@ function calc(){
   localStorage.setItem('fin_s',JSON.stringify(s));
   localStorage.setItem('fin_btc',JSON.stringify(btcConf));
   localStorage.setItem('fin_cfg',JSON.stringify({cap:parseFloat($('cfg_cap').value)||2500}));
+}
+
+function toggleSettings(){const c=$('settingsCard');c.style.display=c.style.display==='none'?'block':'none'}
+function updateTargets(){
+  T={investito:+$('t_inv').value||74,liquidita:+$('t_liq').value||14,buffer:+$('t_buf').value||7,rischio:+$('t_risk').value||5};
+  R={acwi:+$('r_acwi').value||80,gov:+$('r_gov').value||20,sc:+$('r_sc').value||0};
+  const tSum=T.investito+T.liquidita+T.buffer+T.rischio;
+  const rSum=R.acwi+R.gov+R.sc;
+  $('settingsMsg').innerHTML=(Math.abs(tSum-100)>0.5?`<span class="neg">Target: ${tSum}% (deve essere 100)</span>`:'Target: 100%')+' · '+(Math.abs(rSum-100)>0.5?`<span class="neg">Ratio: ${rSum}% (deve essere 100)</span>`:'Ratio: 100%');
+  localStorage.setItem('fin_t',JSON.stringify(T));
+  localStorage.setItem('fin_r',JSON.stringify(R));
+  calc();
 }
 
 function save(){
@@ -307,7 +348,7 @@ function drawChart(){
 function tk(){return localStorage.getItem('ght')||prompt('GitHub Token:')}
 async function toGist(){
   const t=tk();if(!t)return;localStorage.setItem('ght',t);
-  const d={s:getS(),btc:btcConf,cfg:{cap:+$('cfg_cap').value},h:hist,u:new Date().toISOString()};
+  const d={s:getS(),btc:btcConf,cfg:{cap:+$('cfg_cap').value},T,R,h:hist,u:new Date().toISOString()};
   try{const r=await fetch('https://api.github.com/gists/'+GIST_ID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify(d)}}})});$('ss').textContent=r.ok?'Cloud OK':'Err '+r.status}catch(e){$('ss').textContent=e.message}
 }
 async function fromGist(){
@@ -317,6 +358,8 @@ async function fromGist(){
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.btc)btcConf=d.btc;
   if(d.cfg){$('cfg_cap').value=d.cfg.cap||2500}
+  if(d.T){T=d.T;localStorage.setItem('fin_t',JSON.stringify(T));$('t_inv').value=T.investito;$('t_liq').value=T.liquidita;$('t_buf').value=T.buffer;$('t_risk').value=T.rischio}
+  if(d.R){R=d.R;localStorage.setItem('fin_r',JSON.stringify(R));$('r_acwi').value=R.acwi;$('r_gov').value=R.gov;$('r_sc').value=R.sc}
   if(d.h){hist=d.h;localStorage.setItem('fin_h',JSON.stringify(hist))}
   calc();renderHist();$('ss').textContent='Caricato'}catch(e){$('ss').textContent=e.message}
 }
