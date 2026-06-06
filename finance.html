@@ -320,7 +320,7 @@ function calcW(){
   let steps=[];
 
   // 1. Cash above floor
-  const cashFloor=T.ca/100*(T.liq/100*total);
+  const cashFloor=T.r_ca/100*(T.liq/100*total);
   const cashAvail=Math.max(0,cash-cashFloor);
   if(remaining>0&&cashAvail>0){
     const take=Math.min(remaining,cashAvail);
