@@ -3,141 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Portfolio Rebalancer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Portfolio</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0a0a0f,#1a1a2e,#16213e);min-height:100vh;padding:24px;color:#e2e8f0;font-size:14px}
-#lock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
-#lock input{font-family:'Inter',sans-serif;padding:12px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;font-size:1em;text-align:center;width:220px}
-#lock button{font-family:'Inter',sans-serif;padding:10px 24px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-size:.9em;cursor:pointer;font-weight:500}
-#lock .err{color:#ef4444;font-size:.8em}
+body{font-family:'Inter',sans-serif;background:#0b0f1a;min-height:100vh;padding:20px;color:#cbd5e1;font-size:13px}
+#lock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:14px}
+#lock input{font-family:'Inter',sans-serif;padding:11px 18px;border-radius:6px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:1em;text-align:center;width:200px}
+#lock button{padding:9px 22px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:.85em;cursor:pointer;font-weight:500}
+#lock .err{color:#ef4444;font-size:.75em}
 #app{display:none}
-.container{max-width:840px;margin:0 auto}
-h1{text-align:center;font-size:1.5em;margin-bottom:4px;font-weight:700;color:#f8fafc}
-.sub-h{text-align:center;opacity:.35;margin-bottom:28px;font-size:.75em;text-transform:uppercase;letter-spacing:.06em}
-.card{background:rgba(255,255,255,.025);border-radius:10px;padding:18px;border:1px solid rgba(255,255,255,.06);margin-bottom:14px}
-.card-t{font-size:.7em;font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.35}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:600px){.g2,.g3{grid-template-columns:1fr 1fr}}
-.f{display:flex;flex-direction:column;gap:3px}
-.f label{font-size:.68em;opacity:.4;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
-.f input{font-family:'Inter',sans-serif;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#f1f5f9;font-size:.9em;width:100%}
-.f input:focus{outline:none;border-color:#3b82f6}
-.total{text-align:center;padding:18px;background:rgba(255,255,255,.04);border-radius:10px;margin-bottom:14px;border:1px solid rgba(255,255,255,.07)}
-.total .n{font-size:2em;font-weight:700;color:#f8fafc}
-.total .d{opacity:.35;font-size:.75em;margin-top:6px}
-.bk{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;margin-bottom:4px;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04)}
-.bk .l{width:140px;font-size:.75em;font-weight:500;line-height:1.3}
-.bk .l small{display:block;font-weight:400;opacity:.3;font-size:.88em}
-.bk .bw{flex:1;height:16px;background:rgba(255,255,255,.04);border-radius:3px;position:relative;overflow:hidden}
-.bk .bf{height:100%;border-radius:3px;position:absolute;top:0;left:0}
-.bk .bm{position:absolute;top:0;height:100%;width:1.5px;background:rgba(255,255,255,.35)}
-.bk .bp{position:absolute;top:50%;right:5px;transform:translateY(-50%);font-size:.6em;font-weight:600;opacity:.6}
-.bk .v{width:120px;text-align:right;font-size:.7em;line-height:1.4;font-variant-numeric:tabular-nums}
-.pos{color:#10b981}.neg{color:#ef4444}.mu{opacity:.3}
-.rb{padding:9px 12px;border-radius:7px;margin-bottom:4px;border:1px solid rgba(139,92,246,.12);background:rgba(139,92,246,.025);font-size:.75em;color:#a78bfa}
-.sbox{padding:16px;border-radius:10px;margin-bottom:14px;border:1px solid rgba(59,130,246,.12);background:rgba(59,130,246,.03)}
-.sbox .st{font-size:.72em;font-weight:600;margin-bottom:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:.05em}
-.sbox .avail{font-size:.85em;margin-bottom:12px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid rgba(255,255,255,.05)}
-.sbox .avail strong{color:#f8fafc}
-.sr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.82em}
-.sr:last-child{border:none}
-.sr .sv{font-weight:600;font-variant-numeric:tabular-nums}
-.sr .sn{font-size:.78em;opacity:.35}
-.ss{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
-.ss .sl{font-size:.68em;opacity:.35;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
-.cfg{display:flex;gap:10px;align-items:end}
-.cfg .f{flex:1}
-.sett{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05)}
-.btn{font-family:'Inter',sans-serif;padding:7px 14px;border-radius:6px;border:none;color:#fff;font-size:.75em;cursor:pointer;font-weight:500}
-.btn:active{transform:scale(.97)}
-.bp-btn{background:#3b82f6}
-.bs-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
-.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.hc{width:100%;height:120px;position:relative;margin-top:8px}
-.hl{max-height:100px;overflow-y:auto;font-size:.68em;margin-top:8px}
-.hl .he{display:flex;justify-content:space-between;padding:3px 5px;border-bottom:1px solid rgba(255,255,255,.025)}
-.sync{font-size:.6em;opacity:.3;text-align:center;margin-top:5px}
-.nav{position:fixed;top:12px;left:12px;font-size:.72em;opacity:.25;text-decoration:none;color:#fff}
-.nav:hover{opacity:.6}
+.wrap{max-width:780px;margin:0 auto}
+header{text-align:center;margin-bottom:24px}
+header h1{font-size:1.3em;font-weight:700;color:#f8fafc;letter-spacing:-.02em}
+header p{font-size:.7em;opacity:.3;margin-top:3px;text-transform:uppercase;letter-spacing:.08em}
+.total{text-align:center;font-size:1.8em;font-weight:700;color:#f8fafc;margin-bottom:4px}
+.total-sub{text-align:center;font-size:.72em;opacity:.3;margin-bottom:20px}
+.section{margin-bottom:20px}
+.section-head{font-size:.68em;font-weight:600;text-transform:uppercase;letter-spacing:.07em;opacity:.3;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #1e293b}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111827}
+.row:last-child{border:none}
+.row .label{font-size:.82em;color:#94a3b8}
+.row .label small{opacity:.5;margin-left:4px}
+.row .value{font-size:.82em;font-weight:600;font-variant-numeric:tabular-nums;color:#f1f5f9}
+.row .pct{font-size:.7em;opacity:.4;margin-left:6px}
+.row .gap{font-size:.72em;margin-left:8px}
+.pos{color:#10b981}.neg{color:#ef4444}
+.input-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #111827}
+.input-row:last-child{border:none}
+.input-row label{font-size:.78em;color:#94a3b8;flex:1}
+.input-row input{font-family:'Inter',sans-serif;width:110px;padding:6px 8px;border-radius:4px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:.85em;text-align:right}
+.input-row input:focus{outline:none;border-color:#2563eb}
+.suggest{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:14px;margin-bottom:20px}
+.suggest .head{font-size:.7em;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#60a5fa;margin-bottom:10px}
+.suggest .avail{font-size:.9em;margin-bottom:10px;color:#f8fafc;font-weight:600}
+.suggest .action{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e293b;font-size:.82em}
+.suggest .action:last-child{border:none}
+.suggest .action .av{font-weight:600;font-variant-numeric:tabular-nums}
+.suggest .sep{margin:10px 0;border-top:1px solid #1e293b}
+.suggest .note{font-size:.7em;opacity:.3}
+.rb-alert{background:#1e1033;border:1px solid #4c1d95;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.78em;color:#a78bfa}
+.footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.btn{padding:7px 14px;border-radius:5px;border:none;color:#fff;font-size:.72em;cursor:pointer;font-weight:500}
+.btn-p{background:#2563eb}
+.btn-s{background:#1e293b;border:1px solid #334155}
+.sync{font-size:.6em;opacity:.25;text-align:center;margin-top:5px}
+.hist{margin-top:12px}
+.hist canvas{width:100%;height:100px}
+.hist .list{max-height:80px;overflow-y:auto;font-size:.65em;margin-top:6px}
+.hist .list div{display:flex;justify-content:space-between;padding:2px 4px;border-bottom:1px solid #111827}
+.sett-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:100;overflow-y:auto;padding:40px 20px}
+.sett-panel{max-width:500px;margin:0 auto;background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:24px}
+.sett-panel h2{font-size:1em;font-weight:600;color:#f8fafc;margin-bottom:16px}
+.sett-panel .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sett-panel label{font-size:.68em;opacity:.4;text-transform:uppercase;display:block;margin-bottom:3px}
+.sett-panel input{font-family:'Inter',sans-serif;width:100%;padding:7px 9px;border-radius:4px;border:1px solid #1e293b;background:#0b0f1a;color:#f1f5f9;font-size:.85em}
+.sett-panel input:focus{outline:none;border-color:#2563eb}
+.sett-panel .msg{font-size:.7em;opacity:.4;margin-top:4px}
+.sett-panel .close{margin-top:16px}
 </style>
 </head>
 <body>
-<a href="index.html" class="nav">back</a>
 <div id="lock">
 <input type="password" id="pw" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
 <button onclick="unlock()">Enter</button>
 <div class="err" id="err"></div>
 </div>
-<div id="app"><div class="container">
-<h1>Portfolio Rebalancer</h1>
-<p class="sub-h">Allocation · Rebalancing · Tracking</p>
+<div id="app"><div class="wrap">
+<header><h1>Portfolio Rebalancer</h1><p>Allocation · Rebalancing · Tracking</p></header>
+<div class="total" id="tot">-</div>
+<div class="total-sub" id="totD"></div>
 
-<div class="total"><div class="n" id="tot">-</div><div class="d" id="totD"></div></div>
-
-<div class="card">
-<div class="card-t">Balances</div>
-<div class="g3">
-<div class="f"><label>Equity (ACWI)</label><input type="number" id="s_eq" step=".01" oninput="calc()"></div>
-<div class="f"><label>Bond (Gov EUR)</label><input type="number" id="s_bo" step=".01" oninput="calc()"></div>
-<div class="f"><label>Money Market (CSH2)</label><input type="number" id="s_mm" step=".01" oninput="calc()"></div>
-<div class="f"><label>Cash (Santander)</label><input type="number" id="s_c1" step=".01" oninput="calc()"></div>
-<div class="f"><label>Cash (Trade Republic)</label><input type="number" id="s_c2" step=".01" oninput="calc()"></div>
-<div class="f"><label>Cash (Other)</label><input type="number" id="s_c3" step=".01" oninput="calc()"></div>
-</div>
-<div class="g2" style="margin-top:10px">
-<div class="f"><label>Satellite (BTC)</label><input type="number" id="s_sa" step=".01" oninput="calc()"></div>
-</div>
+<div class="section" id="balSection">
+<div class="section-head">Balances</div>
+<div class="input-row"><label>Equity <small>(ACWI)</small></label><input type="number" id="s_eq" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Bond <small>(Gov EUR)</small></label><input type="number" id="s_bo" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Money Market <small>(CSH2)</small></label><input type="number" id="s_mm" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Cash <small>(Santander)</small></label><input type="number" id="s_c1" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Cash <small>(Trade Republic)</small></label><input type="number" id="s_c2" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Cash <small>(Other)</small></label><input type="number" id="s_c3" step=".01" oninput="calc()"></div>
+<div class="input-row"><label>Satellite <small>(BTC)</small></label><input type="number" id="s_sa" step=".01" oninput="calc()"></div>
 </div>
 
-<div class="card">
-<div class="card-t">Allocation vs Target</div>
-<div id="bks"></div>
+<div class="section">
+<div class="section-head">Allocation</div>
+<div id="alloc"></div>
 </div>
 
-<div class="sbox" id="sug"></div>
+<div id="rbAlert"></div>
+<div class="suggest" id="sug"></div>
 
-<div class="card">
-<div class="card-t">Configuration</div>
-<div class="cfg">
-<div class="f"><label>Investment Tranches (how many entries)</label><input type="number" id="cap" value="5" min="1" max="20" step="1" oninput="calc()"></div>
-<div class="f"><label>Satellite Tranches</label><input type="number" id="capSa" value="2" min="1" max="10" step="1" oninput="calc()"></div>
+<div class="hist">
+<div class="section-head">History</div>
+<canvas id="cv"></canvas>
+<div class="list" id="hl"></div>
 </div>
-<div class="sett" id="sett">
-<div class="card-t" style="margin-top:0">Target Allocation (must sum to 100%)</div>
-<div class="g3">
-<div class="f"><label>Equity %</label><input type="number" id="t_eq" step="1" oninput="upT()"></div>
-<div class="f"><label>Bond %</label><input type="number" id="t_bo" step="1" oninput="upT()"></div>
-<div class="f"><label>Money Market %</label><input type="number" id="t_mm" step="1" oninput="upT()"></div>
-<div class="f"><label>Cash %</label><input type="number" id="t_ca" step="1" oninput="upT()"></div>
-<div class="f"><label>Satellite %</label><input type="number" id="t_sa" step="1" oninput="upT()"></div>
-</div>
-<div class="mu" id="tMsg" style="font-size:.7em;margin-top:6px"></div>
-</div>
-<div class="acts">
-<button class="btn bp-btn" onclick="save()">Save Snapshot</button>
-<button class="btn bs-btn" onclick="toG()">Sync</button>
-<button class="btn bs-btn" onclick="frG()">Load</button>
-<button class="btn bs-btn" onclick="tog()">Settings</button>
+
+<div class="footer">
+<button class="btn btn-p" onclick="save()">Save</button>
+<button class="btn btn-s" onclick="toG()">Sync</button>
+<button class="btn btn-s" onclick="frG()">Load</button>
+<button class="btn btn-s" onclick="openS()">Settings</button>
 </div>
 <div class="sync" id="ss"></div>
-</div>
-
-<div class="card">
-<div class="card-t">History</div>
-<div class="hc"><canvas id="cv"></canvas></div>
-<div class="hl" id="hl"></div>
-</div>
 </div></div>
+
+<div class="sett-overlay" id="sOv">
+<div class="sett-panel">
+<h2>Settings</h2>
+<p style="font-size:.72em;opacity:.4;margin-bottom:14px">Target allocation (must sum 100%)</p>
+<div class="g2">
+<div><label>Equity %</label><input type="number" id="t_eq" step="1" oninput="upT()"></div>
+<div><label>Bond %</label><input type="number" id="t_bo" step="1" oninput="upT()"></div>
+<div><label>Money Market %</label><input type="number" id="t_mm" step="1" oninput="upT()"></div>
+<div><label>Cash Floor %</label><input type="number" id="t_ca" step="1" oninput="upT()"></div>
+<div><label>Satellite %</label><input type="number" id="t_sa" step="1" oninput="upT()"></div>
+</div>
+<div class="msg" id="tMsg"></div>
+<p style="font-size:.72em;opacity:.4;margin:14px 0 8px">Caps</p>
+<div class="g2">
+<div><label>Investment Cap (€)</label><input type="number" id="cfg_cap" step="100" oninput="calc()"></div>
+<div><label>Satellite Cap (€)</label><input type="number" id="cfg_capSa" step="100" oninput="calc()"></div>
+</div>
+<p style="font-size:.72em;opacity:.4;margin:14px 0 8px">BTC Trade</p>
+<div class="g2">
+<div><label>Entry Price (€)</label><input type="number" id="btc_entry" step="1000" oninput="saveBtc()"></div>
+<div><label>Sell Price (€)</label><input type="number" id="btc_sell" step="1000" oninput="saveBtc()"></div>
+</div>
+<button class="btn btn-s close" onclick="closeS()">Close</button>
+</div>
+</div>
 
 <script>
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
 let T={eq:64,bo:16,mm:9,ca:6,sa:5};
-let hist=[],btc={entry:40000,sell:95000};
+let cfg={cap:2500,capSa:2500};
+let btc={entry:40000,sell:95000};
+let hist=[];
 
 function unlock(){if($('pw').value===PW){localStorage.setItem('fa','1');show();init()}else $('err').textContent='Wrong'}
 function show(){$('lock').style.display='none';$('app').style.display='block'}
@@ -148,135 +151,130 @@ function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);retu
 
 function init(){
   const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
-  T=J('ft')||T;btc=J('fb')||btc;
-  const c=J('fc')||{};if(c.cap)$('cap').value=c.cap;if(c.capSa)$('capSa').value=c.capSa;
-  hist=J('fh')||[];
+  T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
   $('t_eq').value=T.eq;$('t_bo').value=T.bo;$('t_mm').value=T.mm;$('t_ca').value=T.ca;$('t_sa').value=T.sa;
+  $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
+  $('btc_entry').value=btc.entry;$('btc_sell').value=btc.sell;
   calc();rH();
 }
 
 function calc(){
   const s=getS();
   const total=KS.reduce((a,k)=>a+s[k],0);
-  const eq=s.eq, bo=s.bo, mm=s.mm;
-  const cash=s.c1+s.c2+s.c3;
-  const sat=s.sa;
+  const eq=s.eq,bo=s.bo,mm=s.mm,cash=s.c1+s.c2+s.c3,sat=s.sa;
   const invested=eq+bo;
 
-  // Total
   $('tot').textContent=total>0?'€'+fm(total):'-';
   if(total>0){
     const r=invested>0?Math.round(eq/invested*100)+'/'+Math.round(bo/invested*100):'—';
-    $('totD').innerHTML=`Invested €${fm(invested)} (${r}) · Liquid €${fm(mm+cash)} · Satellite €${fm(sat)}`;
+    $('totD').textContent=`Invested €${fm(invested)} (${r}) · Liquid €${fm(mm+cash)} · Satellite €${fm(sat)}`;
   }
 
-  // Buckets
+  // Allocation P&L style
   const bks=[
-    {n:'Equity',s:'ACWI',v:eq,t:T.eq,c:'#3b82f6'},
-    {n:'Bond',s:'Gov EUR',v:bo,t:T.bo,c:'#10b981'},
-    {n:'Money Market',s:'CSH2',v:mm,t:T.mm,c:'#f59e0b'},
-    {n:'Cash',s:'Accounts',v:cash,t:T.ca,c:'#6b7280'},
-    {n:'Satellite',s:'BTC',v:sat,t:T.sa,c:'#ef4444'},
+    {n:'Equity',s:'ACWI',v:eq,t:T.eq},
+    {n:'Bond',s:'Gov EUR',v:bo,t:T.bo},
+    {n:'Money Market',s:'CSH2',v:mm,t:T.mm},
+    {n:'Cash Floor',s:'Accounts',v:cash,t:T.ca},
+    {n:'Satellite',s:'BTC',v:sat,t:T.sa},
   ];
-  let h='';
+  let ah='';
   bks.forEach(b=>{
-    const pct=total>0?b.v/total*100:0;
+    const pct=total>0?(b.v/total*100).toFixed(1):'0.0';
     const te=b.t/100*total;
     const gap=te-b.v;
-    const mx=Math.max(pct,b.t,1);
-    const bw=Math.min(pct/mx*100,100);
-    const mp=b.t/mx*100;
-    const gt=Math.abs(gap)<50?'<span class="mu">OK</span>':(gap>0?`<span class="neg">-€${fm(Math.abs(gap))}</span>`:`<span class="pos">+€${fm(-gap)}</span>`);
-    h+=`<div class="bk"><div class="l">${b.n}<small>${b.s}</small></div><div class="bw"><div class="bf" style="width:${bw}%;background:${b.c};opacity:.4"></div><div class="bm" style="left:${mp}%"></div><div class="bp">${pct.toFixed(0)}% / ${b.t}%</div></div><div class="v">${gt}<br><span class="mu">€${fm(b.v)} / €${fm(te)}</span></div></div>`;
+    const gs=Math.abs(gap)<50?'':gap>0?`<span class="neg gap">-€${fm(Math.abs(gap))}</span>`:`<span class="pos gap">+€${fm(-gap)}</span>`;
+    ah+=`<div class="row"><span class="label">${b.n} <small>${b.s}</small></span><span><span class="value">€${fm(b.v)}</span><span class="pct">${pct}% / ${b.t}%</span>${gs}</span></div>`;
   });
-  // Rebalance (equity/bond ratio drift)
+  $('alloc').innerHTML=ah;
+
+  // Rebalance alert
+  let rb='';
   if(invested>0){
-    const idealEqPct=T.eq/(T.eq+T.bo)*100;
-    const actualEqPct=eq/invested*100;
-    if(Math.abs(actualEqPct-idealEqPct)>5){
-      const from=actualEqPct>idealEqPct?'Equity':'Bond';
-      const to=actualEqPct>idealEqPct?'Bond':'Equity';
-      const amt=Math.round(Math.abs(eq-(idealEqPct/100)*invested));
-      h+=`<div class="rb">Rebalance: sell €${fm(amt)} ${from} → buy ${to} (ratio ${Math.round(actualEqPct)}/${Math.round(100-actualEqPct)} vs ${Math.round(idealEqPct)}/${Math.round(100-idealEqPct)})</div>`;
+    const idealR=T.eq/(T.eq+T.bo)*100;
+    const actualR=eq/invested*100;
+    if(Math.abs(actualR-idealR)>5){
+      const from=actualR>idealR?'Equity':'Bond';
+      const to=actualR>idealR?'Bond':'Equity';
+      const amt=Math.round(Math.abs(eq-(idealR/100)*invested));
+      rb=`<div class="rb-alert">Rebalance: sell €${fm(amt)} ${from} → buy ${to} (ratio ${Math.round(actualR)}/${Math.round(100-actualR)} vs ${Math.round(idealR)}/${Math.round(100-idealR)} target)</div>`;
     }
   }
-  $('bks').innerHTML=h;
+  $('rbAlert').innerHTML=rb;
 
   // Suggestions
-  const tranches=Math.max(1,parseInt($('cap').value)||5);
+  const cap=cfg.cap||2500;
+  const capSa=cfg.capSa||2500;
   const cashTarget=T.ca/100*total;
   const mmTarget=T.mm/100*total;
   const eqTarget=T.eq/100*total;
   const boTarget=T.bo/100*total;
   const saTarget=T.sa/100*total;
-
   const cashExcess=Math.max(0,cash-cashTarget);
   const mmGap=Math.max(0,mmTarget-mm);
   const eqGap=Math.max(0,eqTarget-eq);
   const boGap=Math.max(0,boTarget-bo);
   const saGap=Math.max(0,saTarget-sat);
 
-  let sg='<div class="st">Suggested Actions</div>';
-  sg+=`<div class="avail">Available to deploy: <strong>€${fm(cashExcess)}</strong></div>`;
+  let sg=`<div class="head">Actions</div>`;
+  sg+=`<div class="avail">Available: €${fm(cashExcess)}</div>`;
   let any=false;
 
-  // 1. Remunerate
+  // Money Market (no cap)
   if(mmGap>0&&cashExcess>0){
     const mv=Math.min(mmGap,cashExcess);
     if(mv>=50){
-      sg+=`<div class="sr"><span>Move to Money Market <span class="sn">(remunerate)</span></span><span class="sv" style="color:#f59e0b">€${fm(mv)}</span></div>`;
+      sg+=`<div class="action"><span>Move to Money Market</span><span class="av" style="color:#f59e0b">€${fm(mv)}</span></div>`;
       any=true;
     }
   }
 
-  // 2. Invest (capped by tranches)
+  // Invest (capped)
   const afterMm=Math.max(0,cashExcess-Math.max(0,mmGap));
-  const cap=afterMm>0?Math.round(afterMm/tranches):0;
   if(afterMm>=300){
     const amt=Math.min(afterMm,cap);
     const invGap=eqGap+boGap;
     let toEq,toBo;
     if(invGap>0){toEq=Math.round(amt*eqGap/invGap);toBo=amt-toEq}
     else{const r=T.eq/(T.eq+T.bo);toEq=Math.round(amt*r);toBo=amt-toEq}
-    sg+=`<div class="ss"><div class="sl">Invest (${tranches} tranches — €${fm(cap)} each)</div>`;
-    if(toEq>0)sg+=`<div class="sr"><span>Equity <span class="sn">(ACWI)</span></span><span class="sv" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
-    if(toBo>0)sg+=`<div class="sr"><span>Bond <span class="sn">(Gov EUR)</span></span><span class="sv" style="color:#10b981">€${fm(toBo)}</span></div>`;
-    if(afterMm>cap)sg+=`<div class="sr"><span class="sn">Remaining (${tranches-1} more tranches)</span><span class="mu">€${fm(afterMm-amt)}</span></div>`;
-    sg+=`</div>`;any=true;
-  }else if(eqGap+boGap>0){
-    sg+=`<div class="ss"><div class="sl">Invest</div><div class="sr"><span class="mu">Not enough surplus. Accumulate.</span><span></span></div></div>`;
+    if(any)sg+=`<div class="sep"></div>`;
+    sg+=`<div class="action"><span>Equity <small>(ACWI)</small></span><span class="av" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
+    sg+=`<div class="action"><span>Bond <small>(Gov EUR)</small></span><span class="av" style="color:#10b981">€${fm(toBo)}</span></div>`;
+    if(afterMm>cap)sg+=`<div class="action"><span class="note">Remaining</span><span class="note">€${fm(afterMm-cap)}</span></div>`;
     any=true;
+  }else if(eqGap+boGap>0&&!any){
+    sg+=`<div class="action"><span class="note">Not enough surplus to invest. Accumulate.</span><span></span></div>`;
   }
 
-  // 3. Satellite (own cap)
+  // Satellite (own cap)
   if(saGap>0){
-    const saTranches=Math.max(1,parseInt($('capSa').value)||2);
-    const capSa=Math.round(saGap/saTranches);
-    const saAmt=capSa;
-    sg+=`<div class="ss"><div class="sl">Satellite (${saTranches} tranches — €${fm(capSa)} each)</div>`;
-    sg+=`<div class="sr"><span>BTC <span class="sn">buy at ~€${fm(btc.entry)}</span></span><span class="sv" style="color:#ef4444">€${fm(saAmt)}</span></div>`;
-    if(saGap>capSa)sg+=`<div class="sr"><span class="sn">Remaining (${saTranches-1} more)</span><span class="mu">€${fm(saGap-saAmt)}</span></div>`;
-    sg+=`</div>`;
+    const saAmt=Math.min(saGap,capSa);
+    if(any)sg+=`<div class="sep"></div>`;
+    sg+=`<div class="action"><span>Satellite <small>(BTC at ~€${fm(btc.entry)})</small></span><span class="av" style="color:#ef4444">€${fm(saAmt)}</span></div>`;
     any=true;
   }else if(sat>saTarget+100){
-    sg+=`<div class="ss"><div class="sl">Satellite</div><div class="sr"><span class="mu">Over target — consider profit</span><span class="pos">+€${fm(sat-saTarget)}</span></div></div>`;
-    any=true;
+    if(any)sg+=`<div class="sep"></div>`;
+    sg+=`<div class="action"><span class="note">Satellite over target — consider profit</span><span class="pos">+€${fm(sat-saTarget)}</span></div>`;
   }
 
-  if(!any)sg+=`<div class="sr"><span class="mu">All on target.</span><span></span></div>`;
+  if(!any)sg+=`<div class="action"><span class="note">All on target.</span><span></span></div>`;
   $('sug').innerHTML=sg;
 
+  // Persist
   localStorage.setItem('fs',JSON.stringify(s));
-  localStorage.setItem('fc',JSON.stringify({cap:parseInt($('cap').value)||5,capSa:parseInt($('capSa').value)||2}));
+  cfg={cap:parseFloat($('cfg_cap').value)||2500,capSa:parseFloat($('cfg_capSa').value)||2500};
+  localStorage.setItem('fc',JSON.stringify(cfg));
 }
 
-function tog(){const p=$('sett');p.style.display=p.style.display==='none'?'block':'none'}
+function openS(){$('sOv').style.display='block'}
+function closeS(){$('sOv').style.display='none'}
 function upT(){
   T={eq:+$('t_eq').value||0,bo:+$('t_bo').value||0,mm:+$('t_mm').value||0,ca:+$('t_ca').value||0,sa:+$('t_sa').value||0};
   const s=T.eq+T.bo+T.mm+T.ca+T.sa;
   $('tMsg').innerHTML=Math.abs(s-100)>0.5?`<span class="neg">Total: ${s}% (must be 100)</span>`:`Total: ${s}%`;
   localStorage.setItem('ft',JSON.stringify(T));calc();
 }
+function saveBtc(){btc={entry:+$('btc_entry').value||40000,sell:+$('btc_sell').value||95000};localStorage.setItem('fb',JSON.stringify(btc));calc()}
 
 function save(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
@@ -287,28 +285,28 @@ function save(){
 }
 
 function rH(){
-  let h='';[...hist].reverse().forEach(e=>{h+=`<div class="he"><span>${e.d}</span><span>€${fm(e.t)}</span></div>`});
-  $('hl').innerHTML=h||'<div class="mu" style="padding:5px;text-align:center">No data</div>';dC();
+  let h='';[...hist].reverse().forEach(e=>{h+=`<div>${e.d}<span>€${fm(e.t)}</span></div>`});
+  $('hl').innerHTML=h||'<div style="opacity:.2;text-align:center;padding:4px">No data</div>';dC();
 }
 
 function dC(){
   const c=$('cv'),x=c.getContext('2d'),d=window.devicePixelRatio||1;
-  const W=c.parentElement.getBoundingClientRect().width,H=120;
-  c.width=W*d;c.height=H*d;x.scale(d,d);x.clearRect(0,0,W,H);
-  if(hist.length<2){x.fillStyle='rgba(255,255,255,.12)';x.font='10px Inter';x.textAlign='center';x.fillText('Min 2 snapshots',W/2,H/2);return}
+  const W=c.parentElement.offsetWidth,H=100;
+  c.width=W*d;c.height=H*d;c.style.height=H+'px';x.scale(d,d);x.clearRect(0,0,W,H);
+  if(hist.length<2){x.fillStyle='rgba(255,255,255,.1)';x.font='10px Inter';x.textAlign='center';x.fillText('Min 2 snapshots',W/2,H/2);return}
   const vs=hist.map(h=>h.t),mn=Math.min(...vs)*.95,mx=Math.max(...vs)*1.05;
-  const p={t:10,b:16,l:38,r:8};
-  x.strokeStyle='rgba(255,255,255,.03)';
-  for(let i=0;i<4;i++){const y=p.t+(H-p.t-p.b)*i/3;x.beginPath();x.moveTo(p.l,y);x.lineTo(W-p.r,y);x.stroke();x.fillStyle='rgba(255,255,255,.18)';x.font='7px Inter';x.textAlign='right';x.fillText('€'+fm(mx-(mx-mn)*i/3),p.l-3,y+3)}
-  x.strokeStyle='#3b82f6';x.lineWidth=1.5;x.lineJoin='round';x.beginPath();
+  const p={t:8,b:14,l:36,r:8};
+  x.strokeStyle='#1e293b';
+  for(let i=0;i<3;i++){const y=p.t+(H-p.t-p.b)*i/2;x.beginPath();x.moveTo(p.l,y);x.lineTo(W-p.r,y);x.stroke();x.fillStyle='rgba(255,255,255,.15)';x.font='7px Inter';x.textAlign='right';x.fillText('€'+fm(mx-(mx-mn)*i/2),p.l-3,y+3)}
+  x.strokeStyle='#2563eb';x.lineWidth=1.5;x.lineJoin='round';x.beginPath();
   hist.forEach((h,i)=>{const px=p.l+i*(W-p.l-p.r)/(hist.length-1);const py=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
-  hist.forEach((h,i)=>{const px=p.l+i*(W-p.l-p.r)/(hist.length-1);const py=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);x.beginPath();x.arc(px,py,2,0,Math.PI*2);x.fillStyle='#93c5fd';x.fill()});
+  hist.forEach((h,i)=>{const px=p.l+i*(W-p.l-p.r)/(hist.length-1);const py=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);x.beginPath();x.arc(px,py,2,0,Math.PI*2);x.fillStyle='#60a5fa';x.fill()});
 }
 
 function tk(){return localStorage.getItem('ght')||prompt('GitHub Token:')}
 async function toG(){
   const t=tk();if(!t)return;localStorage.setItem('ght',t);
-  const d={s:getS(),T,btc,cfg:{cap:+$('cap').value,capSa:+$('capSa').value},h:hist,u:new Date().toISOString()};
+  const d={s:getS(),T,cfg,btc,h:hist,u:new Date().toISOString()};
   try{const r=await fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify(d)}}})});$('ss').textContent=r.ok?'Synced':'Err '+r.status}catch(e){$('ss').textContent=e.message}
 }
 async function frG(){
@@ -317,10 +315,10 @@ async function frG(){
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.T){T=d.T;$('t_eq').value=T.eq;$('t_bo').value=T.bo;$('t_mm').value=T.mm;$('t_ca').value=T.ca;$('t_sa').value=T.sa}
-  if(d.btc)btc=d.btc;
-  if(d.cfg){$('cap').value=d.cfg.cap||5;$('capSa').value=d.cfg.capSa||2}
+  if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}
+  if(d.btc){btc=d.btc;$('btc_entry').value=btc.entry;$('btc_sell').value=btc.sell}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
-  localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fb',JSON.stringify(btc));
+  localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH();$('ss').textContent='Loaded'}catch(e){$('ss').textContent=e.message}
 }
 
