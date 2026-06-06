@@ -61,12 +61,8 @@ input[type=number]{-moz-appearance:textfield}
 </style>
 </head>
 <body>
-<div id="lock">
-<input type="text" id="pw" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
-<button onclick="unlock()">Enter</button>
-<div class="err" id="err"></div>
-</div>
-<div id="app"><div class="w">
+
+<div id="app" style="display:block"><div class="w">
 <div class="total" id="tot">-</div>
 <div class="total-d" id="totD"></div>
 
@@ -145,8 +141,8 @@ let cfg={cap:2500,capSa:2500};
 let btc={entry:40000,sell:95000};
 let hist=[];
 
-function unlock(){if($('pw').value===PW){localStorage.setItem('fa','1');show();init()}else $('err').textContent='Wrong'}
-function show(){$('lock').style.display='none';$('app').style.display='block'}
+function show(){}
+
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
@@ -327,7 +323,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
 
-if(localStorage.getItem('fa')==='1'){show();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}}else $('pw').focus();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
 </script>
 </body>
 </html>
