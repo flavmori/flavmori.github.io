@@ -175,9 +175,10 @@ function fm(n){return Math.round(n).toLocaleString('it-IT')}
 
 async function fetchPrices(){
   try{
+    const proxy='https://api.allorigins.win/raw?url=';
     const fetches=Object.entries(SYMBOLS).map(([k,sym])=>
-      fetch(`https://eodhd.com/api/real-time/${sym}?api_token=${API_KEY}&fmt=json`)
-        .then(r=>r.json()).then(d=>{if(d.close&&d.close!=='NA'){prices[k]={close:parseFloat(d.close),change:parseFloat(d.change_p)||0,prev:parseFloat(d.previousClose)||0}}})
+      fetch(proxy+encodeURIComponent(`https://eodhd.com/api/real-time/${sym}?api_token=${API_KEY}&fmt=json`))
+        .then(r=>r.json()).then(d=>{if(d.close&&d.close!=='NA'){prices[k]={close:parseFloat(d.close),change:parseFloat(d.change_p)||0}}})
         .catch(()=>{})
     );
     await Promise.all(fetches);
