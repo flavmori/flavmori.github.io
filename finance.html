@@ -198,86 +198,90 @@ function calc(){
   a+=`<div class="arow"><span class="l">Satellite</span><span class="r">€${fm(sat)} <span class="mu">${pSat}% → ${T.sat}%</span> <span class="gap">${gapH(gSat)}</span></span></div>`;
   $('alloc').innerHTML=a;
 
-  // Actions — clear priority-based logic
+  // Actions — numbered steps with explanations
   let acts='<div class="ah">Actions</div>';
-  let any=false;
+  let step=0;
 
-  // Priority 1: Equity/Bond ratio drift (always check, independent of other actions)
-  if(invested>0){
-    const idealR=T.r_eq/(T.r_eq+T.r_bo)*100;
-    const actualR=eq/invested*100;
-    if(Math.abs(actualR-idealR)>5){
-      const from=actualR>idealR?'Equity':'Bond';
-      const to=actualR>idealR?'Bond':'Equity';
-      const amt=Math.round(Math.abs(eq-(idealR/100)*invested));
-      acts+=`<div class="act"><span>Sell ${from}, buy ${to} <small>ratio ${Math.round(actualR)}/${Math.round(100-actualR)} → ${T.r_eq}/${T.r_bo}</small></span><span class="av" style="color:#a78bfa">€${fm(amt)}</span></div>`;
-      any=true;
-    }
+  const surplus=liquid-tLiq;
+  const idealEqR=T.r_eq/(T.r_eq+T.r_bo)*100;
+  const actualEqR=invested>0?eq/invested*100:0;
+  const eqBoDrift=invested>0?Math.abs(actualEqR-idealEqR):0;
+
+  // Step: Sell invested to rebuild liquidity (if invested over AND liquid under)
+  if(invested>tInv+200&&surplus<-200){
+    step++;
+    const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
+    acts+=`<div class="act"><span><b>${step}.</b> Sell invested → rebuild liquidity</span><span class="av neg">€${fm(sellAmt)}</span></div>`;
+    acts+=`<div class="act-note">Invested is ${pInv}% (target ${T.inv}%), liquid is ${pLiq}% (target ${T.liq}%). Sell to restore balance.</div>`;
   }
 
-  // Priority 2: Determine if we have surplus (liquid > target) or deficit (liquid < target)
-  const surplus=liquid-tLiq;
+  // Step: Rebalance Equity/Bond ratio
+  if(eqBoDrift>5){
+    step++;
+    const from=actualEqR>idealEqR?'Equity':'Bond';
+    const to=actualEqR>idealEqR?'Bond':'Equity';
+    const amt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
+    acts+=`<div class="act"><span><b>${step}.</b> Sell ${from} → buy ${to}</span><span class="av" style="color:#a78bfa">€${fm(amt)}</span></div>`;
+    acts+=`<div class="act-note">Invested ratio is ${Math.round(actualEqR)}/${Math.round(100-actualEqR)}, target is ${T.r_eq}/${T.r_bo}.</div>`;
+  }
 
+  // Step: Move Cash → Money Market (if surplus exists and MM below target)
   if(surplus>300){
-    // We have excess liquidity — deploy it
-    // Step A: Fill Money Market to its target if needed
     const mmNeed=Math.max(0,tMm-mm);
     if(mmNeed>50){
-      acts+=`<div class="act"><span>Cash → Money Market <small>fill to ${T.r_mm}% of liquid target</small></span><span class="av" style="color:#f59e0b">€${fm(Math.round(mmNeed))}</span></div>`;
-      any=true;
+      step++;
+      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(mmNeed))}</span></div>`;
+      acts+=`<div class="act-note">Money Market is ${subMm}% of your liquid (target ${T.r_mm}%). Fill it before investing.</div>`;
     }
-    // Step B: Invest the rest (capped)
+
+    // Step: Invest surplus (capped)
     const investable=Math.max(0,surplus-mmNeed);
     if(investable>=300){
-      if(any)acts+=`<div class="act-sep"></div>`;
+      step++;
       const amt=Math.min(investable,cfg.cap);
       const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
       const invGap=eqG+boG;
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
-      acts+=`<div class="act"><span>Invest: Equity <small>ACWI</small></span><span class="av" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
-      acts+=`<div class="act"><span>Invest: Bond <small>Gov EUR</small></span><span class="av" style="color:#10b981">€${fm(toBo)}</span></div>`;
-      if(investable>cfg.cap)acts+=`<div class="act-note">Remaining for next time: €${fm(Math.round(investable-cfg.cap))}</div>`;
-      any=true;
+      acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
+      acts+=`<div class="act-note">You have €${fm(Math.round(surplus))} excess liquidity. Invest €${fm(amt)} (cap). ${investable>cfg.cap?'Remaining €'+fm(Math.round(investable-cfg.cap))+' for next time.':''}</div>`;
     }
-  }else if(surplus<-200&&invested>tInv+200){
-    // Liquid is below target AND invested is above target — sell to rebuild liquidity
-    const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
-    acts+=`<div class="act"><span>Sell invested → rebuild liquidity <small>liquid ${pLiq}% below ${T.liq}% target</small></span><span class="av neg">€${fm(sellAmt)}</span></div>`;
-    any=true;
-  }else if(surplus<-200){
-    // Liquid below target but invested also below — just accumulate
-    acts+=`<div class="act"><span class="mu">Liquidity below target. Accumulate cash before investing.</span><span></span></div>`;
-    any=true;
+  }else if(surplus<-200&&invested<=tInv){
+    // Liquid below target, invested also below — accumulate
+    step++;
+    acts+=`<div class="act"><span><b>${step}.</b> Accumulate</span><span class="av mu">—</span></div>`;
+    acts+=`<div class="act-note">Liquidity is below target (${pLiq}% vs ${T.liq}%). Wait for income before investing.</div>`;
   }
 
-  // Priority 3: MM/Cash rebalance (only when liquid is AT target, not when surplus exists)
-  if(Math.abs(surplus)<500&&liquid>0){
+  // Step: MM/Cash rebalance (only at regime — liquid near target)
+  if(Math.abs(surplus)<=500&&liquid>0){
     const mmIdeal=T.r_mm/100*tLiq;
     const mmOff=mm-mmIdeal;
     if(mmOff>200){
-      acts+=`<div class="act"><span>Money Market → Cash <small>MM over ${T.r_mm}% liquid target</small></span><span class="av mu">€${fm(Math.round(mmOff))}</span></div>`;
-      any=true;
+      step++;
+      acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fm(Math.round(mmOff))}</span></div>`;
+      acts+=`<div class="act-note">Money Market is over its ${T.r_mm}% share of liquid. Move excess to cash accounts.</div>`;
     }else if(mmOff<-200&&cash>tCa){
-      acts+=`<div class="act"><span>Cash → Money Market <small>MM below ${T.r_mm}% liquid target</small></span><span class="av" style="color:#f59e0b">€${fm(Math.round(-mmOff))}</span></div>`;
-      any=true;
+      step++;
+      acts+=`<div class="act"><span><b>${step}.</b> Cash → Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(-mmOff))}</span></div>`;
+      acts+=`<div class="act-note">Money Market is below its ${T.r_mm}% share. Move cash to earn yield.</div>`;
     }
   }
 
-  // Priority 4: Satellite
+  // Step: Satellite
   if(sat<tSat-50){
-    if(any)acts+=`<div class="act-sep"></div>`;
+    step++;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
-    acts+=`<div class="act"><span>Satellite <small>BTC — buy at ~€${fm(btc.entry)}</small></span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
-    any=true;
+    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
+    acts+=`<div class="act-note">Satellite is ${pSat}% (target ${T.sat}%). Buy at ~€${fm(btc.entry)} when price is right.</div>`;
   }else if(sat>tSat+100){
-    if(any)acts+=`<div class="act-sep"></div>`;
-    acts+=`<div class="act"><span>Satellite over target <small>consider taking profit</small></span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
-    any=true;
+    step++;
+    acts+=`<div class="act"><span><b>${step}.</b> Satellite — consider profit</span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
+    acts+=`<div class="act-note">Satellite is over target. Sell at ~€${fm(btc.sell)} as planned.</div>`;
   }
 
-  if(!any)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
+  if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
     any=true;
   }
 
