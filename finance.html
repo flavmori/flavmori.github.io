@@ -85,6 +85,12 @@ input[type=number]{-moz-appearance:textfield}
 <div class="acts" id="acts"></div>
 
 <div class="sec">
+<div class="sec-h">I need cash</div>
+<div class="irow"><label>How much do you need?</label><input type="number" id="w_amt" step="100" oninput="calcW()"></div>
+<div id="wResult"></div>
+</div>
+
+<div class="sec">
 <div class="sec-h">Snapshots</div>
 <div class="hl" id="hl"></div>
 </div>
@@ -300,6 +306,74 @@ function upT(){
 }
 function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
 function saveB(){btc={entry:+$('btc_e').value||40000,sell:+$('btc_s').value||95000};localStorage.setItem('fb',JSON.stringify(btc));calc()}
+
+function calcW(){
+  const need=parseFloat($('w_amt').value)||0;
+  if(need<=0){$('wResult').innerHTML='';return}
+  const s=getS();
+  const eq=s.eq,bo=s.bo,mm=s.mm,cash=s.c1+s.c2+s.c3,sat=s.sa;
+  const total=KS.reduce((a,k)=>a+s[k],0);
+  const tLiq=T.liq/100*total;
+
+  // Priority: 1. Cash (free), 2. Money Market (free, 1-2 days), 3. Sell Bond (low vol, tax), 4. Sell Equity (high vol, tax), 5. Sell Satellite (speculative, tax)
+  let remaining=need;
+  let steps=[];
+
+  // 1. Cash above floor
+  const cashFloor=T.ca/100*(T.liq/100*total);
+  const cashAvail=Math.max(0,cash-cashFloor);
+  if(remaining>0&&cashAvail>0){
+    const take=Math.min(remaining,cashAvail);
+    steps.push({src:'Cash (accounts)',amt:take,note:'Instant, no cost, no tax',color:'#6b7280'});
+    remaining-=take;
+  }
+
+  // 2. Cash below floor (touch emergency)
+  if(remaining>0&&cash-cashAvail>0){
+    const take=Math.min(remaining,cash-cashAvail);
+    steps.push({src:'Cash (emergency reserve)',amt:take,note:'Touches your floor. Rebuild after.',color:'#f59e0b'});
+    remaining-=take;
+  }
+
+  // 3. Money Market
+  if(remaining>0&&mm>0){
+    const take=Math.min(remaining,mm);
+    steps.push({src:'Money Market (CSH2)',amt:take,note:'Sell order, available in 1-2 days. No tax (money market).',color:'#f59e0b'});
+    remaining-=take;
+  }
+
+  // 4. Bond
+  if(remaining>0&&bo>0){
+    const take=Math.min(remaining,bo);
+    const tax=Math.round(take*0.15*0.19);
+    steps.push({src:'Bond (Gov EUR)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}.`,color:'#10b981'});
+    remaining-=take;
+  }
+
+  // 5. Equity
+  if(remaining>0&&eq>0){
+    const take=Math.min(remaining,eq);
+    const tax=Math.round(take*0.30*0.20);
+    steps.push({src:'Equity (ACWI)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}. Avoid if possible.`,color:'#3b82f6'});
+    remaining-=take;
+  }
+
+  // 6. Satellite
+  if(remaining>0&&sat>0){
+    const take=Math.min(remaining,sat);
+    const tax=Math.round(take*0.40*0.21);
+    steps.push({src:'Satellite (BTC)',amt:take,note:`Sell on exchange, 1-3 days. Tax on gain: approx €${fm(tax)}.`,color:'#ef4444'});
+    remaining-=take;
+  }
+
+  let h='';
+  steps.forEach((s,i)=>{
+    h+=`<div class="act"><span><b>${i+1}.</b> ${s.src}</span><span class="av" style="color:${s.color}">€${fm(Math.round(s.amt))}</span></div>`;
+    h+=`<div class="act-note">${s.note}</div>`;
+  });
+  if(remaining>0)h+=`<div class="act"><span class="neg">Not enough assets. Short €${fm(Math.round(remaining))}.</span><span></span></div>`;
+  $('wResult').innerHTML=h;
+}
 
 function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
