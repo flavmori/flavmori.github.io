@@ -208,8 +208,10 @@ function calc(){
   if(invested>tInv+500&&surplus<-500){
     step++;
     const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
-    acts+=`<div class="act"><span><b>${step}.</b> Sell invested → rebuild liquidity</span><span class="av neg">€${fm(sellAmt)}</span></div>`;
-    acts+=`<div class="act-note">Invested is ${pInv}% (target ${T.inv}%), liquid is ${pLiq}% (target ${T.liq}%). Sell to restore balance.</div>`;
+    const taxCostLiq=Math.round(sellAmt*0.25*0.20);
+    acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (invested ${pInv}%, liquid ${pLiq}%)</span><span class="av neg">€${fm(sellAmt)} needed</span></div>`;
+    acts+=`<div class="act-note">Option A (free): stop investing, let salary rebuild liquid over time.</div>`;
+    acts+=`<div class="act-note">Option B (now): sell €${fm(sellAmt)} from investments. Tax cost approx €${fm(taxCostLiq)}.</div>`;
   }
 
   // Step: Rebalance Equity/Bond ratio
@@ -217,9 +219,12 @@ function calc(){
     step++;
     const from=actualEqR>idealEqR?'Equity':'Bond';
     const to=actualEqR>idealEqR?'Bond':'Equity';
-    const amt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
-    acts+=`<div class="act"><span><b>${step}.</b> Sell ${from} → buy ${to}</span><span class="av" style="color:#a78bfa">€${fm(amt)}</span></div>`;
-    acts+=`<div class="act-note">Invested ratio is ${Math.round(actualEqR)}/${Math.round(100-actualEqR)}, target is ${T.r_eq}/${T.r_bo}.</div>`;
+    const sellAmt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
+    const taxCost=Math.round(sellAmt*0.25*0.20);
+    const tranchesToFix=cfg.cap>0?Math.ceil(sellAmt/cfg.cap):99;
+    acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fm(sellAmt)} off</span></div>`;
+    acts+=`<div class="act-note">Option A (free): invest next ${tranchesToFix} tranches 100% into ${to}. No tax, takes time.</div>`;
+    acts+=`<div class="act-note">Option B (now): sell €${fm(sellAmt)} ${from}, buy ${to}. Tax cost approx €${fm(taxCost)}.</div>`;
   }
 
   // Step: Move Cash → Money Market (if surplus exists and MM below target)
@@ -271,11 +276,11 @@ function calc(){
     step++;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
     acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
-    acts+=`<div class="act-note">Satellite is ${pSat}% (target ${T.sat}%). Buy at ~€${fm(btc.entry)} when price is right.</div>`;
+    acts+=`<div class="act-note">Satellite is ${pSat}% (target ${T.sat}%). Buy at €${fm(btc.entry)} when price is right.</div>`;
   }else if(sat>tSat+100){
     step++;
     acts+=`<div class="act"><span><b>${step}.</b> Satellite — consider profit</span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
-    acts+=`<div class="act-note">Satellite is over target. Sell at ~€${fm(btc.sell)} as planned.</div>`;
+    acts+=`<div class="act-note">Satellite is over target. Sell at €${fm(btc.sell)} as planned.</div>`;
   }
 
   if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
