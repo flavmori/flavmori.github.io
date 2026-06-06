@@ -121,7 +121,7 @@ h1{text-align:center;font-size:1.6em;margin-bottom:4px;font-weight:700;letter-sp
 <div class="grid2">
 <div class="field"><label>Invested</label><input type="number" id="t_inv" step="1" oninput="updateT()"></div>
 <div class="field"><label>Liquid (remunerated)</label><input type="number" id="t_liqr" step="1" oninput="updateT()"></div>
-<div class="field"><label>Cash (accounts)</label><input type="number" id="t_cash" step="1" oninput="updateT()"></div>
+<div class="field"><label>Cash Floor (min on accounts)</label><input type="number" id="t_cash" step="1" oninput="updateT()"></div>
 <div class="field"><label>High Risk</label><input type="number" id="t_risk" step="1" oninput="updateT()"></div>
 </div>
 <div class="card-title" style="margin-top:12px">Investment Ratio (%)</div>
@@ -201,7 +201,7 @@ function calc(){
   const bks=[
     {name:'Invested',sub:`ACWI/Gov ${R.acwi}/${R.gov}`,val:invested,tgt:T.invested,color:'#3b82f6'},
     {name:'Liquid',sub:'Remunerated (CSH2)',val:liquid,tgt:T.liquid,color:'#f59e0b'},
-    {name:'Cash',sub:'Santander + TR + Other',val:cash,tgt:T.cash,color:'#6b7280'},
+    {name:'Cash Floor',sub:'Min on accounts',val:cash,tgt:T.cash,color:'#6b7280'},
     {name:'High Risk',sub:'BTC / Speculation',val:risk,tgt:T.risk,color:'#ef4444'},
   ];
   let bhtml='';
