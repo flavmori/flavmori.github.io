@@ -10,11 +10,7 @@
 body{font-family:'Inter',sans-serif;background:#0b0f1a;min-height:100vh;padding:20px;color:#cbd5e1;font-size:13px}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
-#lock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:14px}
-#lock input{font-family:'Inter',sans-serif;padding:11px 18px;border-radius:6px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:1em;text-align:center;width:200px}
-#lock button{padding:9px 22px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:.85em;cursor:pointer;font-weight:500}
-#lock .err{color:#ef4444;font-size:.75em}
-#app{display:none}
+
 .w{max-width:720px;margin:0 auto}
 .total{text-align:center;font-size:2em;font-weight:700;color:#f8fafc;margin:16px 0 4px}
 .total-d{text-align:center;font-size:.7em;opacity:.3;margin-bottom:24px}
@@ -65,10 +61,6 @@ input[type=number]{-moz-appearance:textfield}
 <div id="app" style="display:block"><div class="w">
 <div class="total" id="tot">-</div>
 <div class="total-d" id="totD"></div>
-<div class="sec" id="mktSec" style="display:none">
-<div class="sec-h">Market</div>
-<div id="mkt"></div>
-</div>
 
 <div class="sec">
 <div class="sec-h">Balances</div>
@@ -156,42 +148,16 @@ input[type=number]{-moz-appearance:textfield}
 </div></div>
 
 <script>
-const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
+const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json';
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
-const API_KEY='6a2423fd76ee37.96319638';
-const SYMBOLS={eq:'SPYY.XETRA',bo:'PRAR.XETRA',btc:'BTC-USD.CC'};
 let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
 let cfg={cap:2500,gEq:1.63,gBo:0.31,gSa:0};
 let btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
 let hist=[];
-let prices={eq:null,bo:null,btc:null};
-
-function show(){}
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
-
-async function fetchPrices(){}
-
-function renderMkt(){
-  const items=[
-    {k:'eq',name:'ACWI',cur:'€'},
-    {k:'bo',name:'Gov Bond',cur:'€'},
-    {k:'btc',name:'Bitcoin',cur:'$'},
-  ];
-  let h='';
-  items.forEach(i=>{
-    const p=prices[i.k];
-    if(!p)return;
-    const price=i.cur+(i.cur==='€'?fm(Math.round(p.close*100)/100):fm(Math.round(p.close)));
-    const chg=p.change;
-    const cls=chg>=0?'pos':'neg';
-    const sign=chg>=0?'+':'';
-    h+=`<div class="arow"><span class="l">${i.name}</span><span class="r"><span style="color:#f8fafc">${price}</span> <span class="${cls}">${sign}${chg.toFixed(2)}%</span></span></div>`;
-  });
-  if(h){$('mktSec').style.display='block';$('mkt').innerHTML=h}
-}
 function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
 
 function init(){
@@ -459,7 +425,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud();fetchPrices()});else{init();loadFromCloud();fetchPrices()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
 </script>
 </body>
 </html>

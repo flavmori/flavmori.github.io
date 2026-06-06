@@ -6,124 +6,111 @@
 <title>Portfolio Rebalancer — Guide</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;max-width:700px;margin:0 auto;padding:40px 24px;color:#1a1a2e;font-size:14px;line-height:1.7}
-h1{font-size:1.5em;margin-bottom:4px}
-h2{font-size:1.1em;margin:28px 0 10px;padding-bottom:4px;border-bottom:2px solid #2563eb}
-h3{font-size:.95em;margin:16px 0 6px;color:#2563eb}
-p{margin:8px 0}
-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.9em}
-th{text-align:left;padding:6px 8px;background:#f1f5f9;border:1px solid #e2e8f0;font-weight:600}
-td{padding:6px 8px;border:1px solid #e2e8f0}
-code{background:#f1f5f9;padding:2px 5px;border-radius:3px;font-size:.85em}
-.formula{background:#f8fafc;border-left:3px solid #2563eb;padding:10px 14px;margin:10px 0;font-family:monospace;font-size:.85em}
-ul{margin:8px 0 8px 20px}
-li{margin:4px 0}
-.note{background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:8px 12px;margin:10px 0;font-size:.85em}
-@media print{body{padding:20px;font-size:12px}h2{page-break-before:auto}}
+body{font-family:'Segoe UI',sans-serif;max-width:680px;margin:0 auto;padding:40px 24px;color:#1a1a2e;font-size:13.5px;line-height:1.7}
+h1{font-size:1.4em;margin-bottom:4px}
+h2{font-size:1em;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #2563eb}
+h3{font-size:.9em;margin:14px 0 4px;color:#2563eb}
+p{margin:6px 0}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.88em}
+th{text-align:left;padding:5px 7px;background:#f1f5f9;border:1px solid #e2e8f0;font-weight:600}
+td{padding:5px 7px;border:1px solid #e2e8f0}
+.f{background:#f8fafc;border-left:3px solid #2563eb;padding:8px 12px;margin:8px 0;font-family:monospace;font-size:.82em}
+ul{margin:6px 0 6px 18px}
+li{margin:3px 0}
+.n{background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:7px 10px;margin:8px 0;font-size:.82em}
+@media print{body{padding:16px;font-size:11.5px}h2{page-break-before:auto}}
 </style>
 </head>
 <body>
-<h1>Portfolio Rebalancer</h1>
-<p style="opacity:.5;font-size:.85em">How the tool works — logic, formulas, and decision engine</p>
+<h1>Portfolio Rebalancer — Guide</h1>
+<p style="opacity:.5;font-size:.82em">Updated June 6, 2026</p>
 
-<h2>1. Structure</h2>
-<p>Your portfolio is divided into 3 top-level buckets, each with sub-allocations:</p>
+<h2>1. Portfolio Structure</h2>
 <table>
-<tr><th>Bucket</th><th>Default %</th><th>Sub-allocation</th></tr>
-<tr><td><b>Invested</b></td><td>80%</td><td>Equity 80% / Bond 20%</td></tr>
-<tr><td><b>Liquid</b></td><td>15%</td><td>Money Market 60% / Cash 40%</td></tr>
-<tr><td><b>Satellite</b></td><td>5%</td><td>BTC (or other high-risk)</td></tr>
+<tr><th>Level</th><th>Bucket</th><th>Default</th><th>What</th></tr>
+<tr><td rowspan="2">Invested (80%)</td><td>Equity</td><td>80% of invested</td><td>SPDR MSCI ACWI (IE00B44Z5B48)</td></tr>
+<tr><td>Bond</td><td>20% of invested</td><td>Amundi Prime Euro Gov (LU2089238898)</td></tr>
+<tr><td rowspan="2">Liquid (15%)</td><td>Money Market</td><td>60% of liquid</td><td>Amundi Smart Overnight CSH2 (LU1190417599)</td></tr>
+<tr><td>Cash</td><td>40% of liquid</td><td>Santander + Trade Republic + Other</td></tr>
+<tr><td>Satellite (5%)</td><td>BTC</td><td>100%</td><td>Bitcoin on Trade Republic</td></tr>
 </table>
-<p>All percentages are configurable in Settings. Top-level must sum to 100%. Sub-allocations must also sum to 100% within their bucket.</p>
+<p>All percentages are configurable in Settings. Each level must sum to 100%.</p>
 
-<h2>2. How Targets Are Calculated</h2>
-<div class="formula">
-Equity target = Total × Invested% × Equity ratio%<br>
-Bond target = Total × Invested% × Bond ratio%<br>
-Money Market target = Total × Liquid% × MM ratio%<br>
-Cash target = Total × Liquid% × Cash ratio%<br>
-Satellite target = Total × Satellite%
+<h2>2. Target Calculation</h2>
+<div class="f">
+Equity target = Total x Invested% x Equity ratio%<br>
+Bond target = Total x Invested% x Bond ratio%<br>
+Money Market target = Total x Liquid% x MM ratio%<br>
+Cash target = Total x Liquid% x Cash ratio%<br>
+Satellite target = Total x Satellite%
 </div>
-<p>Example with €50,000 and defaults:</p>
-<table>
-<tr><th>Asset</th><th>Calculation</th><th>Target €</th></tr>
-<tr><td>Equity (ACWI)</td><td>50K × 80% × 80%</td><td>€32,000</td></tr>
-<tr><td>Bond (Gov EUR)</td><td>50K × 80% × 20%</td><td>€8,000</td></tr>
-<tr><td>Money Market (CSH2)</td><td>50K × 15% × 60%</td><td>€4,500</td></tr>
-<tr><td>Cash (Accounts)</td><td>50K × 15% × 40%</td><td>€3,000</td></tr>
-<tr><td>Satellite (BTC)</td><td>50K × 5%</td><td>€2,500</td></tr>
-</table>
 
-<h2>3. The Decision Engine</h2>
-<p>Every time you update balances, the tool evaluates these conditions in order:</p>
+<h2>3. Decision Engine (Actions)</h2>
+<p>When you update balances, the tool evaluates in priority order:</p>
 
-<h3>Step 1: Sell Invested → Rebuild Liquidity</h3>
-<p><b>Triggers when:</b> Invested is over target by >€500 AND Liquid is under target by >€500</p>
-<p><b>What it means:</b> Markets went up, your portfolio drifted too heavy into investments. You need to take profit and rebuild your safety net.</p>
-<p><b>Amount:</b> min(invested excess, liquid deficit)</p>
+<h3>1. Rebuild Liquidity</h3>
+<p><b>When:</b> Invested > target + €500 AND Liquid < target - €500</p>
+<p><b>What:</b> Markets rallied, portfolio drifted too heavy. Shows two options: (A) stop investing and let salary rebuild liquid (free), or (B) sell investments (tax cost shown).</p>
 
-<h3>Step 2: Rebalance Equity/Bond</h3>
-<p><b>Triggers when:</b> The ratio between Equity and Bond drifts more than 5 percentage points from target</p>
-<p><b>What it means:</b> One asset grew faster than the other. Sell the winner, buy the loser to maintain your risk profile.</p>
-<p><b>Amount:</b> difference between actual equity and ideal equity within invested</p>
+<h3>2. Rebalance Equity/Bond</h3>
+<p><b>When:</b> Equity/Bond ratio drifts more than 5 percentage points from target</p>
+<p><b>What:</b> Shows two options: (A) invest next N tranches 100% into the underweight asset (free), or (B) sell overweight and buy underweight (tax cost shown).</p>
 
-<h3>Step 3: Deploy Surplus (when Liquid > Target)</h3>
-<p>If you have more liquidity than needed:</p>
-<ul>
-<li><b>3a. Fill Money Market</b> — if MM is below its sub-target, move cash there first (earns yield)</li>
-<li><b>3b. Invest</b> — remaining surplus goes into Equity + Bond, split by their gaps. Capped per tranche.</li>
-</ul>
-<p><b>Cap:</b> You set a maximum per investment (default €2,500). This enforces DCA — you never invest everything at once.</p>
+<h3>3. Move Cash to Money Market</h3>
+<p><b>When:</b> Liquid > target (surplus exists) AND Money Market is below its sub-target</p>
+<p><b>What:</b> Fill MM before investing — it earns yield while you wait.</p>
 
-<h3>Step 4: Accumulate</h3>
-<p><b>Triggers when:</b> Liquid is below target AND Invested is also below target</p>
-<p><b>What it means:</b> You don't have enough anywhere. Wait for income before investing.</p>
+<h3>4. Invest Surplus</h3>
+<p><b>When:</b> Liquid > target by more than €300</p>
+<p><b>What:</b> Invest the surplus, capped at Investment Cap per session. Split between Equity and Bond based on which is more below target (gap-weighted, not fixed 80/20).</p>
+<p><b>Dynamic cap:</b> If your equity gain% is negative (market is down), the cap increases by 1.5x — you invest more when it's cheaper.</p>
 
-<h3>Step 5: MM/Cash Rebalance (Regime)</h3>
-<p><b>Triggers when:</b> Liquid is approximately at target (±€500) but the MM/Cash ratio inside is off by >€200</p>
-<p><b>What it means:</b> You're at steady state but the split between remunerated and non-remunerated cash is wrong. Move between them.</p>
+<h3>5. Accumulate</h3>
+<p><b>When:</b> Liquid below target AND Invested also below target</p>
+<p><b>What:</b> Don't invest. Wait for income to rebuild liquidity first.</p>
 
-<h3>Step 6: Satellite</h3>
-<ul>
-<li><b>Below target (by >€100):</b> "Buy BTC at your entry price" — capped separately</li>
-<li><b>Above target (by >€100):</b> "Consider taking profit at your sell price"</li>
-</ul>
+<h3>6. MM/Cash Rebalance</h3>
+<p><b>When:</b> Liquid is approximately at target (within €500) but MM/Cash split is off by more than €200</p>
+<p><b>What:</b> Move between MM and Cash to maintain the 60/40 ratio within liquid.</p>
 
-<h2>4. Caps</h2>
-<table>
-<tr><th>Cap</th><th>Applies to</th><th>Purpose</th></tr>
-<tr><td>Investment Cap</td><td>Equity + Bond</td><td>DCA — don't invest all surplus at once</td></tr>
-<tr><td>Satellite Cap</td><td>BTC</td><td>Control high-risk entry size</td></tr>
-</table>
-<p>Money Market moves have <b>no cap</b> — it's practically cash, zero risk to enter fully.</p>
+<h3>7. Satellite (BTC)</h3>
+<p><b>Buy:</b> When satellite is below target by more than €100. Budget split into 3 equal tranches at price levels you set (default: €50K, €45K, €38K). Buy each tranche when BTC reaches that level.</p>
+<p><b>Sell:</b> When satellite is over target by more than €100. Sell in 3 tranches at price levels you set (default: €80K, €95K, €110K). 33/33/34% split.</p>
 
-<h2>5. Investment Split Logic</h2>
-<p>When investing, the split between Equity and Bond is <b>gap-weighted</b>, not fixed:</p>
-<div class="formula">
-Equity amount = Investment × (Equity gap / Total gap)<br>
-Bond amount = Investment − Equity amount
-</div>
-<p>If Equity is more below target than Bond, more goes to Equity. This naturally rebalances toward 80/20 with every tranche.</p>
+<h2>4. Investment Cap</h2>
+<p>The cap limits how much you invest per session (default €2,500). This enforces DCA — you never deploy all surplus at once. The tool calculates how many tranches remain.</p>
+<p>When equity gain% is negative: cap x 1.5 (buy more when market is cheaper).</p>
 
-<h2>6. When to Use the Tool</h2>
-<ul>
-<li><b>Every 2 weeks</b> (bulk phase): update balances, follow the suggested action, invest the cap amount</li>
-<li><b>Monthly</b> (regime): update balances after salary, follow suggestions</li>
-<li><b>After market moves</b>: check if rebalancing triggered</li>
-<li><b>After large expenses</b>: check if liquidity dropped below target</li>
-</ul>
+<h2>5. Tax Awareness</h2>
+<p>When selling is suggested, the tool estimates tax cost using:</p>
+<div class="f">Tax = Amount sold x (gain% / (100 + gain%)) x tax rate (19-21%)</div>
+<p>You set your unrealized gain% per asset in Settings (read from Trade Republic "Since buy" view).</p>
+
+<h2>6. I Need Cash</h2>
+<p>Enter an amount and the tool shows where to take it from, in priority order:</p>
+<ol>
+<li>Cash above floor (free, instant)</li>
+<li>Cash emergency reserve (touches floor, rebuild after)</li>
+<li>Money Market (1-2 days, no tax)</li>
+<li>Bond (1-2 days, low tax)</li>
+<li>Equity (1-2 days, medium tax — avoid if possible)</li>
+<li>Satellite/BTC (1-3 days, highest tax)</li>
+</ol>
 
 <h2>7. Cloud Sync</h2>
-<p>Your data syncs to a private GitHub Gist. To enable:</p>
+<p>Settings > GitHub Token. Save once, syncs automatically. Opening on a new device loads from cloud if token is present.</p>
+
+<h2>8. How to Use</h2>
 <ul>
-<li>Go to Settings → paste your GitHub token (needs "gist" scope)</li>
-<li>Every time you click Save, it syncs automatically</li>
-<li>Opening the tool on a new device loads from cloud automatically</li>
+<li>Open every 1-2 weeks (or monthly)</li>
+<li>Update balances from Trade Republic</li>
+<li>Update gain% from Trade Republic "Since buy"</li>
+<li>Follow the numbered Actions</li>
+<li>Click Save when done</li>
 </ul>
 
-<div class="note">
-<b>Important:</b> The tool never invests for you. It only suggests actions. You execute them manually on Trade Republic. The suggestions are based on math — they don't consider market sentiment, news, or timing. That's by design: systematic investing outperforms emotional decisions.
+<div class="n">
+<b>The tool suggests. You execute.</b> It does not connect to your broker or make trades. It uses math, not market sentiment. Systematic investing outperforms emotional decisions.
 </div>
-
 </body>
 </html>
