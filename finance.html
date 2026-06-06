@@ -47,8 +47,7 @@ input[type=number]{-moz-appearance:textfield}
 .btn-p{background:#2563eb}.btn-s{background:#1e293b}
 .foot{display:flex;gap:8px;flex-wrap:wrap}
 .sync{font-size:.58em;opacity:.2;text-align:center;margin-top:5px}
-.hc{width:100%;height:90px;margin-top:8px}
-.hl{max-height:70px;overflow-y:auto;font-size:.62em;margin-top:6px}
+.hl{max-height:100px;overflow-y:auto;font-size:.62em}
 .hl div{display:flex;justify-content:space-between;padding:2px 4px;border-bottom:1px solid #111827}
 .sov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:100;overflow-y:auto;padding:40px 20px}
 .sp{max-width:440px;margin:0 auto;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:20px}
@@ -90,15 +89,12 @@ input[type=number]{-moz-appearance:textfield}
 <div class="acts" id="acts"></div>
 
 <div class="sec">
-<div class="sec-h">History</div>
-<canvas class="hc" id="cv"></canvas>
+<div class="sec-h">Snapshots</div>
 <div class="hl" id="hl"></div>
 </div>
 
 <div class="foot">
-<button class="btn btn-p" onclick="save()">Save</button>
-<button class="btn btn-s" onclick="toG()">Sync</button>
-<button class="btn btn-s" onclick="frG()">Load</button>
+<button class="btn btn-p" onclick="saveAll()">Save</button>
 <button class="btn btn-s" onclick="openS()">Settings</button>
 </div>
 <div class="sync" id="ss"></div>
@@ -135,6 +131,8 @@ input[type=number]{-moz-appearance:textfield}
 <div><label>Entry (€)</label><input type="number" id="btc_e" step="1000" oninput="saveB()"></div>
 <div><label>Sell (€)</label><input type="number" id="btc_s" step="1000" oninput="saveB()"></div>
 </div>
+<div class="sh">Cloud Sync</div>
+<div><label>GitHub Token (for cross-device sync)</label><input type="text" id="ghToken" style="width:100%;margin-top:4px" onchange="localStorage.setItem('ght',this.value)" placeholder="ghp_..."></div>
 <button class="btn btn-s" style="margin-top:14px" onclick="closeS()">Close</button>
 </div></div>
 
@@ -160,6 +158,7 @@ function init(){
   $('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca;
   $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
   $('btc_e').value=btc.entry;$('btc_s').value=btc.sell;
+  $('ghToken').value=localStorage.getItem('ght')||'';
   calc();rH();
 }
 
@@ -294,34 +293,34 @@ function upT(){
 function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
 function saveB(){btc={entry:+$('btc_e').value||40000,sell:+$('btc_s').value||95000};localStorage.setItem('fb',JSON.stringify(btc));calc()}
 
-function save(){
+function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
   hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));
   hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});
   hist.sort((a,b)=>a.d.localeCompare(b.d));
-  localStorage.setItem('fh',JSON.stringify(hist));rH();$('ss').textContent='Saved';
+  localStorage.setItem('fh',JSON.stringify(hist));rH();
+  // Auto-sync to cloud
+  const t=localStorage.getItem('ght');
+  if(t){fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify({s:getS(),T,cfg,btc,h:hist})}}})}).then(r=>{$('ss').textContent=r.ok?'Saved & synced':'Saved locally (sync failed)'}).catch(()=>{$('ss').textContent='Saved locally'})}
+  else{$('ss').textContent='Saved locally (set token in Settings to sync)'}
 }
 function rH(){
-  let h='';[...hist].reverse().forEach(e=>{h+=`<div><span>${e.d}</span><span>€${fm(e.t)}</span></div>`});
-  $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';dC();
+  let h='';[...hist].reverse().slice(0,10).forEach(e=>{h+=`<div><span>${e.d}</span><span>€${fm(e.t)}</span></div>`});
+  $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';
 }
-function dC(){
-  const c=$('cv'),x=c.getContext('2d'),d=window.devicePixelRatio||1;
-  const W=c.offsetWidth,H=90;c.width=W*d;c.height=H*d;c.style.height=H+'px';x.scale(d,d);x.clearRect(0,0,W,H);
-  if(hist.length<2){x.fillStyle='rgba(255,255,255,.08)';x.font='9px Inter';x.textAlign='center';x.fillText('Min 2 snapshots',W/2,H/2);return}
-  const vs=hist.map(h=>h.t),mn=Math.min(...vs)*.95,mx=Math.max(...vs)*1.05;
-  const p={t:6,b:12,l:32,r:6};
-  x.strokeStyle='#1e293b';for(let i=0;i<3;i++){const y=p.t+(H-p.t-p.b)*i/2;x.beginPath();x.moveTo(p.l,y);x.lineTo(W-p.r,y);x.stroke()}
-  x.strokeStyle='#2563eb';x.lineWidth=1.5;x.lineJoin='round';x.beginPath();
-  hist.forEach((h,i)=>{const px=p.l+i*(W-p.l-p.r)/(hist.length-1);const py=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
-}
+async function loadFromCloud(){
+  const t=localStorage.getItem('ght');if(!t)return;
+  try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
+  const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
+  if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
+  if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
+  if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}
+  if(d.btc){btc=d.btc;$('btc_e').value=btc.entry;$('btc_s').value=btc.sell}
+  if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
+  localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
+  calc();rH()}catch(e){}}
 
-function tk(){return localStorage.getItem('ght')||prompt('GitHub Token:')}
-async function toG(){const t=tk();if(!t)return;localStorage.setItem('ght',t);try{const r=await fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify({s:getS(),T,cfg,btc,h:hist})}}})});$('ss').textContent=r.ok?'Synced':'Err'}catch(e){$('ss').textContent=e.message}}
-async function frG(){const t=tk();if(!t)return;localStorage.setItem('ght',t);try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}if(d.btc){btc=d.btc;$('btc_e').value=btc.entry;$('btc_s').value=btc.sell}if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));calc();rH();$('ss').textContent='Loaded'}catch(e){$('ss').textContent=e.message}}
-
-if(localStorage.getItem('fa')==='1'){show();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()}else $('pw').focus();
-window.addEventListener('resize',dC);
+if(localStorage.getItem('fa')==='1'){show();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}}else $('pw').focus();
 </script>
 </body>
 </html>
