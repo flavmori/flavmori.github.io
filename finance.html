@@ -131,7 +131,6 @@ input[type=number]{-moz-appearance:textfield}
 <div class="sh">Caps</div>
 <div class="g2">
 <div><label>Investment Cap (€)</label><input type="number" id="cfg_cap" step="100" oninput="saveCfg()"></div>
-<div><label>Satellite Cap (€)</label><input type="number" id="cfg_capSa" step="100" oninput="saveCfg()"></div>
 </div>
 <div class="sh">Unrealized gain (%)</div>
 <div class="g2">
@@ -162,7 +161,7 @@ const KS=['eq','bo','mm','c1','c2','c3','sa'];
 const API_KEY='6a2423fd76ee37.96319638';
 const SYMBOLS={eq:'SPYY.XETRA',bo:'PRAR.XETRA',btc:'BTC-USD.CC'};
 let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
-let cfg={cap:2500,capSa:2500,gEq:1.63,gBo:0.31,gSa:0};
+let cfg={cap:2500,gEq:1.63,gBo:0.31,gSa:0};
 let btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
 let hist=[];
 let prices={eq:null,bo:null,btc:null};
@@ -201,7 +200,7 @@ function init(){
   if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
   $('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca;
-  $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
+  $('cfg_cap').value=cfg.cap;
   $('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0;
   $('btc_b1').value=btc.buy?btc.buy[0]:50000;$('btc_b2').value=btc.buy?btc.buy[1]:45000;$('btc_b3').value=btc.buy?btc.buy[2]:38000;
   $('btc_s1').value=btc.sell?btc.sell[0]:80000;$('btc_s2').value=btc.sell?btc.sell[1]:95000;$('btc_s3').value=btc.sell?btc.sell[2]:110000;
@@ -301,8 +300,7 @@ function calc(){
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
       const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fm(dynCap)} (x1.5). `:'';
-      const priceNote=prices.eq?` ACWI at €${prices.eq.close.toFixed(2)}.`:'';
-      acts+=`<div class="act-note">${capNote}${priceNote} You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act-note">${capNote}You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
@@ -327,38 +325,24 @@ function calc(){
   }
 
   // Step: Satellite
-  if(sat<tSat-100){
+  const saGap=Math.max(0,tSat-sat);
+  const nBuyTranches=btc.buy.length;
+  if(saGap>100){
     step++;
-    const saAmt=Math.min(tSat-sat,cfg.capSa);
-    const btcLive=prices.btc?prices.btc.close:null;
-    const btcEur=btcLive?Math.round(btcLive*0.865):null; // USD to EUR approx
-    let trancheNote='';
-    if(btcEur){
-      trancheNote=btc.buy.map((p,i)=>{
-        const status=btcEur<=p?'<b style="color:#10b981">BUY</b>':'wait';
-        return `T${i+1}: €${fm(p)} — ${status}`;
-      }).join(' | ');
-      trancheNote=`BTC at €${fm(btcEur)} ($${fm(Math.round(btcLive))}). ${trancheNote}`;
-    }else{
-      trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fm(p)}`).join(' | ');
-    }
-    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
+    const perTranche=Math.round(saGap/nBuyTranches);
+    let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fm(p)} (€${fm(perTranche)})`).join(' | ');
+    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(perTranche)}/tranche</span></div>`;
     acts+=`<div class="act-note">${trancheNote}</div>`;
+    acts+=`<div class="act-note">Total budget: €${fm(Math.round(saGap))}. Buy each tranche when price reaches target.</div>`;
   }else if(sat>tSat+100){
     step++;
-    const btcLive2=prices.btc?prices.btc.close:null;
-    const btcEur2=btcLive2?Math.round(btcLive2*0.865):null;
-    let sellNote='';
-    if(btcEur2){
-      sellNote=btc.sell.map((p,i)=>{
-        const status=btcEur2>=p?'<b style="color:#10b981">SELL</b>':'hold';
-        return `T${i+1}: €${fm(p)} — ${status}`;
-      }).join(' | ');
-      sellNote=`BTC at €${fm(btcEur2)}. ${sellNote}`;
-    }else{
-      sellNote=btc.sell.map((p,i)=>`T${i+1}: €${fm(p)}`).join(' | ');
-    }
-    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
+    const nSellTranches=btc.sell.length;
+    const pctEach=Math.floor(100/nSellTranches);
+    let sellNote=btc.sell.map((p,i)=>{
+      const pct=i<nSellTranches-1?pctEach:(100-(pctEach*(nSellTranches-1)));
+      return `T${i+1}: sell ${pct}% at €${fm(p)}`;
+    }).join(' | ');
+    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fm(Math.round(sat-tSat))} over target</span></div>`;
     acts+=`<div class="act-note">${sellNote}</div>`;
   }
 
@@ -377,7 +361,7 @@ function upT(){
   $('m3').innerHTML=(T.r_mm+T.r_ca)!==100?'<span class="neg">'+(T.r_mm+T.r_ca)+'%</span>':'';
   localStorage.setItem('ft',JSON.stringify(T));calc();
 }
-function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500,gEq:+$('cfg_gEq').value||0,gBo:+$('cfg_gBo').value||0,gSa:+$('cfg_gSa').value||0};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
+function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,gEq:+$('cfg_gEq').value||0,gBo:+$('cfg_gBo').value||0,gSa:+$('cfg_gSa').value||0};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
 function saveB(){btc={buy:[+$('btc_b1').value||50000,+$('btc_b2').value||45000,+$('btc_b3').value||38000],sell:[+$('btc_s1').value||80000,+$('btc_s2').value||95000,+$('btc_s3').value||110000]};localStorage.setItem('fb',JSON.stringify(btc));calc()}
 
 function calcW(){
@@ -469,7 +453,7 @@ async function loadFromCloud(){
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
-  if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}
+  if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0}
   if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
