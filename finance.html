@@ -62,7 +62,7 @@ input[type=number]{-moz-appearance:textfield}
 </head>
 <body>
 <div id="lock">
-<input type="password" id="pw" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
+<input type="text" id="pw" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
 <button onclick="unlock()">Enter</button>
 <div class="err" id="err"></div>
 </div>
@@ -283,10 +283,6 @@ function calc(){
   }
 
   if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
-    any=true;
-  }
-
-  if(!any)acts+=`<div class="act"><span class="mu">All on target.</span><span></span></div>`;
   $('acts').innerHTML=acts;
 
   localStorage.setItem('fs',JSON.stringify(s));
