@@ -22,48 +22,60 @@ h1{text-align:center;font-size:2em;margin-bottom:8px;font-weight:700;letter-spac
 .card h2{font-size:1.1em;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr}}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:.8em;opacity:.7;font-weight:500}
-.field input{font-family:'Inter',sans-serif;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:1em;width:100%;transition:border-color .2s}
+.field input,.field select{font-family:'Inter',sans-serif;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:1em;width:100%;transition:border-color .2s}
 .field input:focus{outline:none;border-color:#764ba2}
-.field input.target-input{background:rgba(102,126,234,.1);border-color:rgba(102,126,234,.3)}
-.total-bar{text-align:center;padding:16px;background:rgba(255,255,255,.08);border-radius:12px;margin-bottom:20px;border:1px solid rgba(255,255,255,.15)}
-.total-bar .big{font-size:2em;font-weight:700}
-.total-bar .sub{opacity:.7;font-size:.9em;margin-top:4px}
-.alloc-table{width:100%;border-collapse:collapse;font-size:.9em}
-.alloc-table th{text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.15);opacity:.7;font-weight:500;font-size:.8em;text-transform:uppercase}
-.alloc-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
-.alloc-table .num{text-align:right;font-variant-numeric:tabular-nums}
-.bar-wrap{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;min-width:80px}
-.bar-fill{height:100%;border-radius:4px;transition:width .3s}
-.pos{color:#34d399}
-.neg{color:#f87171}
-.warn{color:#fbbf24}
+.field select{background:#1e1b4b;-webkit-appearance:none;appearance:none}
+.field select option{background:#1e1b4b;color:#fff}
+.total-bar{text-align:center;padding:20px;background:rgba(255,255,255,.08);border-radius:12px;margin-bottom:20px;border:1px solid rgba(255,255,255,.15)}
+.total-bar .big{font-size:2.2em;font-weight:700}
+.total-bar .sub{opacity:.7;font-size:.9em;margin-top:6px}
+.total-bar .breakdown{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
+.total-bar .breakdown .item{font-size:.85em;padding:4px 12px;border-radius:8px;background:rgba(255,255,255,.06)}
+.alloc-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.alloc-row .name{width:130px;font-size:.9em;font-weight:500}
+.alloc-row .bar-wrap{flex:1;height:24px;background:rgba(255,255,255,.08);border-radius:6px;position:relative;overflow:hidden}
+.alloc-row .bar-fill{height:100%;border-radius:6px;transition:width .3s;position:absolute;top:0;left:0}
+.alloc-row .bar-target{position:absolute;top:0;height:100%;width:2px;background:#fff;opacity:.6}
+.alloc-row .bar-label{position:absolute;top:50%;right:8px;transform:translateY(-50%);font-size:.75em;font-weight:600}
+.alloc-row .nums{width:180px;text-align:right;font-size:.8em;font-variant-numeric:tabular-nums}
+.alloc-row .gap{font-weight:600;font-size:.85em}
+.pos{color:#34d399}.neg{color:#f87171}.warn{color:#fbbf24}
+.alert-box{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:.85em;display:none}
+.alert-box.show{display:block}
+.alert-warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:#fbbf24}
+.alert-ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399}
+.pac-table{width:100%;border-collapse:collapse;font-size:.85em;margin-top:12px}
+.pac-table th{text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.15);opacity:.7;font-size:.8em;text-transform:uppercase}
+.pac-table td{padding:8px;border-bottom:1px solid rgba(255,255,255,.06);font-variant-numeric:tabular-nums}
+.pac-table .total-row{border-top:2px solid rgba(102,126,234,.4);font-weight:600}
+.btc-card{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:20px;margin-bottom:20px}
+.btc-card h2{color:#f59e0b}
+.btc-status{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;margin-top:12px;font-size:.9em}
+.btc-waiting{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.btc-active{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2)}
+.btc-note{font-size:.8em;opacity:.6;margin-top:10px;line-height:1.5}
 .btn{font-family:'Inter',sans-serif;padding:10px 20px;border-radius:10px;border:none;color:#fff;font-size:.9em;cursor:pointer;font-weight:500;transition:transform .1s}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2)}
 .btn-secondary{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}
-.btn-danger{background:rgba(248,113,113,.2);border:1px solid rgba(248,113,113,.3);color:#f87171}
+.btn-sm{padding:6px 14px;font-size:.8em}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .split-result{margin-top:16px;padding:16px;background:rgba(102,126,234,.08);border-radius:12px;border:1px solid rgba(102,126,234,.2)}
 .split-result h3{font-size:.95em;margin-bottom:10px;font-weight:600}
 .split-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9em}
 .split-row:last-child{border:none}
 .split-row .amt{font-weight:600}
-.alert-box{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:.85em;display:none}
-.alert-box.show{display:block}
-.alert-warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:#fbbf24}
-.alert-ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399}
-.history-chart{width:100%;height:200px;position:relative;margin-top:12px}
-.history-chart canvas{width:100%!important;height:100%!important}
-.history-list{max-height:200px;overflow-y:auto;font-size:.8em;margin-top:12px}
+.history-chart{width:100%;height:180px;position:relative;margin-top:12px}
+.history-list{max-height:180px;overflow-y:auto;font-size:.8em;margin-top:12px}
 .history-list .entry{display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
-.history-list .entry:nth-child(even){background:rgba(255,255,255,.02)}
 .sync-status{font-size:.75em;opacity:.6;text-align:center;margin-top:8px}
 .nav-link{position:fixed;top:16px;left:16px;font-size:.85em;opacity:.6;text-decoration:none;color:#fff}
 .nav-link:hover{opacity:1}
-.target-note{font-size:.75em;opacity:.5;margin-top:8px;text-align:center}
+.section-label{font-size:.75em;text-transform:uppercase;letter-spacing:.05em;opacity:.4;margin-bottom:8px;margin-top:20px}
 </style>
 </head>
 <body>
@@ -79,81 +91,83 @@ h1{text-align:center;font-size:2em;margin-bottom:8px;font-weight:700;letter-spac
 <div id="app">
 <div class="container">
 <h1>Finance Rebalancer</h1>
-<p class="subtitle">Patrimonio · Allocazione · Ribilanciamento</p>
+<p class="subtitle">Patrimonio · Allocazione · Piano PAC</p>
 
 <!-- Total -->
 <div class="total-bar">
 <div class="big" id="totalDisplay">€0</div>
-<div class="sub" id="totalSub"></div>
+<div class="sub" id="totalSub">Inserisci i saldi</div>
+<div class="breakdown" id="totalBreakdown"></div>
 </div>
 
 <!-- Alert -->
 <div class="alert-box" id="alertBox"></div>
 
-<!-- Saldi attuali -->
+<!-- Saldi -->
 <div class="card">
-<h2>💰 Saldi Attuali</h2>
-<div class="grid3">
+<h2>💰 I Miei Saldi</h2>
+<div class="grid4">
 <div class="field"><label>ACWI (Equity)</label><input type="number" id="s_acwi" step="0.01" oninput="calc()"></div>
 <div class="field"><label>Gov Bond</label><input type="number" id="s_gov" step="0.01" oninput="calc()"></div>
-<div class="field"><label>CSH2 (Liquidità)</label><input type="number" id="s_csh2" step="0.01" oninput="calc()"></div>
-<div class="field"><label>Saldo TR Cash</label><input type="number" id="s_trcash" step="0.01" oninput="calc()"></div>
+<div class="field"><label>CSH2</label><input type="number" id="s_csh2" step="0.01" oninput="calc()"></div>
 <div class="field"><label>Santander</label><input type="number" id="s_sant" step="0.01" oninput="calc()"></div>
-<div class="field"><label>BTC (Speculazione)</label><input type="number" id="s_btc" step="0.01" oninput="calc()"></div>
+</div>
+<div class="grid2" style="margin-top:12px">
+<div class="field"><label>Saldo TR Cash (disponibile)</label><input type="number" id="s_trcash" step="0.01" oninput="calc()"></div>
+<div class="field"><label>BTC (se comprato)</label><input type="number" id="s_btc" step="0.01" oninput="calc()"></div>
 </div>
 </div>
 
-<!-- Target % -->
+<!-- Allocation visual -->
 <div class="card">
-<h2>🎯 Target Allocazione (%)</h2>
+<h2>📊 Dove Sono vs Dove Voglio Essere</h2>
+<p class="section-label">Target: ACWI 60% · Gov 15% · Liquidità 18% · Buffer 7% (ratio investito 80/20)</p>
+<div id="allocRows"></div>
+</div>
+
+<!-- PAC Plan -->
+<div class="card">
+<h2>📅 Piano PAC — Prossime Tranches</h2>
 <div class="grid3">
-<div class="field"><label>ACWI</label><input type="number" id="t_acwi" class="target-input" step="1" oninput="calc()"></div>
-<div class="field"><label>Gov Bond</label><input type="number" id="t_gov" class="target-input" step="1" oninput="calc()"></div>
-<div class="field"><label>CSH2</label><input type="number" id="t_csh2" class="target-input" step="1" oninput="calc()"></div>
-<div class="field"><label>Saldo TR Cash</label><input type="number" id="t_trcash" class="target-input" step="1" oninput="calc()"></div>
-<div class="field"><label>Santander</label><input type="number" id="t_sant" class="target-input" step="1" oninput="calc()"></div>
-<div class="field"><label>BTC</label><input type="number" id="t_btc" class="target-input" step="1" oninput="calc()"></div>
+<div class="field"><label>€ per tranche</label><input type="number" id="pacAmt" value="2500" step="100" oninput="calcPac()"></div>
+<div class="field"><label>Frequenza</label><select id="pacFreq" onchange="calcPac()"><option value="14">Ogni 2 settimane</option><option value="30">Mensile</option></select></div>
+<div class="field"><label>Quante tranches</label><input type="number" id="pacN" value="5" min="1" max="20" oninput="calcPac()"></div>
 </div>
-<p class="target-note">Totale target: <span id="targetSum">100</span>% — deve essere 100%</p>
+<div id="pacResult"></div>
 </div>
 
-<!-- Allocation Table -->
-<div class="card">
-<h2>📊 Allocazione Attuale vs Target</h2>
-<table class="alloc-table">
-<thead><tr><th>Cassetto</th><th class="num">€</th><th class="num">Attuale %</th><th>Barra</th><th class="num">Target %</th><th class="num">Gap €</th></tr></thead>
-<tbody id="allocBody"></tbody>
-</table>
+<!-- BTC Trade Tracker -->
+<div class="btc-card">
+<h2>₿ Trade BTC — Zona di Acquisto</h2>
+<div class="grid3">
+<div class="field"><label>Budget riservato (€)</label><input type="number" id="btcBudget" value="5000" step="100" oninput="calcBtc()"></div>
+<div class="field"><label>Prezzo entry target (€)</label><input type="number" id="btcEntry" value="40000" step="1000" oninput="calcBtc()"></div>
+<div class="field"><label>Prezzo sell target (€)</label><input type="number" id="btcSell" value="95000" step="1000" oninput="calcBtc()"></div>
+</div>
+<div id="btcStatus"></div>
+<p class="btc-note" id="btcNote"></p>
 </div>
 
-<!-- Invest -->
+<!-- Quick invest -->
 <div class="card">
-<h2>💸 Quanto Investo Oggi?</h2>
+<h2>💸 Investo Ora</h2>
 <div class="grid2">
-<div class="field"><label>Importo da allocare (€)</label><input type="number" id="investAmt" step="0.01" oninput="calcSplit()"></div>
-<div class="field"><label>Fonte (da dove prendi i soldi)</label>
-<select id="investSrc" style="font-family:'Inter',sans-serif;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#1e1b4b;color:#fff;font-size:1em;-webkit-appearance:none;appearance:none" onchange="calcSplit()">
-<option value="external" style="background:#1e1b4b;color:#fff">Soldi nuovi (esterni)</option>
-<option value="s_trcash" style="background:#1e1b4b;color:#fff">Da Saldo TR Cash</option>
-<option value="s_sant" style="background:#1e1b4b;color:#fff">Da Santander</option>
-<option value="s_csh2" style="background:#1e1b4b;color:#fff">Da CSH2</option>
-</select>
-</div>
+<div class="field"><label>Importo (€)</label><input type="number" id="investAmt" step="0.01" oninput="calcSplit()"></div>
+<div class="field"><label>Da dove</label><select id="investSrc" onchange="calcSplit()"><option value="s_trcash">Da Saldo TR Cash</option><option value="external">Soldi nuovi (esterni)</option><option value="s_csh2">Da CSH2</option></select></div>
 </div>
 <div class="split-result" id="splitResult" style="display:none">
-<h3>Split consigliato:</h3>
+<h3>Split 80/20 (solo investimenti):</h3>
 <div id="splitRows"></div>
 </div>
 </div>
 
-<!-- Actions -->
+<!-- Save -->
 <div class="card">
 <h2>💾 Salva & Sincronizza</h2>
 <div class="actions">
 <button class="btn btn-primary" onclick="saveSnapshot()">Salva Snapshot</button>
 <button class="btn btn-secondary" onclick="syncToGist()">Sync → Cloud</button>
 <button class="btn btn-secondary" onclick="syncFromGist()">Cloud → Qui</button>
-<button class="btn btn-danger" onclick="clearHistory()">Reset Storico</button>
 </div>
 <div class="sync-status" id="syncStatus">Non sincronizzato</div>
 </div>
@@ -172,12 +186,15 @@ h1{text-align:center;font-size:2em;margin-bottom:8px;font-weight:700;letter-spac
 const GIST_ID='17fedcdc8ee90458b9513999b55a4813';
 const GIST_FILE='finance.json';
 const PASS='flavmori2210';
-const INSTRUMENTS=['acwi','gov','csh2','trcash','sant','btc'];
-const LABELS={acwi:'ACWI (Equity)',gov:'Gov Bond',csh2:'CSH2 (Liquidità)',trcash:'Saldo TR Cash',sant:'Santander',btc:'BTC'};
-const COLORS={acwi:'#667eea',gov:'#34d399',csh2:'#fbbf24',trcash:'#94a3b8',sant:'#f87171',btc:'#f59e0b'};
-const DEFAULT_TARGETS={acwi:55,gov:14,csh2:12,trcash:8,sant:6,btc:5};
-const LIQUIDITY_KEYS=['csh2','sant'];
-const LIQUIDITY_TARGET_PCT=18;
+const KEYS=['acwi','gov','csh2','sant','trcash','btc'];
+const LABELS={acwi:'ACWI (Equity)',gov:'Gov Bond',csh2:'CSH2',sant:'Santander',trcash:'Saldo TR Cash',btc:'BTC'};
+const COLORS={acwi:'#667eea',gov:'#34d399',csh2:'#fbbf24',sant:'#f87171',trcash:'#94a3b8',btc:'#f59e0b'};
+
+// Targets are on 4 BUCKETS (not individual instruments)
+// Bucket: investito (ACWI+Gov)=75%, liquidità (CSH2+Sant)=18%, buffer (TR cash)=7%
+// Inside investito: ACWI=80%, Gov=20%
+const TARGETS={investito:75, liquidita:18, buffer:7}; // BTC is separate
+const INVEST_RATIO={acwi:0.80, gov:0.20};
 
 let history=[];
 
@@ -187,154 +204,212 @@ function unlock(){
     document.getElementById('lock').style.display='none';
     document.getElementById('app').style.display='block';
     init();
-  } else {
-    document.getElementById('err').textContent='Password errata';
-  }
+  } else {document.getElementById('err').textContent='Password errata'}
 }
 
 function init(){
-  // Load targets
-  let t=JSON.parse(localStorage.getItem('fin_targets')||'null')||DEFAULT_TARGETS;
-  INSTRUMENTS.forEach(k=>{document.getElementById('t_'+k).value=t[k]||0});
-  // Load last saldi
   let s=JSON.parse(localStorage.getItem('fin_saldi')||'null')||{};
-  INSTRUMENTS.forEach(k=>{if(s[k])document.getElementById('s_'+k).value=s[k]});
-  // Load history
+  KEYS.forEach(k=>{if(s[k])document.getElementById('s_'+k).value=s[k]});
+  let btcConf=JSON.parse(localStorage.getItem('fin_btc')||'null')||{};
+  if(btcConf.budget)document.getElementById('btcBudget').value=btcConf.budget;
+  if(btcConf.entry)document.getElementById('btcEntry').value=btcConf.entry;
+  if(btcConf.sell)document.getElementById('btcSell').value=btcConf.sell;
+  let pacConf=JSON.parse(localStorage.getItem('fin_pac')||'null')||{};
+  if(pacConf.amt)document.getElementById('pacAmt').value=pacConf.amt;
+  if(pacConf.n)document.getElementById('pacN').value=pacConf.n;
+  if(pacConf.freq)document.getElementById('pacFreq').value=pacConf.freq;
   history=JSON.parse(localStorage.getItem('fin_history')||'[]');
-  calc();
-  renderHistory();
+  calc();renderHistory();
 }
 
-function getVals(){
-  let s={},t={};
-  INSTRUMENTS.forEach(k=>{
-    s[k]=parseFloat(document.getElementById('s_'+k).value)||0;
-    t[k]=parseFloat(document.getElementById('t_'+k).value)||0;
-  });
-  return {s,t};
+function getS(){
+  let s={};
+  KEYS.forEach(k=>s[k]=parseFloat(document.getElementById('s_'+k).value)||0);
+  return s;
 }
 
 function calc(){
-  const {s,t}=getVals();
-  const total=INSTRUMENTS.reduce((a,k)=>a+s[k],0);
-  const tSum=INSTRUMENTS.reduce((a,k)=>a+t[k],0);
+  const s=getS();
+  const btcBudget=parseFloat(document.getElementById('btcBudget').value)||0;
+  const btcOwned=s.btc;
+  const total=KEYS.reduce((a,k)=>a+s[k],0);
 
+  // BTC budget is "reserved" from TR cash for display purposes
+  const btcReserved=btcOwned>0?0:Math.min(btcBudget,s.trcash);
+  const effectiveTrCash=s.trcash-btcReserved;
+
+  // Buckets
+  const investito=s.acwi+s.gov;
+  const liquidita=s.csh2+s.sant;
+  const buffer=effectiveTrCash;
+  const totalExBtc=total-btcOwned-btcReserved;
+
+  // Display
   document.getElementById('totalDisplay').textContent='€'+fmt(total);
-  document.getElementById('totalSub').textContent=total>0?'Investito: €'+fmt(s.acwi+s.gov)+' · Liquido: €'+fmt(s.csh2+s.trcash+s.sant)+' · BTC: €'+fmt(s.btc):'Inserisci i saldi';
-  document.getElementById('targetSum').textContent=tSum.toFixed(0);
-  document.getElementById('targetSum').style.color=Math.abs(tSum-100)<0.5?'#34d399':'#f87171';
+  document.getElementById('totalSub').textContent=total>0?
+    `Investito: €${fmt(investito)} · Liquido: €${fmt(liquidita)} · Buffer TR: €${fmt(s.trcash)}`+(btcOwned>0?' · BTC: €'+fmt(btcOwned):'')
+    :'Inserisci i saldi';
 
-  // Alert liquidità
-  const liqPct=total>0?(s.csh2+s.sant)/total*100:0;
-  const alertBox=document.getElementById('alertBox');
-  if(total>0&&liqPct<LIQUIDITY_TARGET_PCT){
-    alertBox.className='alert-box alert-warn show';
-    alertBox.textContent='⚠️ Liquidità al '+liqPct.toFixed(1)+'% (sotto il target '+LIQUIDITY_TARGET_PCT+'%). Considera di fermare il PAC.';
-  } else if(total>0){
-    alertBox.className='alert-box alert-ok show';
-    alertBox.textContent='✓ Liquidità al '+liqPct.toFixed(1)+'% — OK';
-  } else {
-    alertBox.className='alert-box';
+  const bk=document.getElementById('totalBreakdown');
+  if(total>0){
+    const invPct=(investito/total*100).toFixed(0);
+    const liqPct=(liquidita/total*100).toFixed(0);
+    const ratio=investito>0?((s.acwi/investito)*100).toFixed(0)+'/'+((s.gov/investito)*100).toFixed(0):'—';
+    bk.innerHTML=`<span class="item">Investito ${invPct}% (ratio ${ratio})</span><span class="item">Liquido ${liqPct}%</span>`;
   }
 
-  // Table
+  // Liquidity alert
+  const liqPct=total>0?liquidita/total*100:0;
+  const ab=document.getElementById('alertBox');
+  if(total>0&&liqPct<TARGETS.liquidita){
+    ab.className='alert-box alert-warn show';
+    ab.textContent=`⚠️ Liquidità al ${liqPct.toFixed(1)}% (target ${TARGETS.liquidita}%). Considera di fermare il PAC.`;
+  } else if(total>0){
+    ab.className='alert-box alert-ok show';
+    ab.textContent=`✓ Liquidità al ${liqPct.toFixed(1)}% — OK (target ${TARGETS.liquidita}%)`;
+  } else {ab.className='alert-box'}
+
+  // Allocation rows
+  const buckets=[
+    {name:'Investito (ACWI+Gov)',val:investito,target:TARGETS.investito,color:'#667eea',detail:`ACWI €${fmt(s.acwi)} + Gov €${fmt(s.gov)} — ratio ${investito>0?((s.acwi/investito)*100).toFixed(0):'0'}/${investito>0?((s.gov/investito)*100).toFixed(0):'0'} (target 80/20)`},
+    {name:'Liquidità (CSH2+Sant)',val:liquidita,target:TARGETS.liquidita,color:'#fbbf24',detail:`CSH2 €${fmt(s.csh2)} + Santander €${fmt(s.sant)}`},
+    {name:'Buffer TR Cash',val:s.trcash,target:TARGETS.buffer,color:'#94a3b8',detail:btcReserved>0?`Di cui €${fmt(btcReserved)} riservati per BTC`:`Disponibile per PAC`},
+  ];
+
   let html='';
-  INSTRUMENTS.forEach(k=>{
-    const pct=total>0?s[k]/total*100:0;
-    const target=t[k];
-    const gap=total>0?(target/100*total)-s[k]:0;
-    const barW=Math.min(pct/Math.max(...INSTRUMENTS.map(i=>total>0?s[i]/total*100:1))*100,100);
-    const gapClass=Math.abs(gap)<50?'':gap>0?'pos':'neg';
-    html+=`<tr>
-      <td>${LABELS[k]}</td>
-      <td class="num">€${fmt(s[k])}</td>
-      <td class="num">${pct.toFixed(1)}%</td>
-      <td><div class="bar-wrap"><div class="bar-fill" style="width:${barW}%;background:${COLORS[k]}"></div></div></td>
-      <td class="num">${target}%</td>
-      <td class="num ${gapClass}">${gap>=0?'+':''}€${fmt(Math.abs(gap))}</td>
-    </tr>`;
+  buckets.forEach(b=>{
+    const pct=total>0?b.val/total*100:0;
+    const targetE=total>0?b.target/100*total:0;
+    const gap=targetE-b.val;
+    const maxPct=Math.max(pct,b.target);
+    const barW=maxPct>0?pct/maxPct*100:0;
+    const targetPos=maxPct>0?b.target/maxPct*100:0;
+    const gapStr=Math.abs(gap)<30?'✓':(gap>0?`<span class="neg">−€${fmt(Math.abs(gap))}</span>`:`<span class="pos">+€${fmt(Math.abs(gap))}</span>`);
+    html+=`<div class="alloc-row">
+      <div class="name">${b.name}</div>
+      <div class="bar-wrap">
+        <div class="bar-fill" style="width:${barW}%;background:${b.color};opacity:.7"></div>
+        <div class="bar-target" style="left:${targetPos}%"></div>
+        <div class="bar-label">${pct.toFixed(1)}% vs ${b.target}%</div>
+      </div>
+      <div class="nums">${gapStr}<br><span style="opacity:.5;font-size:.8em">${b.detail}</span></div>
+    </div>`;
   });
-  document.getElementById('allocBody').innerHTML=html;
+  document.getElementById('allocRows').innerHTML=html;
 
-  // Save saldi to localStorage
+  // Save
   localStorage.setItem('fin_saldi',JSON.stringify(s));
-  localStorage.setItem('fin_targets',JSON.stringify(t));
+  localStorage.setItem('fin_btc',JSON.stringify({
+    budget:parseFloat(document.getElementById('btcBudget').value)||0,
+    entry:parseFloat(document.getElementById('btcEntry').value)||0,
+    sell:parseFloat(document.getElementById('btcSell').value)||0
+  }));
 
+  calcPac();
+  calcBtc();
   calcSplit();
 }
 
+function calcPac(){
+  const s=getS();
+  const total=KEYS.reduce((a,k)=>a+s[k],0);
+  const pacAmt=parseFloat(document.getElementById('pacAmt').value)||0;
+  const pacN=parseInt(document.getElementById('pacN').value)||0;
+  const pacFreq=parseInt(document.getElementById('pacFreq').value)||14;
+  localStorage.setItem('fin_pac',JSON.stringify({amt:pacAmt,n:pacN,freq:pacFreq}));
+
+  if(!pacAmt||!pacN||total<=0){document.getElementById('pacResult').innerHTML='';return}
+
+  const btcBudget=parseFloat(document.getElementById('btcBudget').value)||0;
+  const available=s.trcash-btcBudget; // Available for PAC (excluding BTC reserve)
+
+  let rows='';
+  let cumAcwi=0,cumGov=0;
+  const startDate=new Date();
+  for(let i=0;i<pacN;i++){
+    const d=new Date(startDate);
+    d.setDate(d.getDate()+i*pacFreq);
+    const dateStr=d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+    const acwi=Math.round(pacAmt*INVEST_RATIO.acwi);
+    const gov=pacAmt-acwi;
+    cumAcwi+=acwi;cumGov+=gov;
+    rows+=`<tr><td>#${i+1}</td><td>${dateStr}</td><td>€${fmt(acwi)}</td><td>€${fmt(gov)}</td><td>€${fmt(pacAmt)}</td></tr>`;
+  }
+  const totalPac=pacAmt*pacN;
+  const remaining=available-totalPac;
+
+  let html=`<table class="pac-table">
+    <thead><tr><th></th><th>Data</th><th>ACWI (80%)</th><th>Gov (20%)</th><th>Totale</th></tr></thead>
+    <tbody>${rows}
+    <tr class="total-row"><td></td><td>TOTALE</td><td>€${fmt(cumAcwi)}</td><td>€${fmt(cumGov)}</td><td>€${fmt(totalPac)}</td></tr>
+    </tbody></table>`;
+  html+=`<div style="margin-top:12px;font-size:.85em;opacity:.8">
+    Disponibile per PAC: €${fmt(Math.max(0,available))} (TR cash − BTC riservati)<br>
+    Dopo ${pacN} tranches ti restano: <strong class="${remaining>=0?'pos':'neg'}">€${fmt(remaining)}</strong> in buffer TR
+  </div>`;
+  if(remaining<0)html+=`<div style="margin-top:6px;font-size:.8em;color:#f87171">⚠️ Non hai abbastanza nel buffer! Riduci tranches o importo.</div>`;
+
+  document.getElementById('pacResult').innerHTML=html;
+}
+
+function calcBtc(){
+  const s=getS();
+  const budget=parseFloat(document.getElementById('btcBudget').value)||0;
+  const entry=parseFloat(document.getElementById('btcEntry').value)||0;
+  const sell=parseFloat(document.getElementById('btcSell').value)||0;
+  const owned=s.btc;
+
+  let html='';
+  if(owned>0){
+    // Active trade
+    const gain=sell>0&&entry>0?(sell/entry-1)*owned:0;
+    html=`<div class="btc-status btc-active">
+      <span style="font-size:1.3em">✓</span>
+      <div><strong>Trade attivo</strong> — Hai €${fmt(owned)} in BTC<br>
+      <span style="font-size:.85em">Target sell: €${fmt(sell)} → guadagno potenziale: <span class="pos">+€${fmt(gain)}</span> (lordo, pre-tasse ~21%)</span></div>
+    </div>`;
+    document.getElementById('btcNote').textContent='Quando vendi, sposta il ricavato in ACWI e rimetti BTC a 0.';
+  } else {
+    // Waiting
+    const canAfford=s.trcash>=budget;
+    html=`<div class="btc-status btc-waiting">
+      <span style="font-size:1.3em">⏳</span>
+      <div><strong>In attesa</strong> — €${fmt(budget)} riservati nel saldo TR<br>
+      <span style="font-size:.85em">Compra quando BTC tocca ~€${fmt(entry)}. Alert su TR!</span></div>
+    </div>`;
+    if(!canAfford)html+=`<div style="margin-top:8px;font-size:.8em;color:#f87171">⚠️ Non hai €${fmt(budget)} disponibili nel saldo TR (hai €${fmt(s.trcash)})</div>`;
+    document.getElementById('btcNote').textContent=`Quei €${fmt(budget)} sono "congelati" nel saldo TR — il PAC non li tocca. Se BTC non scende a ${fmt(entry)}, a fine estate li reinvesti in ACWI.`;
+  }
+  document.getElementById('btcStatus').innerHTML=html;
+}
+
 function calcSplit(){
-  const {s,t}=getVals();
   const amt=parseFloat(document.getElementById('investAmt').value)||0;
-  const src=document.getElementById('investSrc').value;
   const box=document.getElementById('splitResult');
   if(amt<=0){box.style.display='none';return}
   box.style.display='block';
-
-  const total=INSTRUMENTS.reduce((a,k)=>a+s[k],0);
-  // New total after adding (or moving from source)
-  const newTotal=src==='external'?total+amt:total;
-
-  // Calculate ideal allocation at new total, then gaps
-  let gaps={};
-  INSTRUMENTS.forEach(k=>{
-    const ideal=t[k]/100*newTotal;
-    const current=src===k?s[k]-amt:s[k]; // if source, reduce current
-    gaps[k]=ideal-(src!=='external'&&src==='s_'+k?s[k]-amt:s[k]);
-  });
-
-  // Recalculate properly
-  let currentAfter={};
-  INSTRUMENTS.forEach(k=>{currentAfter[k]=s[k]});
-  if(src!=='external'){
-    const srcKey=src.replace('s_','');
-    currentAfter[srcKey]-=amt;
-  }
-
-  // Only allocate to instruments that are BELOW target
-  let totalGap=0;
-  let needs={};
-  INSTRUMENTS.forEach(k=>{
-    const ideal=t[k]/100*newTotal;
-    const need=ideal-currentAfter[k];
-    if(need>0){needs[k]=need;totalGap+=need}
-  });
-
-  // Proportional split of amt based on gap size
-  let split={};
-  INSTRUMENTS.forEach(k=>{
-    if(needs[k]&&totalGap>0){
-      split[k]=Math.round(amt*needs[k]/totalGap*100)/100;
-    }
-  });
-
-  // Render
-  let html='';
-  INSTRUMENTS.forEach(k=>{
-    if(split[k]&&split[k]>0){
-      html+=`<div class="split-row"><span>${LABELS[k]}</span><span class="amt" style="color:${COLORS[k]}">€${fmt(split[k])}</span></div>`;
-    }
-  });
-  if(!html)html='<div class="split-row"><span>Sei già in target!</span><span>🎯</span></div>';
-  document.getElementById('splitRows').innerHTML=html;
+  const acwi=Math.round(amt*INVEST_RATIO.acwi*100)/100;
+  const gov=amt-acwi;
+  document.getElementById('splitRows').innerHTML=`
+    <div class="split-row"><span>ACWI (80%)</span><span class="amt" style="color:${COLORS.acwi}">€${fmt(acwi)}</span></div>
+    <div class="split-row"><span>Gov Bond (20%)</span><span class="amt" style="color:${COLORS.gov}">€${fmt(gov)}</span></div>
+    <div class="split-row" style="opacity:.5"><span>Totale</span><span>€${fmt(amt)}</span></div>`;
 }
 
 function saveSnapshot(){
-  const {s}=getVals();
-  const total=INSTRUMENTS.reduce((a,k)=>a+s[k],0);
+  const s=getS();
+  const total=KEYS.reduce((a,k)=>a+s[k],0);
   if(total<=0)return;
   const entry={date:new Date().toISOString().slice(0,10),total,breakdown:{...s}};
-  // Avoid duplicate same day
   history=history.filter(h=>h.date!==entry.date);
   history.push(entry);
   history.sort((a,b)=>a.date.localeCompare(b.date));
   localStorage.setItem('fin_history',JSON.stringify(history));
   renderHistory();
-  document.getElementById('syncStatus').textContent='Salvato localmente · '+new Date().toLocaleTimeString();
+  document.getElementById('syncStatus').textContent='✓ Salvato · '+new Date().toLocaleTimeString();
 }
 
 function renderHistory(){
-  // List
   const list=document.getElementById('historyList');
   let html='';
   [...history].reverse().forEach(h=>{
@@ -349,55 +424,37 @@ function drawChart(){
   const ctx=canvas.getContext('2d');
   const dpr=window.devicePixelRatio||1;
   const rect=canvas.parentElement.getBoundingClientRect();
-  canvas.width=rect.width*dpr;
-  canvas.height=200*dpr;
+  canvas.width=rect.width*dpr;canvas.height=180*dpr;
   ctx.scale(dpr,dpr);
-  const W=rect.width,H=200;
+  const W=rect.width,H=180;
   ctx.clearRect(0,0,W,H);
-
   if(history.length<2){
-    ctx.fillStyle='rgba(255,255,255,.3)';
-    ctx.font='13px Inter';
-    ctx.textAlign='center';
-    ctx.fillText('Almeno 2 snapshot per il grafico',W/2,H/2);
-    return;
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='13px Inter';ctx.textAlign='center';
+    ctx.fillText('Almeno 2 snapshot per il grafico',W/2,H/2);return;
   }
-
   const vals=history.map(h=>h.total);
-  const min=Math.min(...vals)*0.95;
-  const max=Math.max(...vals)*1.05;
+  const min=Math.min(...vals)*0.95,max=Math.max(...vals)*1.05;
   const pad={t:20,b:30,l:50,r:20};
-
-  // Grid
-  ctx.strokeStyle='rgba(255,255,255,.08)';
-  ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;
   for(let i=0;i<5;i++){
     const y=pad.t+(H-pad.t-pad.b)*i/4;
     ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='10px Inter';ctx.textAlign='right';
     ctx.fillText('€'+fmt(max-(max-min)*i/4),pad.l-6,y+4);
   }
-
-  // Line
   const grad=ctx.createLinearGradient(0,0,W,0);
   grad.addColorStop(0,'#667eea');grad.addColorStop(1,'#764ba2');
-  ctx.strokeStyle=grad;ctx.lineWidth=2.5;ctx.lineJoin='round';
-  ctx.beginPath();
+  ctx.strokeStyle=grad;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.beginPath();
   history.forEach((h,i)=>{
     const x=pad.l+i*(W-pad.l-pad.r)/(history.length-1);
     const y=pad.t+(1-(h.total-min)/(max-min))*(H-pad.t-pad.b);
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  });
-  ctx.stroke();
-
-  // Dots
+  });ctx.stroke();
   history.forEach((h,i)=>{
     const x=pad.l+i*(W-pad.l-pad.r)/(history.length-1);
     const y=pad.t+(1-(h.total-min)/(max-min))*(H-pad.t-pad.b);
     ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
   });
-
-  // X labels
   ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='10px Inter';ctx.textAlign='center';
   const step=Math.max(1,Math.floor(history.length/6));
   history.forEach((h,i)=>{
@@ -409,68 +466,41 @@ function drawChart(){
 }
 
 // Gist sync
-async function getToken(){
-  return localStorage.getItem('gh_token')||prompt('GitHub Token (gist scope):');
-}
-
+function getToken(){return localStorage.getItem('gh_token')||prompt('GitHub Token (gist scope):')}
 async function syncToGist(){
-  const token=await getToken();
-  if(!token)return;
-  localStorage.setItem('gh_token',token);
-  const {s}=getVals();
-  const t=JSON.parse(localStorage.getItem('fin_targets')||'{}');
-  const data={saldi:s,targets:t,history,updated:new Date().toISOString()};
+  const token=getToken();if(!token)return;localStorage.setItem('gh_token',token);
+  const s=getS();
+  const data={saldi:s,btc:{budget:+document.getElementById('btcBudget').value||0,entry:+document.getElementById('btcEntry').value||0,sell:+document.getElementById('btcSell').value||0},pac:{amt:+document.getElementById('pacAmt').value,n:+document.getElementById('pacN').value,freq:+document.getElementById('pacFreq').value},history,updated:new Date().toISOString()};
   try{
-    const r=await fetch('https://api.github.com/gists/'+GIST_ID,{
-      method:'PATCH',
-      headers:{'Authorization':'token '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(data)}}})
-    });
-    if(r.ok){document.getElementById('syncStatus').textContent='✓ Sincronizzato con cloud · '+new Date().toLocaleTimeString()}
-    else{document.getElementById('syncStatus').textContent='Errore sync: '+r.status}
+    const r=await fetch('https://api.github.com/gists/'+GIST_ID,{method:'PATCH',headers:{'Authorization':'token '+token,'Content-Type':'application/json'},body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(data)}}})});
+    document.getElementById('syncStatus').textContent=r.ok?'✓ Cloud aggiornato · '+new Date().toLocaleTimeString():'Errore: '+r.status;
   }catch(e){document.getElementById('syncStatus').textContent='Errore: '+e.message}
 }
-
 async function syncFromGist(){
-  const token=await getToken();
-  if(!token)return;
-  localStorage.setItem('gh_token',token);
+  const token=getToken();if(!token)return;localStorage.setItem('gh_token',token);
   try{
     const r=await fetch('https://api.github.com/gists/'+GIST_ID,{headers:{'Authorization':'token '+token}});
     if(!r.ok){document.getElementById('syncStatus').textContent='Errore: '+r.status;return}
     const g=await r.json();
-    if(!g.files[GIST_FILE]){document.getElementById('syncStatus').textContent='File non trovato nel Gist';return}
+    if(!g.files[GIST_FILE]){document.getElementById('syncStatus').textContent='File non trovato';return}
     const data=JSON.parse(g.files[GIST_FILE].content);
-    if(data.saldi)INSTRUMENTS.forEach(k=>{document.getElementById('s_'+k).value=data.saldi[k]||0});
-    if(data.targets){
-      INSTRUMENTS.forEach(k=>{document.getElementById('t_'+k).value=data.targets[k]||0});
-      localStorage.setItem('fin_targets',JSON.stringify(data.targets));
-    }
+    if(data.saldi)KEYS.forEach(k=>{document.getElementById('s_'+k).value=data.saldi[k]||0});
+    if(data.btc){document.getElementById('btcBudget').value=data.btc.budget||5000;document.getElementById('btcEntry').value=data.btc.entry||40000;document.getElementById('btcSell').value=data.btc.sell||95000}
+    if(data.pac){document.getElementById('pacAmt').value=data.pac.amt||2500;document.getElementById('pacN').value=data.pac.n||5;document.getElementById('pacFreq').value=data.pac.freq||14}
     if(data.history){history=data.history;localStorage.setItem('fin_history',JSON.stringify(history))}
-    calc();
-    renderHistory();
+    calc();renderHistory();
     document.getElementById('syncStatus').textContent='✓ Caricato dal cloud · '+new Date().toLocaleTimeString();
   }catch(e){document.getElementById('syncStatus').textContent='Errore: '+e.message}
 }
 
-function clearHistory(){
-  if(!confirm('Cancellare tutto lo storico?'))return;
-  history=[];
-  localStorage.setItem('fin_history','[]');
-  renderHistory();
-}
-
-function fmt(n){return n.toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function fmt(n){return Math.round(n).toLocaleString('it-IT')}
 
 // Boot
 if(localStorage.getItem('fin_auth')==='1'){
   document.getElementById('lock').style.display='none';
   document.getElementById('app').style.display='block';
-  window.addEventListener('DOMContentLoaded',init);
-  if(document.readyState!=='loading')init();
-} else {
-  document.getElementById('pw').focus();
-}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+} else {document.getElementById('pw').focus()}
 window.addEventListener('resize',()=>{if(history.length>=2)drawChart()});
 </script>
 </body>
