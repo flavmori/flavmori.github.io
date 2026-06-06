@@ -148,16 +148,31 @@ input[type=number]{-moz-appearance:textfield}
 <script>
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
+const API_KEY='6a2423fd76ee37.96319638';
+const SYMBOLS={eq:'IE00B44Z5B48.XETRA',bo:'LU2089238898.XETRA',btc:'BTC-USD'};
 let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
 let cfg={cap:2500,capSa:2500,gEq:1.63,gBo:0.31,gSa:0};
-let btc={entry:40000,sell:95000};
+let btc={entry:45000,sell:95000};
 let hist=[];
+let prices={eq:null,bo:null,btc:null};
 
 function show(){}
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
+
+async function fetchPrices(){
+  try{
+    const fetches=Object.entries(SYMBOLS).map(([k,sym])=>
+      fetch(`https://eodhd.com/api/real-time/${sym}?api_token=${API_KEY}&fmt=json`)
+        .then(r=>r.json()).then(d=>{if(d.close)prices[k]=parseFloat(d.close)})
+        .catch(()=>{})
+    );
+    await Promise.all(fetches);
+    calc();
+  }catch(e){}
+}
 function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
 
 function init(){
@@ -264,7 +279,8 @@ function calc(){
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
       const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fm(dynCap)} (x1.5). `:'';
-      acts+=`<div class="act-note">${capNote}You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
+      const priceNote=prices.eq?` ACWI at €${prices.eq.toFixed(2)}.`:'';
+      acts+=`<div class="act-note">${capNote}${priceNote} You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
@@ -292,12 +308,16 @@ function calc(){
   if(sat<tSat-100){
     step++;
     const saAmt=Math.min(tSat-sat,cfg.capSa);
+    const btcLive=prices.btc;
+    const btcContext=btcLive?(btcLive<=btc.entry?`BTC at €${fm(btcLive)} — BELOW entry €${fm(btc.entry)}. Buy now.`:`BTC at €${fm(btcLive)} — above entry €${fm(btc.entry)}. Wait.`):`Buy at €${fm(btc.entry)} when price is right.`;
     acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(Math.round(saAmt))}</span></div>`;
-    acts+=`<div class="act-note">Satellite is ${pSat}% (target ${T.sat}%). Buy at €${fm(btc.entry)} when price is right.</div>`;
+    acts+=`<div class="act-note">${btcContext}</div>`;
   }else if(sat>tSat+100){
     step++;
+    const btcLive2=prices.btc;
+    const sellCtx=btcLive2?(btcLive2>=btc.sell?`BTC at €${fm(btcLive2)} — AT/ABOVE sell target. Take profit now.`:`BTC at €${fm(btcLive2)}. Sell target: €${fm(btc.sell)}.`):`Sell at €${fm(btc.sell)} as planned.`;
     acts+=`<div class="act"><span><b>${step}.</b> Satellite — consider profit</span><span class="pos">+€${fm(Math.round(sat-tSat))}</span></div>`;
-    acts+=`<div class="act-note">Satellite is over target. Sell at €${fm(btc.sell)} as planned.</div>`;
+    acts+=`<div class="act-note">${sellCtx}</div>`;
   }
 
   if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
@@ -413,7 +433,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud();fetchPrices()});else{init();loadFromCloud();fetchPrices()}
 </script>
 </body>
 </html>
