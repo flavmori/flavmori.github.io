@@ -208,7 +208,7 @@ function calc(){
   const eqBoDrift=invested>0?Math.abs(actualEqR-idealEqR):0;
 
   // Step: Sell invested to rebuild liquidity (if invested over AND liquid under)
-  if(invested>tInv+200&&surplus<-200){
+  if(invested>tInv+500&&surplus<-500){
     step++;
     const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
     acts+=`<div class="act"><span><b>${step}.</b> Sell invested → rebuild liquidity</span><span class="av neg">€${fm(sellAmt)}</span></div>`;
@@ -247,7 +247,7 @@ function calc(){
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
       acts+=`<div class="act-note">You have €${fm(Math.round(surplus))} excess liquidity. Invest €${fm(amt)} (cap). ${investable>cfg.cap?'Remaining €'+fm(Math.round(investable-cfg.cap))+' for next time.':''}</div>`;
     }
-  }else if(surplus<-200&&invested<=tInv){
+  }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
     step++;
     acts+=`<div class="act"><span><b>${step}.</b> Accumulate</span><span class="av mu">—</span></div>`;
