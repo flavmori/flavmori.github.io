@@ -254,14 +254,17 @@ function calc(){
     const investable=Math.max(0,surplus-mmNeed);
     if(investable>=300){
       step++;
-      const amt=Math.min(investable,cfg.cap);
+      const capMult=cfg.gEq<0?1.5:1;
+      const dynCap=Math.round(cfg.cap*capMult);
+      const amt=Math.min(investable,dynCap);
       const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
       const invGap=eqG+boG;
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
-      acts+=`<div class="act-note">You have €${fm(Math.round(surplus))} excess liquidity. Invest €${fm(amt)} (cap). ${investable>cfg.cap?'Remaining €'+fm(Math.round(investable-cfg.cap))+' for next time.':''}</div>`;
+      const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fm(dynCap)} (x1.5). `:'';
+      acts+=`<div class="act-note">${capNote}You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
