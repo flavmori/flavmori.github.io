@@ -1,152 +1,147 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Finance</title>
+<title>Portfolio Rebalancer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;padding:24px;color:#fff;letter-spacing:-.01em}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0a0a0f,#1a1a2e,#16213e);min-height:100vh;padding:24px;color:#e2e8f0;letter-spacing:-.01em;font-size:14px}
 #lock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
-#lock h2{font-size:1.8em;opacity:.6}
-#lock input{font-family:'Inter',sans-serif;padding:12px 20px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:1.1em;text-align:center;width:250px}
-#lock button{font-family:'Inter',sans-serif;padding:10px 24px;border-radius:12px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:1em;cursor:pointer;font-weight:500}
-#lock .err{color:#f87171;font-size:.85em}
+#lock input{font-family:'Inter',sans-serif;padding:12px 20px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:#fff;font-size:1em;text-align:center;width:240px}
+#lock button{font-family:'Inter',sans-serif;padding:10px 24px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-size:.9em;cursor:pointer;font-weight:500}
+#lock .err{color:#ef4444;font-size:.8em}
 #app{display:none}
-h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spacing:-.03em;background:linear-gradient(135deg,#667eea,#764ba2,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.subtitle{text-align:center;opacity:.5;margin-bottom:24px;font-size:.9em}
-.container{max-width:880px;margin:0 auto}
-.card{background:rgba(255,255,255,.04);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,.08);margin-bottom:18px}
-.card-title{font-size:.85em;font-weight:600;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;opacity:.6}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.container{max-width:860px;margin:0 auto}
+h1{text-align:center;font-size:1.6em;margin-bottom:4px;font-weight:700;letter-spacing:-.03em;color:#f8fafc}
+.subtitle{text-align:center;opacity:.4;margin-bottom:28px;font-size:.8em;text-transform:uppercase;letter-spacing:.05em}
+.card{background:rgba(255,255,255,.03);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.06);margin-bottom:16px}
+.card-title{font-size:.75em;font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr 1fr}}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:.75em;opacity:.5;font-weight:500}
-.field input{font-family:'Inter',sans-serif;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:.95em;width:100%}
-.field input:focus{outline:none;border-color:#764ba2}
-.total-bar{text-align:center;padding:20px;background:rgba(255,255,255,.06);border-radius:12px;margin-bottom:18px;border:1px solid rgba(255,255,255,.1)}
-.total-bar .big{font-size:2.2em;font-weight:700}
-.total-bar .sub{opacity:.5;font-size:.82em;margin-top:8px;line-height:1.7}
-.total-bar .frozen{margin-top:10px;font-size:.78em;padding:6px 12px;display:inline-block;border-radius:6px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);color:#f59e0b}
-.bucket{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}
-.bucket .lbl{width:120px;font-size:.82em;font-weight:500;line-height:1.3}
-.bucket .lbl small{display:block;font-weight:400;opacity:.4;font-size:.85em}
-.bucket .bar-wrap{flex:1;height:20px;background:rgba(255,255,255,.07);border-radius:5px;position:relative;overflow:hidden}
-.bucket .bar-fill{height:100%;border-radius:5px;position:absolute;top:0;left:0;transition:width .3s}
-.bucket .bar-marker{position:absolute;top:0;height:100%;width:2px;background:rgba(255,255,255,.5)}
-.bucket .bar-pct{position:absolute;top:50%;right:6px;transform:translateY(-50%);font-size:.7em;font-weight:600}
-.bucket .val{width:150px;text-align:right;font-size:.78em;line-height:1.4;font-variant-numeric:tabular-nums}
-.pos{color:#34d399}.neg{color:#f87171}.muted{opacity:.4}
-.alert-box{padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:.82em;display:none}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:.7em;opacity:.4;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.field input{font-family:'Inter',sans-serif;padding:9px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#f1f5f9;font-size:.9em;width:100%}
+.field input:focus{outline:none;border-color:#3b82f6}
+.total-bar{text-align:center;padding:20px;background:rgba(255,255,255,.04);border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08)}
+.total-bar .big{font-size:2em;font-weight:700;color:#f8fafc}
+.total-bar .sub{opacity:.4;font-size:.78em;margin-top:6px;line-height:1.6}
+.bucket{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:8px;margin-bottom:5px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)}
+.bucket .lbl{width:130px;font-size:.78em;font-weight:500;line-height:1.3}
+.bucket .lbl small{display:block;font-weight:400;opacity:.35;font-size:.9em}
+.bucket .bar-wrap{flex:1;height:18px;background:rgba(255,255,255,.05);border-radius:4px;position:relative;overflow:hidden}
+.bucket .bar-fill{height:100%;border-radius:4px;position:absolute;top:0;left:0;transition:width .3s}
+.bucket .bar-marker{position:absolute;top:0;height:100%;width:1.5px;background:rgba(255,255,255,.4)}
+.bucket .bar-pct{position:absolute;top:50%;right:6px;transform:translateY(-50%);font-size:.65em;font-weight:600;opacity:.7}
+.bucket .val{width:130px;text-align:right;font-size:.72em;line-height:1.4;font-variant-numeric:tabular-nums}
+.pos{color:#10b981}.neg{color:#ef4444}.muted{opacity:.35}
+.alert-box{padding:9px 14px;border-radius:6px;margin-bottom:14px;font-size:.78em;display:none}
 .alert-box.show{display:block}
-.alert-warn{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);color:#fbbf24}
-.alert-ok{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);color:#34d399}
-.action-box{padding:18px;border-radius:12px;margin-bottom:18px;border:1px solid rgba(102,126,234,.2);background:rgba(102,126,234,.05)}
-.action-box .phase{font-size:.78em;opacity:.5;margin-bottom:6px}
-.action-box .title{font-size:.95em;font-weight:600;margin-bottom:14px}
-.action-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88em}
-.action-row:last-child{border:none}
-.action-row .v{font-weight:600;font-variant-numeric:tabular-nums}
-.action-box .after{margin-top:14px;font-size:.78em;opacity:.5;line-height:1.5}
-.config-row{display:flex;gap:12px;margin-bottom:14px;align-items:end}
+.alert-warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);color:#f59e0b}
+.alert-ok{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);color:#10b981}
+.suggest-box{padding:18px;border-radius:10px;margin-bottom:16px;border:1px solid rgba(59,130,246,.15);background:rgba(59,130,246,.04)}
+.suggest-box .title{font-size:.8em;font-weight:600;margin-bottom:12px;color:#93c5fd;text-transform:uppercase;letter-spacing:.04em}
+.suggest-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85em}
+.suggest-row:last-child{border:none}
+.suggest-row .v{font-weight:600;font-variant-numeric:tabular-nums}
+.suggest-row .note{font-size:.75em;opacity:.4}
+.suggest-section{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.suggest-section .label{font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.config-row{display:flex;gap:10px;align-items:end}
 .config-row .field{flex:1}
-.btc-box{padding:18px;border-radius:12px;margin-bottom:18px;border:1px solid rgba(245,158,11,.2);background:rgba(245,158,11,.03)}
-.btc-box .title{font-size:.9em;font-weight:600;margin-bottom:10px;color:#f59e0b}
-.btc-box .status{font-size:.85em;line-height:1.6;margin-bottom:8px}
-.btc-box .note{font-size:.75em;opacity:.4;line-height:1.5}
-.btn{font-family:'Inter',sans-serif;padding:9px 18px;border-radius:8px;border:none;color:#fff;font-size:.82em;cursor:pointer;font-weight:500}
+.rebal-row{padding:11px 12px;border-radius:8px;margin-bottom:5px;border:1px solid rgba(139,92,246,.15);background:rgba(139,92,246,.03)}
+.rebal-row .inner{display:flex;align-items:center;gap:12px;font-size:.78em}
+.rebal-row .lbl{color:#a78bfa;font-weight:500;width:130px}
+.rebal-row .detail{opacity:.5}
+.settings{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
+.settings .grid2{margin-bottom:10px}
+.settings .note{font-size:.7em;opacity:.35;margin-top:6px}
+.btn{font-family:'Inter',sans-serif;padding:8px 16px;border-radius:6px;border:none;color:#fff;font-size:.78em;cursor:pointer;font-weight:500}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:linear-gradient(135deg,#667eea,#764ba2)}
-.btn-secondary{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.history-chart{width:100%;height:140px;position:relative;margin-top:10px}
-.history-list{max-height:140px;overflow-y:auto;font-size:.75em;margin-top:10px}
-.history-list .entry{display:flex;justify-content:space-between;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.04)}
-.sync-status{font-size:.7em;opacity:.4;text-align:center;margin-top:6px}
-.nav-link{position:fixed;top:14px;left:14px;font-size:.8em;opacity:.4;text-decoration:none;color:#fff}
-.nav-link:hover{opacity:.8}
+.btn-primary{background:#3b82f6}
+.btn-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.history-chart{width:100%;height:130px;position:relative;margin-top:8px}
+.history-list{max-height:120px;overflow-y:auto;font-size:.7em;margin-top:8px}
+.history-list .entry{display:flex;justify-content:space-between;padding:3px 6px;border-bottom:1px solid rgba(255,255,255,.03)}
+.sync-status{font-size:.65em;opacity:.35;text-align:center;margin-top:6px}
+.nav-link{position:fixed;top:14px;left:14px;font-size:.75em;opacity:.3;text-decoration:none;color:#fff}
+.nav-link:hover{opacity:.7}
 </style>
 </head>
 <body>
-<a href="index.html" class="nav-link">< calendario</a>
+<a href="index.html" class="nav-link">< back</a>
 <div id="lock">
-<h2>-</h2>
 <input type="password" id="pw" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
-<button onclick="unlock()">Entra</button>
+<button onclick="unlock()">Enter</button>
 <div class="err" id="err"></div>
 </div>
 <div id="app"><div class="container">
-<h1>Finance Rebalancer</h1>
-<p class="subtitle">Aggiorna saldi. Vedi dove sei. Investi smart.</p>
+<h1>Portfolio Rebalancer</h1>
+<p class="subtitle">Allocation · Rebalancing · Tracking</p>
 
 <div class="total-bar">
 <div class="big" id="tot">-</div>
 <div class="sub" id="totSub"></div>
-<div class="frozen" id="frozenLabel" style="display:none"></div>
 </div>
 <div class="alert-box" id="alert"></div>
 
 <div class="card">
-<div class="card-title">Saldi attuali</div>
+<div class="card-title">Current Balances</div>
 <div class="grid3">
 <div class="field"><label>ACWI</label><input type="number" id="s_acwi" step=".01" oninput="calc()"></div>
 <div class="field"><label>Gov Bond</label><input type="number" id="s_gov" step=".01" oninput="calc()"></div>
-<div class="field"><label>Small Cap</label><input type="number" id="s_sc" step=".01" oninput="calc()"></div>
-<div class="field"><label>CSH2</label><input type="number" id="s_csh2" step=".01" oninput="calc()"></div>
+<div class="field"><label>CSH2 (Money Market)</label><input type="number" id="s_csh2" step=".01" oninput="calc()"></div>
 <div class="field"><label>Santander</label><input type="number" id="s_sant" step=".01" oninput="calc()"></div>
-<div class="field"><label>Saldo TR Cash</label><input type="number" id="s_trcash" step=".01" oninput="calc()"></div>
+<div class="field"><label>TR Cash</label><input type="number" id="s_trcash" step=".01" oninput="calc()"></div>
+<div class="field"><label>Other Cash (PayPal etc)</label><input type="number" id="s_other" step=".01" oninput="calc()"></div>
 </div>
-<div class="grid2" style="margin-top:12px">
-<div class="field"><label>BTC (0 se non comprato)</label><input type="number" id="s_btc" step=".01" oninput="calc()"></div>
+<div class="grid2" style="margin-top:10px">
+<div class="field"><label>BTC (current value, 0 if not bought)</label><input type="number" id="s_btc" step=".01" oninput="calc()"></div>
 </div>
 </div>
 
 <div class="card">
-<div class="card-title">Allocazione vs Target</div>
+<div class="card-title">Allocation vs Target</div>
 <div id="buckets"></div>
 </div>
 
-<div class="action-box" id="actionBox">
-<div class="config-row">
-<div class="field"><label>Cap per tranche</label><input type="number" id="cfg_cap" value="2500" step="100" oninput="calc()"></div>
-</div>
-<div id="actionContent"></div>
-</div>
-
-<div class="btc-box" id="btcBox"></div>
-
-<div class="card" id="settingsCard" style="display:none">
-<div class="card-title">Impostazioni</div>
-<div class="grid2" style="margin-bottom:12px">
-<div class="field"><label>Target Investito %</label><input type="number" id="t_inv" step="1" oninput="updateTargets()"></div>
-<div class="field"><label>Target Liquidita %</label><input type="number" id="t_liq" step="1" oninput="updateTargets()"></div>
-<div class="field"><label>Target Buffer %</label><input type="number" id="t_buf" step="1" oninput="updateTargets()"></div>
-<div class="field"><label>Target Alto Rischio %</label><input type="number" id="t_risk" step="1" oninput="updateTargets()"></div>
-</div>
-<div class="grid3" style="margin-bottom:12px">
-<div class="field"><label>ACWI % (dell'investito)</label><input type="number" id="r_acwi" step="1" oninput="updateTargets()"></div>
-<div class="field"><label>Gov % (dell'investito)</label><input type="number" id="r_gov" step="1" oninput="updateTargets()"></div>
-<div class="field"><label>Small Cap % (dell'investito)</label><input type="number" id="r_sc" step="1" oninput="updateTargets()"></div>
-</div>
-<div id="settingsMsg" style="font-size:.78em;opacity:.5"></div>
-</div>
+<div class="suggest-box" id="suggestBox"></div>
 
 <div class="card">
-<div class="card-title">Salva</div>
-<div class="actions">
-<button class="btn btn-primary" onclick="save()">Snapshot</button>
-<button class="btn btn-secondary" onclick="toGist()">Sync cloud</button>
-<button class="btn btn-secondary" onclick="fromGist()">Carica cloud</button>
-<button class="btn btn-secondary" onclick="toggleSettings()">Impostazioni</button>
+<div class="card-title">Configuration</div>
+<div class="config-row">
+<div class="field"><label>Investment Cap</label><input type="number" id="cfg_cap" value="2500" step="100" oninput="calc()"></div>
+</div>
+<div class="settings" id="settingsPanel">
+<div class="card-title" style="margin-top:0">Target Allocation (%)</div>
+<div class="grid2">
+<div class="field"><label>Invested</label><input type="number" id="t_inv" step="1" oninput="updateT()"></div>
+<div class="field"><label>Liquid (remunerated)</label><input type="number" id="t_liqr" step="1" oninput="updateT()"></div>
+<div class="field"><label>Cash (accounts)</label><input type="number" id="t_cash" step="1" oninput="updateT()"></div>
+<div class="field"><label>High Risk</label><input type="number" id="t_risk" step="1" oninput="updateT()"></div>
+</div>
+<div class="card-title" style="margin-top:12px">Investment Ratio (%)</div>
+<div class="grid2">
+<div class="field"><label>ACWI (equity)</label><input type="number" id="r_acwi" step="1" oninput="updateT()"></div>
+<div class="field"><label>Gov Bond</label><input type="number" id="r_gov" step="1" oninput="updateT()"></div>
+</div>
+<div class="note" id="settingsMsg"></div>
+</div>
+<div class="actions" style="margin-top:12px">
+<button class="btn btn-primary" onclick="save()">Save Snapshot</button>
+<button class="btn btn-secondary" onclick="toGist()">Sync Cloud</button>
+<button class="btn btn-secondary" onclick="fromGist()">Load Cloud</button>
+<button class="btn btn-secondary" onclick="toggleSettings()">Settings</button>
 </div>
 <div class="sync-status" id="ss"></div>
 </div>
 
 <div class="card">
-<div class="card-title">Storico</div>
+<div class="card-title">History</div>
 <div class="history-chart"><canvas id="cv"></canvas></div>
 <div class="history-list" id="hl"></div>
 </div>
@@ -154,165 +149,154 @@ h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spac
 
 <script>
 const GIST_ID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
-const KS=['acwi','gov','sc','csh2','sant','trcash','btc'];
-let T={investito:74,liquidita:14,buffer:7,rischio:5};
-let R={acwi:80,gov:20,sc:0}; // ratio inside investito
+const KS=['acwi','gov','csh2','sant','trcash','other','btc'];
+// Buckets: invested (ACWI+Gov), liquid_remunerated (CSH2), cash (Santander+TR+Other), high_risk (BTC)
+let T={invested:74,liquid:14,cash:7,risk:5};
+let R={acwi:80,gov:20};
 let hist=[],btcConf={budget:5000,entry:40000,sell:95000};
 
-function unlock(){if(document.getElementById('pw').value===PW){localStorage.setItem('fa','1');show();init()}else $('err').textContent='No'}
+function unlock(){if($('pw').value===PW){localStorage.setItem('fa','1');show();init()}else $('err').textContent='Wrong'}
 function show(){$('lock').style.display='none';$('app').style.display='block'}
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
-function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($(('s_'+k)).value)||0);return s}
+function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
 
 function init(){
   let s=J('fin_s')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
   btcConf=J('fin_btc')||btcConf;
-  T=J('fin_t')||T;
-  R=J('fin_r')||R;
-  let cfg=J('fin_cfg')||{};
-  if(cfg.cap)$('cfg_cap').value=cfg.cap;
+  T=J('fin_t')||T;R=J('fin_r')||R;
+  let cfg=J('fin_cfg')||{};if(cfg.cap)$('cfg_cap').value=cfg.cap;
   hist=J('fin_h')||[];
-  // Set settings fields
-  $('t_inv').value=T.investito;$('t_liq').value=T.liquidita;$('t_buf').value=T.buffer;$('t_risk').value=T.rischio;
-  $('r_acwi').value=R.acwi;$('r_gov').value=R.gov;$('r_sc').value=R.sc;
+  $('t_inv').value=T.invested;$('t_liqr').value=T.liquid;$('t_cash').value=T.cash;$('t_risk').value=T.risk;
+  $('r_acwi').value=R.acwi;$('r_gov').value=R.gov;
   calc();renderHist();
 }
 
 function calc(){
   const s=getS();
   const total=KS.reduce((a,k)=>a+s[k],0);
-  const btcOwned=s.btc;
-  const btcRes=btcOwned>0?0:Math.min(btcConf.budget,s.trcash);
-  const active=total; // everything counts, BTC is in the target system
-  const investito=s.acwi+s.gov+s.sc;
-  const liquidita=s.csh2+s.sant;
-  const buffer=s.trcash-btcRes;
+  const invested=s.acwi+s.gov;
+  const liquid=s.csh2; // remunerated liquidity
+  const cash=s.sant+s.trcash+s.other; // non-remunerated cash
+  const risk=s.btc;
 
-  // Total display
+  // Display
   $('tot').textContent=total>0?'€'+fm(total):'-';
   if(total>0){
-    const r=investito>0?(R.sc>0?Math.round(s.acwi/investito*100)+'/'+Math.round(s.sc/investito*100)+'/'+Math.round(s.gov/investito*100):Math.round(s.acwi/investito*100)+'/'+Math.round(s.gov/investito*100)):'—';
-    $('totSub').innerHTML=`Investito €${fm(investito)} (ratio ${r}) · Liquido €${fm(liquidita)} · Buffer €${fm(buffer)}`+(btcRes>0?` · BTC riservati €${fm(btcRes)}`:'')+(btcOwned>0?` · BTC €${fm(btcOwned)}`:'');
+    const r=invested>0?Math.round(s.acwi/invested*100)+'/'+Math.round(s.gov/invested*100):'—';
+    $('totSub').innerHTML=`Invested €${fm(invested)} (${r}) · Liquid €${fm(liquid)} · Cash €${fm(cash)} · Risk €${fm(risk)}`;
   }
-  // Frozen BTC label
-  const fl=$('frozenLabel');
-  if(btcRes>0){fl.style.display='inline-block';fl.textContent=`€${fm(btcRes)} nel saldo TR riservati per BTC`}
-  else if(btcOwned>0){fl.style.display='inline-block';fl.textContent=`Trade BTC attivo: €${fm(btcOwned)}`}
-  else{fl.style.display='none'}
 
   // Alert
-  const liqPct=active>0?liquidita/active*100:0;
+  const liqTot=liquid+cash;
+  const liqPct=total>0?liqTot/total*100:0;
+  const minLiq=T.liquid+T.cash;
   const al=$('alert');
-  if(active>0&&liqPct<T.liquidita){al.className='alert-box alert-warn show';al.textContent=`Liquidita ${liqPct.toFixed(1)}% — sotto target ${T.liquidita}%. Rallenta.`}
-  else if(active>0){al.className='alert-box alert-ok show';al.textContent=`Liquidita ${liqPct.toFixed(1)}% (target ${T.liquidita}%) — OK`}
+  if(total>0&&liqPct<minLiq){al.className='alert-box alert-warn show';al.textContent=`Liquidity ${liqPct.toFixed(1)}% — below ${minLiq}% target. Consider pausing investments.`}
+  else if(total>0){al.className='alert-box alert-ok show';al.textContent=`Liquidity ${liqPct.toFixed(1)}% (target ${minLiq}%) — OK`}
   else al.className='alert-box';
 
   // Buckets
-  const btcVal=btcOwned>0?btcOwned:btcRes;
   const bks=[
-    {name:'Investito',sub:R.sc>0?`ACWI/SC/Gov ${R.acwi}/${R.sc}/${R.gov}`:`ACWI/Gov ${R.acwi}/${R.gov}`,val:investito,tgt:T.investito,color:'#667eea'},
-    {name:'Liquidita',sub:'CSH2+Santander',val:liquidita,tgt:T.liquidita,color:'#fbbf24'},
-    {name:'Buffer',sub:'TR cash da investire',val:buffer,tgt:T.buffer,color:'#94a3b8'},
-    {name:'Alto rischio',sub:'BTC / speculazione',val:btcVal,tgt:T.rischio,color:'#f59e0b'},
+    {name:'Invested',sub:`ACWI/Gov ${R.acwi}/${R.gov}`,val:invested,tgt:T.invested,color:'#3b82f6'},
+    {name:'Liquid',sub:'Remunerated (CSH2)',val:liquid,tgt:T.liquid,color:'#f59e0b'},
+    {name:'Cash',sub:'Santander + TR + Other',val:cash,tgt:T.cash,color:'#6b7280'},
+    {name:'High Risk',sub:'BTC / Speculation',val:risk,tgt:T.risk,color:'#ef4444'},
   ];
   let bhtml='';
   bks.forEach(b=>{
-    const pct=active>0?b.val/active*100:0;
-    const tgtE=b.tgt/100*active;
+    const pct=total>0?b.val/total*100:0;
+    const tgtE=b.tgt/100*total;
     const gap=tgtE-b.val;
     const mx=Math.max(pct,b.tgt,1);
     const bw=Math.min(pct/mx*100,100);
     const mp=b.tgt/mx*100;
-    const gt=Math.abs(gap)<50?'<span class="muted">OK</span>':(gap>0?`<span class="neg">-€${fm(Math.abs(gap))}</span>`:`<span class="pos">+€${fm(-gap)} sopra</span>`);
-    const style=b.name==='Alto rischio'?'border-color:rgba(245,158,11,.15);background:rgba(245,158,11,.02)':'';
-    bhtml+=`<div class="bucket" style="${style}"><div class="lbl">${b.name}<small>${b.sub}</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${bw}%;background:${b.color};opacity:.5"></div><div class="bar-marker" style="left:${mp}%"></div><div class="bar-pct">${pct.toFixed(0)}%/${b.tgt}%</div></div><div class="val">${gt}<br><span class="muted">€${fm(b.val)} / €${fm(tgtE)}</span></div></div>`;
+    const gt=Math.abs(gap)<50?'<span class="muted">OK</span>':(gap>0?`<span class="neg">-€${fm(Math.abs(gap))}</span>`:`<span class="pos">+€${fm(-gap)} over</span>`);
+    bhtml+=`<div class="bucket"><div class="lbl">${b.name}<small>${b.sub}</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${bw}%;background:${b.color};opacity:.45"></div><div class="bar-marker" style="left:${mp}%"></div><div class="bar-pct">${pct.toFixed(0)}%/${b.tgt}%</div></div><div class="val">${gt}<br><span class="muted">€${fm(b.val)} / €${fm(tgtE)}</span></div></div>`;
   });
-  // Rebalance alert (ratio drift)
-  if(investito>0){
-    const acwiRatio=s.acwi/investito*100;
-    const drift=Math.abs(acwiRatio-R.acwi);
+  // Rebalance alert (ratio drift >5pts)
+  if(invested>0){
+    const acwiR=s.acwi/invested*100;
+    const drift=Math.abs(acwiR-R.acwi);
     if(drift>5){
-      const sellFrom=acwiRatio>R.acwi?'ACWI':'Gov Bond';
-      const buyInto=acwiRatio>R.acwi?'Gov Bond'+(R.sc>0?' / Small Cap':''):'ACWI';
-      const moveAmt=Math.round(Math.abs(s.acwi-(R.acwi/100)*investito));
-      bhtml+=`<div class="bucket" style="border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div class="lbl" style="color:#a78bfa">Ribilancia<small>Ratio ${Math.round(acwiRatio)}% ACWI vs ${R.acwi}% target</small></div><div class="bar-wrap"><div class="bar-fill" style="width:${acwiRatio}%;background:#a78bfa;opacity:.3"></div><div class="bar-marker" style="left:${R.acwi}%"></div><div class="bar-pct">${Math.round(acwiRatio)}%</div></div><div class="val"><span style="color:#a78bfa">Vendi €${fm(moveAmt)} ${sellFrom}</span><br><span class="muted">Compra ${buyInto}</span></div></div>`;
+      const from=acwiR>R.acwi?'ACWI':'Gov Bond';
+      const to=acwiR>R.acwi?'Gov Bond':'ACWI';
+      const amt=Math.round(Math.abs(s.acwi-(R.acwi/100)*invested));
+      bhtml+=`<div class="rebal-row"><div class="inner"><span class="lbl">Rebalance</span><span>Sell €${fm(amt)} ${from} → Buy ${to}</span><span class="detail">(ratio ${Math.round(acwiR)}/${Math.round(100-acwiR)} vs target ${R.acwi}/${R.gov})</span></div></div>`;
     }
   }
   $('buckets').innerHTML=bhtml;
 
-  // Action — investibile + capped suggestion
+  // Suggestions
   const cap=parseFloat($('cfg_cap').value)||2500;
-  const bufferTarget=T.buffer/100*active;
-  const investibile=Math.max(0,buffer-bufferTarget);
-  const investTarget=T.investito/100*active;
-  const liqTarget=T.liquidita/100*active;
-  const investGap=Math.max(0,investTarget-investito);
-  const liqGap=Math.max(0,liqTarget-liquidita);
+  const investTarget=T.invested/100*total;
+  const liqTarget=T.liquid/100*total;
+  const cashTarget=T.cash/100*total;
+  const riskTarget=T.risk/100*total;
 
-  let ahtml='';
-  if(investibile<300){
-    ahtml=`<div class="phase">Investibile: €${fm(investibile)}</div><div class="title">Non investire — accumula</div><div class="after">Aspetta che il buffer cresca (stipendio, surplus). Tornerai sopra soglia.</div>`;
-  }else{
-    const amt=Math.min(investibile,cap);
-    const totalGap=investGap+liqGap;
-    let toInvest=amt,toLiq=0;
-    if(totalGap>0&&liqGap>0){toLiq=Math.min(amt,Math.round(amt*liqGap/totalGap));toInvest=amt-toLiq}
-    if(liqGap<=0){toInvest=amt;toLiq=0}
+  const investGap=Math.max(0,investTarget-invested);
+  const liqGap=Math.max(0,liqTarget-liquid);
+  const cashExcess=Math.max(0,cash-cashTarget);
+  const riskGap=Math.max(0,riskTarget-risk);
 
-    const acwiTgt=(R.acwi/100)*investTarget;
-    const govTgt=(R.gov/100)*investTarget;
-    const scTgt=(R.sc/100)*investTarget;
-    const acwiGap=Math.max(0,acwiTgt-s.acwi);
-    const govGap=Math.max(0,govTgt-s.gov);
-    const scGap=Math.max(0,scTgt-s.sc);
-    const ig=acwiGap+govGap+scGap;
-    let toA,toG,toSc;
-    if(ig>0){toA=Math.round(toInvest*acwiGap/ig);toSc=Math.round(toInvest*scGap/ig);toG=toInvest-toA-toSc}
-    else{toA=Math.round(toInvest*R.acwi/100);toSc=Math.round(toInvest*R.sc/100);toG=toInvest-toA-toSc}
+  let shtml='<div class="title">Suggested Actions</div>';
+  let hasAction=false;
 
-    ahtml=`<div class="phase">Investibile: €${fm(investibile)}</div><div class="title">Suggerimento: €${fm(amt)}</div>`;
-    if(toA>0)ahtml+=`<div class="action-row"><span>ACWI</span><span class="v" style="color:#667eea">€${fm(toA)}</span></div>`;
-    if(toSc>0)ahtml+=`<div class="action-row"><span>Small Cap</span><span class="v" style="color:#818cf8">€${fm(toSc)}</span></div>`;
-    if(toG>0)ahtml+=`<div class="action-row"><span>Gov Bond</span><span class="v" style="color:#34d399">€${fm(toG)}</span></div>`;
-    if(toLiq>0)ahtml+=`<div class="action-row"><span>CSH2 (liquidita)</span><span class="v" style="color:#fbbf24">€${fm(toLiq)}</span></div>`;
-
-    const newInv=investito+toInvest;
-    const newR=newInv>0?(R.sc>0?Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.sc+toSc)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100):Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100)):'—';
-    ahtml+=`<div class="after">Dopo: investito ${active>0?((newInv/active)*100).toFixed(1):'0'}% (ratio ${newR})`;
-    if(investibile>cap)ahtml+=` · rimangono €${fm(investibile-amt)} per le prossime volte`;
-    ahtml+=`</div>`;
+  // 1. Move cash → liquid (remunerate)
+  if(liqGap>0&&cashExcess>0){
+    const moveToLiq=Math.min(liqGap,cashExcess);
+    if(moveToLiq>=50){
+      shtml+=`<div class="suggest-row"><span>Move to CSH2 <span class="note">(remunerate idle cash)</span></span><span class="v" style="color:#f59e0b">€${fm(moveToLiq)}</span></div>`;
+      hasAction=true;
+    }
   }
-  $('actionContent').innerHTML=ahtml;
 
-  // BTC
-  let bh='';
-  if(btcOwned>0){
-    const gain=(btcConf.sell/btcConf.entry-1)*btcOwned;
-    bh=`<div class="title">Trade attivo</div><div class="status">€${fm(btcOwned)} in BTC. Target sell: €${fm(btcConf.sell)}.<br>Guadagno potenziale: €${fm(gain)} lordo (tasse ~21%).</div><div class="note">Quando vendi, sposta tutto in ACWI e rimetti BTC a 0.</div>`;
-  }else if(btcRes>0){
-    bh=`<div class="title">In attesa — €${fm(btcRes)} riservati</div><div class="status">Congelati nel saldo TR. Non disponibili per investire.<br>Compra quando BTC tocca ~€${fm(btcConf.entry)}. Alert su Trade Republic.</div><div class="note">Se non scende entro fine estate, reinvesti quei €${fm(btcRes)} in ACWI.</div>`;
-  }else{
-    bh=`<div class="title">Nessun trade attivo</div><div class="note">Budget BTC: €${fm(btcConf.budget)} · Entry: €${fm(btcConf.entry)} · Sell: €${fm(btcConf.sell)}</div>`;
+  // 2. Invest (capped)
+  const investable=Math.max(0,cashExcess-Math.max(0,liqGap));
+  if(investable>=300){
+    const amt=Math.min(investable,cap);
+    const acwiAmt=Math.round(amt*R.acwi/100);
+    const govAmt=amt-acwiAmt;
+    shtml+=`<div class="suggest-section"><div class="label">Invest (cap €${fm(cap)})</div>`;
+    shtml+=`<div class="suggest-row"><span>ACWI <span class="note">(${R.acwi}%)</span></span><span class="v" style="color:#3b82f6">€${fm(acwiAmt)}</span></div>`;
+    shtml+=`<div class="suggest-row"><span>Gov Bond <span class="note">(${R.gov}%)</span></span><span class="v" style="color:#10b981">€${fm(govAmt)}</span></div>`;
+    if(investable>cap)shtml+=`<div class="suggest-row"><span class="note">Remaining for future</span><span class="muted">€${fm(investable-amt)}</span></div>`;
+    shtml+=`</div>`;
+    hasAction=true;
+  }else if(investGap>0&&investable<300){
+    shtml+=`<div class="suggest-section"><div class="label">Invest</div><div class="suggest-row"><span class="muted">Not enough in cash buffer. Accumulate.</span><span></span></div></div>`;
+    hasAction=true;
   }
-  $('btcBox').innerHTML=bh;
+
+  // 3. High risk
+  if(riskGap>0){
+    shtml+=`<div class="suggest-section"><div class="label">High Risk (${T.risk}% target)</div>`;
+    shtml+=`<div class="suggest-row"><span>BTC <span class="note">Buy at ~€${fm(btcConf.entry)}</span></span><span class="v" style="color:#ef4444">€${fm(riskGap)}</span></div>`;
+    shtml+=`</div>`;
+    hasAction=true;
+  }else if(risk>riskTarget+100){
+    shtml+=`<div class="suggest-section"><div class="label">High Risk</div><div class="suggest-row"><span class="muted">Over target — consider taking profit</span><span class="pos">+€${fm(risk-riskTarget)}</span></div></div>`;
+    hasAction=true;
+  }
+
+  if(!hasAction)shtml+=`<div class="suggest-row"><span class="muted">All buckets on target. Nothing to do.</span><span></span></div>`;
+  $('suggestBox').innerHTML=shtml;
 
   // Persist
   localStorage.setItem('fin_s',JSON.stringify(s));
   localStorage.setItem('fin_btc',JSON.stringify(btcConf));
-  localStorage.setItem('fin_cfg',JSON.stringify({cap:parseFloat($('cfg_cap').value)||2500}));
+  localStorage.setItem('fin_cfg',JSON.stringify({cap}));
 }
 
-function toggleSettings(){const c=$('settingsCard');c.style.display=c.style.display==='none'?'block':'none'}
-function updateTargets(){
-  T={investito:+$('t_inv').value||74,liquidita:+$('t_liq').value||14,buffer:+$('t_buf').value||7,rischio:+$('t_risk').value||5};
-  R={acwi:+$('r_acwi').value||80,gov:+$('r_gov').value||20,sc:+$('r_sc').value||0};
-  const tSum=T.investito+T.liquidita+T.buffer+T.rischio;
-  const rSum=R.acwi+R.gov+R.sc;
-  $('settingsMsg').innerHTML=(Math.abs(tSum-100)>0.5?`<span class="neg">Target: ${tSum}% (deve essere 100)</span>`:'Target: 100%')+' · '+(Math.abs(rSum-100)>0.5?`<span class="neg">Ratio: ${rSum}% (deve essere 100)</span>`:'Ratio: 100%');
-  localStorage.setItem('fin_t',JSON.stringify(T));
-  localStorage.setItem('fin_r',JSON.stringify(R));
+function toggleSettings(){const p=$('settingsPanel');p.style.display=p.style.display==='none'?'block':'none'}
+function updateT(){
+  T={invested:+$('t_inv').value||74,liquid:+$('t_liqr').value||14,cash:+$('t_cash').value||7,risk:+$('t_risk').value||5};
+  R={acwi:+$('r_acwi').value||80,gov:+$('r_gov').value||20};
+  const ts=T.invested+T.liquid+T.cash+T.risk;
+  const rs=R.acwi+R.gov;
+  $('settingsMsg').innerHTML=(Math.abs(ts-100)>0.5?`<span class="neg">Targets: ${ts}% (must be 100)</span>`:`Targets: ${ts}%`)+' · '+(Math.abs(rs-100)>0.5?`<span class="neg">Ratio: ${rs}% (must be 100)</span>`:`Ratio: ${rs}%`);
+  localStorage.setItem('fin_t',JSON.stringify(T));localStorage.setItem('fin_r',JSON.stringify(R));
   calc();
 }
 
@@ -321,35 +305,34 @@ function save(){
   const e={d:new Date().toISOString().slice(0,10),t:total,s:{...s}};
   hist=hist.filter(h=>h.d!==e.d);hist.push(e);hist.sort((a,b)=>a.d.localeCompare(b.d));
   localStorage.setItem('fin_h',JSON.stringify(hist));renderHist();
-  $('ss').textContent='Salvato '+new Date().toLocaleTimeString();
+  $('ss').textContent='Saved '+new Date().toLocaleTimeString();
 }
 
 function renderHist(){
   let h='';[...hist].reverse().forEach(e=>{h+=`<div class="entry"><span>${e.d}</span><span>€${fm(e.t)}</span></div>`});
-  $('hl').innerHTML=h||'<div class="muted" style="padding:6px;text-align:center">Nessun dato</div>';
+  $('hl').innerHTML=h||'<div class="muted" style="padding:6px;text-align:center">No data yet</div>';
   drawChart();
 }
 
 function drawChart(){
   const c=$('cv'),ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1;
-  const W=c.parentElement.getBoundingClientRect().width,H=140;
+  const W=c.parentElement.getBoundingClientRect().width,H=130;
   c.width=W*dpr;c.height=H*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  if(hist.length<2){ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='11px Inter';ctx.textAlign='center';ctx.fillText('Min 2 snapshot',W/2,H/2);return}
+  if(hist.length<2){ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='11px Inter';ctx.textAlign='center';ctx.fillText('Min 2 snapshots',W/2,H/2);return}
   const vs=hist.map(h=>h.t),mn=Math.min(...vs)*.95,mx=Math.max(...vs)*1.05;
-  const p={t:14,b:20,l:42,r:12};
-  ctx.strokeStyle='rgba(255,255,255,.05)';
-  for(let i=0;i<4;i++){const y=p.t+(H-p.t-p.b)*i/3;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(W-p.r,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.25)';ctx.font='8px Inter';ctx.textAlign='right';ctx.fillText('€'+fm(mx-(mx-mn)*i/3),p.l-4,y+3)}
-  const g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,'#667eea');g.addColorStop(1,'#764ba2');
-  ctx.strokeStyle=g;ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();
+  const p={t:12,b:18,l:40,r:10};
+  ctx.strokeStyle='rgba(255,255,255,.04)';
+  for(let i=0;i<4;i++){const y=p.t+(H-p.t-p.b)*i/3;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(W-p.r,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='8px Inter';ctx.textAlign='right';ctx.fillText('€'+fm(mx-(mx-mn)*i/3),p.l-4,y+3)}
+  ctx.strokeStyle='#3b82f6';ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.beginPath();
   hist.forEach((h,i)=>{const x=p.l+i*(W-p.l-p.r)/(hist.length-1);const y=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
-  hist.forEach((h,i)=>{const x=p.l+i*(W-p.l-p.r)/(hist.length-1);const y=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill()});
+  hist.forEach((h,i)=>{const x=p.l+i*(W-p.l-p.r)/(hist.length-1);const y=p.t+(1-(h.t-mn)/(mx-mn))*(H-p.t-p.b);ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='#93c5fd';ctx.fill()});
 }
 
 function tk(){return localStorage.getItem('ght')||prompt('GitHub Token:')}
 async function toGist(){
   const t=tk();if(!t)return;localStorage.setItem('ght',t);
   const d={s:getS(),btc:btcConf,cfg:{cap:+$('cfg_cap').value},T,R,h:hist,u:new Date().toISOString()};
-  try{const r=await fetch('https://api.github.com/gists/'+GIST_ID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify(d)}}})});$('ss').textContent=r.ok?'Cloud OK':'Err '+r.status}catch(e){$('ss').textContent=e.message}
+  try{const r=await fetch('https://api.github.com/gists/'+GIST_ID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify(d)}}})});$('ss').textContent=r.ok?'Synced':'Error '+r.status}catch(e){$('ss').textContent=e.message}
 }
 async function fromGist(){
   const t=tk();if(!t)return;localStorage.setItem('ght',t);
@@ -357,11 +340,12 @@ async function fromGist(){
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.btc)btcConf=d.btc;
-  if(d.cfg){$('cfg_cap').value=d.cfg.cap||2500}
-  if(d.T){T=d.T;localStorage.setItem('fin_t',JSON.stringify(T));$('t_inv').value=T.investito;$('t_liq').value=T.liquidita;$('t_buf').value=T.buffer;$('t_risk').value=T.rischio}
-  if(d.R){R=d.R;localStorage.setItem('fin_r',JSON.stringify(R));$('r_acwi').value=R.acwi;$('r_gov').value=R.gov;$('r_sc').value=R.sc}
+  if(d.cfg)$('cfg_cap').value=d.cfg.cap||2500;
+  if(d.T){T=d.T;$('t_inv').value=T.invested;$('t_liqr').value=T.liquid;$('t_cash').value=T.cash;$('t_risk').value=T.risk}
+  if(d.R){R=d.R;$('r_acwi').value=R.acwi;$('r_gov').value=R.gov}
   if(d.h){hist=d.h;localStorage.setItem('fin_h',JSON.stringify(hist))}
-  calc();renderHist();$('ss').textContent='Caricato'}catch(e){$('ss').textContent=e.message}
+  localStorage.setItem('fin_t',JSON.stringify(T));localStorage.setItem('fin_r',JSON.stringify(R));
+  calc();renderHist();$('ss').textContent='Loaded'}catch(e){$('ss').textContent=e.message}
 }
 
 if(localStorage.getItem('fa')==='1'){show();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()}else $('pw').focus();
