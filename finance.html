@@ -111,19 +111,29 @@ header p{font-size:.7em;opacity:.3;margin-top:3px;text-transform:uppercase;lette
 <div class="sett-overlay" id="sOv">
 <div class="sett-panel">
 <h2>Settings</h2>
-<p style="font-size:.72em;opacity:.4;margin-bottom:14px">Target allocation (must sum 100%)</p>
+<p style="font-size:.72em;opacity:.4;margin-bottom:14px">Top-level allocation (must sum 100%)</p>
 <div class="g2">
-<div><label>Equity %</label><input type="number" id="t_eq" step="1" oninput="upT()"></div>
-<div><label>Bond %</label><input type="number" id="t_bo" step="1" oninput="upT()"></div>
-<div><label>Money Market %</label><input type="number" id="t_mm" step="1" oninput="upT()"></div>
-<div><label>Cash Floor %</label><input type="number" id="t_ca" step="1" oninput="upT()"></div>
-<div><label>Satellite %</label><input type="number" id="t_sa" step="1" oninput="upT()"></div>
+<div><label>Invested %</label><input type="number" id="t_inv" step="1" oninput="upT()"></div>
+<div><label>Liquid %</label><input type="number" id="t_liq" step="1" oninput="upT()"></div>
+<div><label>Satellite %</label><input type="number" id="t_sat" step="1" oninput="upT()"></div>
 </div>
-<div class="msg" id="tMsg"></div>
+<div class="msg" id="tMsg1"></div>
+<p style="font-size:.72em;opacity:.4;margin:14px 0 8px">Within Invested (must sum 100%)</p>
+<div class="g2">
+<div><label>Equity %</label><input type="number" id="r_eq" step="1" oninput="upT()"></div>
+<div><label>Bond %</label><input type="number" id="r_bo" step="1" oninput="upT()"></div>
+</div>
+<div class="msg" id="tMsg2"></div>
+<p style="font-size:.72em;opacity:.4;margin:14px 0 8px">Within Liquid (must sum 100%)</p>
+<div class="g2">
+<div><label>Money Market %</label><input type="number" id="r_mm" step="1" oninput="upT()"></div>
+<div><label>Cash %</label><input type="number" id="r_ca" step="1" oninput="upT()"></div>
+</div>
+<div class="msg" id="tMsg3"></div>
 <p style="font-size:.72em;opacity:.4;margin:14px 0 8px">Caps</p>
 <div class="g2">
-<div><label>Investment Cap (€)</label><input type="number" id="cfg_cap" step="100" oninput="calc()"></div>
-<div><label>Satellite Cap (€)</label><input type="number" id="cfg_capSa" step="100" oninput="calc()"></div>
+<div><label>Investment Cap (€)</label><input type="number" id="cfg_cap" step="100" oninput="saveCfg()"></div>
+<div><label>Satellite Cap (€)</label><input type="number" id="cfg_capSa" step="100" oninput="saveCfg()"></div>
 </div>
 <p style="font-size:.72em;opacity:.4;margin:14px 0 8px">BTC Trade</p>
 <div class="g2">
@@ -137,7 +147,7 @@ header p{font-size:.7em;opacity:.3;margin-top:3px;text-transform:uppercase;lette
 <script>
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json',PW='flavmori2210';
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
-let T={eq:64,bo:16,mm:9,ca:6,sa:5};
+let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
 let cfg={cap:2500,capSa:2500};
 let btc={entry:40000,sell:95000};
 let hist=[];
@@ -152,7 +162,9 @@ function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);retu
 function init(){
   const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
-  $('t_eq').value=T.eq;$('t_bo').value=T.bo;$('t_mm').value=T.mm;$('t_ca').value=T.ca;$('t_sa').value=T.sa;
+  $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
+  $('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;
+  $('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca;
   $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
   $('btc_entry').value=btc.entry;$('btc_sell').value=btc.sell;
   calc();rH();
@@ -170,13 +182,20 @@ function calc(){
     $('totD').textContent=`Invested €${fm(invested)} (${r}) · Liquid €${fm(mm+cash)} · Satellite €${fm(sat)}`;
   }
 
+  // Derive flat targets from hierarchical T
+  const tEq=T.inv*T.r_eq/100;
+  const tBo=T.inv*T.r_bo/100;
+  const tMm=T.liq*T.r_mm/100;
+  const tCa=T.liq*T.r_ca/100;
+  const tSa=T.sat;
+
   // Allocation P&L style
   const bks=[
-    {n:'Equity',s:'ACWI',v:eq,t:T.eq},
-    {n:'Bond',s:'Gov EUR',v:bo,t:T.bo},
-    {n:'Money Market',s:'CSH2',v:mm,t:T.mm},
-    {n:'Cash Floor',s:'Accounts',v:cash,t:T.ca},
-    {n:'Satellite',s:'BTC',v:sat,t:T.sa},
+    {n:'Equity',s:'ACWI',v:eq,t:tEq},
+    {n:'Bond',s:'Gov EUR',v:bo,t:tBo},
+    {n:'Money Market',s:'CSH2',v:mm,t:tMm},
+    {n:'Cash Floor',s:'Accounts',v:cash,t:tCa},
+    {n:'Satellite',s:'BTC',v:sat,t:tSa},
   ];
   let ah='';
   bks.forEach(b=>{
@@ -191,7 +210,7 @@ function calc(){
   // Rebalance alert
   let rb='';
   if(invested>0){
-    const idealR=T.eq/(T.eq+T.bo)*100;
+    const idealR=tEq/(tEq+tBo)*100;
     const actualR=eq/invested*100;
     if(Math.abs(actualR-idealR)>5){
       const from=actualR>idealR?'Equity':'Bond';
@@ -205,11 +224,11 @@ function calc(){
   // Suggestions
   const cap=cfg.cap||2500;
   const capSa=cfg.capSa||2500;
-  const cashTarget=T.ca/100*total;
-  const mmTarget=T.mm/100*total;
-  const eqTarget=T.eq/100*total;
-  const boTarget=T.bo/100*total;
-  const saTarget=T.sa/100*total;
+  const cashTarget=tCa/100*total;
+  const mmTarget=tMm/100*total;
+  const eqTarget=tEq/100*total;
+  const boTarget=tBo/100*total;
+  const saTarget=tSa/100*total;
   const cashExcess=Math.max(0,cash-cashTarget);
   const mmGap=Math.max(0,mmTarget-mm);
   const eqGap=Math.max(0,eqTarget-eq);
@@ -236,7 +255,7 @@ function calc(){
     const invGap=eqGap+boGap;
     let toEq,toBo;
     if(invGap>0){toEq=Math.round(amt*eqGap/invGap);toBo=amt-toEq}
-    else{const r=T.eq/(T.eq+T.bo);toEq=Math.round(amt*r);toBo=amt-toEq}
+    else{const r=T.r_eq/(T.r_eq+T.r_bo);toEq=Math.round(amt*r);toBo=amt-toEq}
     if(any)sg+=`<div class="sep"></div>`;
     sg+=`<div class="action"><span>Equity <small>(ACWI)</small></span><span class="av" style="color:#3b82f6">€${fm(toEq)}</span></div>`;
     sg+=`<div class="action"><span>Bond <small>(Gov EUR)</small></span><span class="av" style="color:#10b981">€${fm(toBo)}</span></div>`;
@@ -262,18 +281,21 @@ function calc(){
 
   // Persist
   localStorage.setItem('fs',JSON.stringify(s));
-  cfg={cap:parseFloat($('cfg_cap').value)||2500,capSa:parseFloat($('cfg_capSa').value)||2500};
-  localStorage.setItem('fc',JSON.stringify(cfg));
 }
 
 function openS(){$('sOv').style.display='block'}
 function closeS(){$('sOv').style.display='none'}
 function upT(){
-  T={eq:+$('t_eq').value||0,bo:+$('t_bo').value||0,mm:+$('t_mm').value||0,ca:+$('t_ca').value||0,sa:+$('t_sa').value||0};
-  const s=T.eq+T.bo+T.mm+T.ca+T.sa;
-  $('tMsg').innerHTML=Math.abs(s-100)>0.5?`<span class="neg">Total: ${s}% (must be 100)</span>`:`Total: ${s}%`;
+  T={inv:+$('t_inv').value||0,liq:+$('t_liq').value||0,sat:+$('t_sat').value||0,r_eq:+$('r_eq').value||0,r_bo:+$('r_bo').value||0,r_mm:+$('r_mm').value||0,r_ca:+$('r_ca').value||0};
+  const s1=T.inv+T.liq+T.sat;
+  const s2=T.r_eq+T.r_bo;
+  const s3=T.r_mm+T.r_ca;
+  $('tMsg1').innerHTML=Math.abs(s1-100)>0.5?`<span class="neg">Total: ${s1}%</span>`:`Total: ${s1}%`;
+  $('tMsg2').innerHTML=Math.abs(s2-100)>0.5?`<span class="neg">Sum: ${s2}%</span>`:`Sum: ${s2}%`;
+  $('tMsg3').innerHTML=Math.abs(s3-100)>0.5?`<span class="neg">Sum: ${s3}%</span>`:`Sum: ${s3}%`;
   localStorage.setItem('ft',JSON.stringify(T));calc();
 }
+function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,capSa:+$('cfg_capSa').value||2500};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
 function saveBtc(){btc={entry:+$('btc_entry').value||40000,sell:+$('btc_sell').value||95000};localStorage.setItem('fb',JSON.stringify(btc));calc()}
 
 function save(){
@@ -314,7 +336,7 @@ async function frG(){
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
-  if(d.T){T=d.T;$('t_eq').value=T.eq;$('t_bo').value=T.bo;$('t_mm').value=T.mm;$('t_ca').value=T.ca;$('t_sa').value=T.sa}
+  if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}
   if(d.btc){btc=d.btc;$('btc_entry').value=btc.entry;$('btc_sell').value=btc.sell}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
