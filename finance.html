@@ -108,8 +108,7 @@ h1{text-align:center;font-size:2em;margin-bottom:6px;font-weight:700;letter-spac
 
 <div class="action-box" id="actionBox">
 <div class="config-row">
-<div class="field"><label>Tranche bulk</label><input type="number" id="cfg_bulk" value="2500" step="100" oninput="calc()"></div>
-<div class="field"><label>PAC mensile (a regime)</label><input type="number" id="cfg_pac" value="400" step="50" oninput="calc()"></div>
+<div class="field"><label>Cap per tranche</label><input type="number" id="cfg_cap" value="2500" step="100" oninput="calc()"></div>
 </div>
 <div id="actionContent"></div>
 </div>
@@ -150,8 +149,7 @@ function init(){
   let s=J('fin_s')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
   btcConf=J('fin_btc')||btcConf;
   let cfg=J('fin_cfg')||{};
-  if(cfg.bulk)$('cfg_bulk').value=cfg.bulk;
-  if(cfg.pac)$('cfg_pac').value=cfg.pac;
+  if(cfg.cap)$('cfg_cap').value=cfg.cap;
   hist=J('fin_h')||[];
   calc();renderHist();
 }
@@ -204,46 +202,45 @@ function calc(){
   });
   $('buckets').innerHTML=bhtml;
 
-  // Action — auto phase
-  const bulkAmt=parseFloat($('cfg_bulk').value)||2500;
-  const pacAmt=parseFloat($('cfg_pac').value)||400;
+  // Action — investibile + capped suggestion
+  const cap=parseFloat($('cfg_cap').value)||2500;
   const bufferTarget=T.buffer/100*active;
-  const available=Math.max(0,buffer-bufferTarget);
-  const isBulk=available>=bulkAmt;
-  const amt=isBulk?bulkAmt:pacAmt;
-  const phase=isBulk?`Fase bulk — €${fm(available)} da allocare (~${Math.ceil(available/bulkAmt)} tranches rimaste)`:`A regime — surplus mensile`;
-
-  // Split based on gaps
+  const investibile=Math.max(0,buffer-bufferTarget);
   const investTarget=T.investito/100*active;
   const liqTarget=T.liquidita/100*active;
   const investGap=Math.max(0,investTarget-investito);
   const liqGap=Math.max(0,liqTarget-liquidita);
-  const totalGap=investGap+liqGap;
 
-  let toInvest=amt,toLiq=0;
-  if(totalGap>0&&liqGap>0){toLiq=Math.min(amt,Math.round(amt*liqGap/totalGap));toInvest=amt-toLiq}
-  if(liqGap<=0){toInvest=amt;toLiq=0}
+  let ahtml='';
+  if(investibile<300){
+    ahtml=`<div class="phase">Investibile: €${fm(investibile)}</div><div class="title">Non investire — accumula</div><div class="after">Aspetta che il buffer cresca (stipendio, surplus). Tornerai sopra soglia.</div>`;
+  }else{
+    const amt=Math.min(investibile,cap);
+    const totalGap=investGap+liqGap;
+    let toInvest=amt,toLiq=0;
+    if(totalGap>0&&liqGap>0){toLiq=Math.min(amt,Math.round(amt*liqGap/totalGap));toInvest=amt-toLiq}
+    if(liqGap<=0){toInvest=amt;toLiq=0}
 
-  // Invest split: ratio-aware
-  const acwiTgt=0.80*investTarget;
-  const govTgt=0.20*investTarget;
-  const acwiGap=Math.max(0,acwiTgt-s.acwi);
-  const govGap=Math.max(0,govTgt-s.gov);
-  const ig=acwiGap+govGap;
-  let toA,toG;
-  if(ig>0){toA=Math.round(toInvest*acwiGap/ig);toG=toInvest-toA}
-  else{toA=Math.round(toInvest*0.80);toG=toInvest-toA}
+    const acwiTgt=0.80*investTarget;
+    const govTgt=0.20*investTarget;
+    const acwiGap=Math.max(0,acwiTgt-s.acwi);
+    const govGap=Math.max(0,govTgt-s.gov);
+    const ig=acwiGap+govGap;
+    let toA,toG;
+    if(ig>0){toA=Math.round(toInvest*acwiGap/ig);toG=toInvest-toA}
+    else{toA=Math.round(toInvest*0.80);toG=toInvest-toA}
 
-  let ahtml=`<div class="phase">${phase}</div><div class="title">Prossima tranche: €${fm(amt)}</div>`;
-  if(toA>0)ahtml+=`<div class="action-row"><span>ACWI</span><span class="v" style="color:#667eea">€${fm(toA)}</span></div>`;
-  if(toG>0)ahtml+=`<div class="action-row"><span>Gov Bond</span><span class="v" style="color:#34d399">€${fm(toG)}</span></div>`;
-  if(toLiq>0)ahtml+=`<div class="action-row"><span>CSH2 (liquidita)</span><span class="v" style="color:#fbbf24">€${fm(toLiq)}</span></div>`;
+    ahtml=`<div class="phase">Investibile: €${fm(investibile)}</div><div class="title">Suggerimento: €${fm(amt)}</div>`;
+    if(toA>0)ahtml+=`<div class="action-row"><span>ACWI</span><span class="v" style="color:#667eea">€${fm(toA)}</span></div>`;
+    if(toG>0)ahtml+=`<div class="action-row"><span>Gov Bond</span><span class="v" style="color:#34d399">€${fm(toG)}</span></div>`;
+    if(toLiq>0)ahtml+=`<div class="action-row"><span>CSH2 (liquidita)</span><span class="v" style="color:#fbbf24">€${fm(toLiq)}</span></div>`;
 
-  const newInv=investito+toInvest;
-  const newR=newInv>0?Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100):'—';
-  ahtml+=`<div class="after">Dopo: investito ${active>0?((newInv/active)*100).toFixed(1):'0'}% (ratio ${newR})`;
-  if(isBulk)ahtml+=` · buffer residuo €${fm(available-amt)}`;
-  ahtml+=`</div>`;
+    const newInv=investito+toInvest;
+    const newR=newInv>0?Math.round((s.acwi+toA)/newInv*100)+'/'+Math.round((s.gov+toG)/newInv*100):'—';
+    ahtml+=`<div class="after">Dopo: investito ${active>0?((newInv/active)*100).toFixed(1):'0'}% (ratio ${newR})`;
+    if(investibile>cap)ahtml+=` · rimangono €${fm(investibile-amt)} per le prossime volte`;
+    ahtml+=`</div>`;
+  }
   $('actionContent').innerHTML=ahtml;
 
   // BTC
@@ -261,7 +258,7 @@ function calc(){
   // Persist
   localStorage.setItem('fin_s',JSON.stringify(s));
   localStorage.setItem('fin_btc',JSON.stringify(btcConf));
-  localStorage.setItem('fin_cfg',JSON.stringify({bulk:bulkAmt,pac:pacAmt}));
+  localStorage.setItem('fin_cfg',JSON.stringify({cap:parseFloat($('cfg_cap').value)||2500}));
 }
 
 function save(){
@@ -296,7 +293,7 @@ function drawChart(){
 function tk(){return localStorage.getItem('ght')||prompt('GitHub Token:')}
 async function toGist(){
   const t=tk();if(!t)return;localStorage.setItem('ght',t);
-  const d={s:getS(),btc:btcConf,cfg:{bulk:+$('cfg_bulk').value,pac:+$('cfg_pac').value},h:hist,u:new Date().toISOString()};
+  const d={s:getS(),btc:btcConf,cfg:{cap:+$('cfg_cap').value},h:hist,u:new Date().toISOString()};
   try{const r=await fetch('https://api.github.com/gists/'+GIST_ID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify(d)}}})});$('ss').textContent=r.ok?'Cloud OK':'Err '+r.status}catch(e){$('ss').textContent=e.message}
 }
 async function fromGist(){
@@ -305,7 +302,7 @@ async function fromGist(){
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.btc)btcConf=d.btc;
-  if(d.cfg){$('cfg_bulk').value=d.cfg.bulk||2500;$('cfg_pac').value=d.cfg.pac||400}
+  if(d.cfg){$('cfg_cap').value=d.cfg.cap||2500}
   if(d.h){hist=d.h;localStorage.setItem('fin_h',JSON.stringify(hist))}
   calc();renderHist();$('ss').textContent='Caricato'}catch(e){$('ss').textContent=e.message}
 }
