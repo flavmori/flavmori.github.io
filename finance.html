@@ -209,12 +209,13 @@ function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);retu
 function init(){
   const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
+  if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
   $('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca;
   $('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa;
   $('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0;
-  $('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];
-  $('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2];
+  $('btc_b1').value=btc.buy?btc.buy[0]:50000;$('btc_b2').value=btc.buy?btc.buy[1]:45000;$('btc_b3').value=btc.buy?btc.buy[2]:38000;
+  $('btc_s1').value=btc.sell?btc.sell[0]:80000;$('btc_s2').value=btc.sell?btc.sell[1]:95000;$('btc_s3').value=btc.sell?btc.sell[2]:110000;
   $('ghToken').value=localStorage.getItem('ght')||'';
   calc();rH();
 }
@@ -480,7 +481,7 @@ async function loadFromCloud(){
   if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_capSa').value=cfg.capSa}
-  if(d.btc){btc=d.btc;if(btc.buy){$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}}
+  if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
