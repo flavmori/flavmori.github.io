@@ -75,7 +75,7 @@ input[type=number]{-moz-appearance:textfield}
 
 <div id="app" style="display:block"><div class="w">
 <div class="total" id="tot">-</div>
-<div class="total-d" id="totD"></div>
+<div class="total-d" id="totD"><button class="proj-btn" id="compactBtn" onclick="togCompact()" style="margin-left:8px;font-size:.7em">Compact</button></div>
 
 <div class="sec">
 <div class="sec-h">Balances</div>
@@ -195,6 +195,10 @@ let hist=[];
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
+let compact=false;
+function fmC(n){if(!compact)return'\u20AC'+fm(n);if(Math.abs(n)>=1000000)return'\u20AC'+(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return'\u20AC'+Math.round(n/1000)+'K';return'\u20AC'+Math.round(n)}
+function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
+function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
 function getS(){let s={};KS.forEach(k=>{const v=$('s_'+k).value.replace(/\./g,'').replace(',','.');s[k]=parseFloat(v)||0});return s}
 function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement)el.value=fm(v);el.style.width=Math.max(5,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
@@ -239,16 +243,16 @@ function calc(){
   const subMm=liquid>0?(mm/liquid*100).toFixed(0):0;
   const subCa=liquid>0?(cash/liquid*100).toFixed(0):0;
 
-  function gapH(g){return Math.abs(g)<50?'<span class="mu">—</span>':(g>0?`<span class="neg">-€${fm(Math.abs(g))}</span>`:`<span class="pos">+€${fm(-g)}</span>`)}
+  function gapH(g){return Math.abs(g)<50?'<span class="mu">\u2014</span>':(g>0?`<span class="neg">${fmC(-Math.abs(g))}</span>`:`<span class="pos">+${fmC(-g)}</span>`)}
 
   let a='';
-  a+=`<div class="arow"><span class="l">Invested</span><span class="r">€${fm(invested)} <span class="mu">${pInv}% → ${T.inv}%</span> <span class="gap">${gapH(gInv)}</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Equity</span><span class="r">\u20AC${fm(eq)} <span class="mu">${subEq}% / ${T.r_eq}%</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Bond</span><span class="r">\u20AC${fm(bo)} <span class="mu">${subBo}% / ${T.r_bo}%</span></span></div>`;
-  a+=`<div class="arow"><span class="l">Liquid</span><span class="r">\u20AC${fm(liquid)} <span class="mu">${pLiq}% \u2192 ${T.liq}%</span> <span class="gap">${gapH(gLiq)}</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Money Market</span><span class="r">\u20AC${fm(mm)} <span class="mu">${subMm}% / ${T.r_mm}%</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Cash</span><span class="r">\u20AC${fm(cash)} <span class="mu">${subCa}% / ${T.r_ca}%</span></span></div>`;
-  a+=`<div class="arow"><span class="l">Satellite</span><span class="r">€${fm(sat)} <span class="mu">${pSat}% → ${T.sat}%</span> <span class="gap">${gapH(gSat)}</span></span></div>`;
+  a+=`<div class="arow"><span class="l">Invested</span><span class="r">${fmC(invested)} <span class="mu">${pInv}% \u2192 ${T.inv}%</span> <span class="gap">${gapH(gInv)}</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Equity</span><span class="r">${fmC(eq)} <span class="mu">${subEq}% / ${T.r_eq}%</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Bond</span><span class="r">${fmC(bo)} <span class="mu">${subBo}% / ${T.r_bo}%</span></span></div>`;
+  a+=`<div class="arow"><span class="l">Liquid</span><span class="r">${fmC(liquid)} <span class="mu">${pLiq}% \u2192 ${T.liq}%</span> <span class="gap">${gapH(gLiq)}</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Money Market</span><span class="r">${fmC(mm)} <span class="mu">${subMm}% / ${T.r_mm}%</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Cash</span><span class="r">${fmC(cash)} <span class="mu">${subCa}% / ${T.r_ca}%</span></span></div>`;
+  a+=`<div class="arow"><span class="l">Satellite</span><span class="r">${fmC(sat)} <span class="mu">${pSat}% \u2192 ${T.sat}%</span> <span class="gap">${gapH(gSat)}</span></span></div>`;
   $('alloc').innerHTML=a;
 
   // Actions — numbered steps with explanations
