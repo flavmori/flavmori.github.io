@@ -632,8 +632,8 @@ function rH(){
   let h='';rev.forEach((e,i)=>{
     const prev=rev[i+1];
     const delta=prev?(e.t-prev.t):0;
-    const ds=delta?` <span style="color:${delta>=0?'#10b981':'#ef4444'};font-size:.9em">${delta>=0?'+':''}${fmA(delta)}</span>`:'';
-    h+=`<div><span>${e.d}</span><span>\u20AC${fmA(e.t)}${ds} <span style="opacity:.2;cursor:pointer;margin-left:4px" onclick="delSnap('${e.d}')">x</span></span></div>`;
+    const ds=delta?` <span style="color:${delta>=0?'#10b981':'#ef4444'};font-size:.9em">${delta>=0?'+':''}${fm(delta)}</span>`:'';
+    h+=`<div><span>${e.d}</span><span>\u20AC${fm(e.t)}${ds} <span style="opacity:.2;cursor:pointer;margin-left:4px" onclick="delSnap('${e.d}')">x</span></span></div>`;
   });
   $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';
   renderInsights();
