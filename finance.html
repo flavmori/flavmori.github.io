@@ -123,8 +123,8 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <div class="sec">
-<div class="sec-h">Snapshots</div>
-<div class="hl" id="hl"></div>
+<div class="sec-h" style="cursor:pointer" onclick="$('hl').style.maxHeight=$('hl').style.maxHeight==='none'?'60px':'none'">Snapshots</div>
+<div class="hl" id="hl" style="max-height:60px;overflow:hidden"></div>
 <div id="insights" style="margin-top:10px"></div>
 </div>
 
@@ -615,9 +615,8 @@ function calcW(){
 
 function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
-  // Skip if all values identical to last snapshot
-  const last=hist.length>0?hist[hist.length-1]:null;
-  if(last&&last.s){const same=KS.every(k=>Math.round(s[k])===Math.round(last.s[k]||0));if(same){$('ss').textContent='No changes';return}}
+  // Skip if all values identical to most recent snapshot (any date)
+  if(hist.length>0){const last=hist[hist.length-1];if(last.s){const same=KS.every(k=>Math.round(s[k])===Math.round(last.s[k]||0));if(same){$('ss').textContent='No changes';return}}}
   hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));
   hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});
   hist.sort((a,b)=>a.d.localeCompare(b.d));
@@ -628,7 +627,9 @@ function saveAll(){
   else{$('ss').textContent='Saved locally (set token in Settings to sync)'}
 }
 function rH(){
-  const rev=[...hist].reverse().slice(0,10);
+  // Remove consecutive duplicates (same total)
+  const clean=hist.filter((e,i)=>i===0||Math.round(e.t)!==Math.round(hist[i-1].t));
+  const rev=[...clean].reverse().slice(0,10);
   let h='';rev.forEach((e,i)=>{
     const prev=rev[i+1];
     const delta=prev?(e.t-prev.t):0;
