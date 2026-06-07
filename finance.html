@@ -125,6 +125,7 @@ input[type=number]{-moz-appearance:textfield}
 <div class="sec">
 <div class="sec-h">Snapshots</div>
 <div class="hl" id="hl"></div>
+<div id="insights" style="margin-top:10px"></div>
 </div>
 
 <div class="foot">
@@ -635,6 +636,50 @@ function rH(){
     h+=`<div><span>${e.d}</span><span>\u20AC${fmA(e.t)}${ds}</span></div>`;
   });
   $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';
+  renderInsights();
+}
+function renderInsights(){
+  if(hist.length<3){$('insights').innerHTML=hist.length>0?'<div style="font-size:.62em;opacity:.2;text-align:center">Need 3+ snapshots for insights</div>':'';return}
+  const first=hist[0],last=hist[hist.length-1];
+  const days=(new Date(last.d)-new Date(first.d))/86400000;
+  if(days<7){$('insights').innerHTML='';return}
+  const months=days/30.44;
+  const years=days/365.25;
+
+  // 1. Real annualized return (TWR approximation)
+  const totalReturn=(last.t-first.t)/first.t;
+  const annReturn=years>0?Math.pow(1+totalReturn,1/years)-1:totalReturn;
+
+  // 2. Average monthly contribution (total growth - estimated market return) / months
+  // Simplified: delta total / months gives avg monthly change (contributions + growth)
+  const avgMonthlyChange=(last.t-first.t)/months;
+
+  // 3. Projection vs reality
+  const mc=cfg.mc||400;
+  const baseRate=0.069/12; // base scenario monthly
+  let projected=first.t;
+  for(let m=0;m<Math.round(months);m++){projected=projected*(1+baseRate)+mc}
+  const vsProj=last.t-projected;
+
+  // 4. Next milestone
+  const milestones=[50000,75000,100000,150000,200000,300000,500000,750000,1000000];
+  const nextM=milestones.find(m=>m>last.t);
+  const toNext=nextM?nextM-last.t:0;
+  const monthsToNext=avgMonthlyChange>0&&toNext>0?Math.round(toNext/avgMonthlyChange):0;
+
+  let h='<div style="font-size:.68em;opacity:.5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Insights</div>';
+  // Return
+  h+=`<div style="font-size:.72em;margin-bottom:4px">Return: <b>${(annReturn*100).toFixed(1)}%</b> annualized (${Math.round(days)} days tracked)</div>`;
+  // Pace
+  h+=`<div style="font-size:.72em;margin-bottom:4px">Pace: <b>\u20AC${fmA(Math.round(avgMonthlyChange))}/month</b> avg growth</div>`;
+  // Projection vs reality
+  const projColor=vsProj>=0?'#10b981':'#ef4444';
+  h+=`<div style="font-size:.72em;margin-bottom:4px">vs Base projection: <span style="color:${projColor}">${vsProj>=0?'+':''}\u20AC${fmA(Math.round(vsProj))}</span> (${vsProj>=0?'ahead':'behind'})</div>`;
+  // Milestone
+  if(nextM&&monthsToNext>0){
+    h+=`<div style="font-size:.72em">Next milestone: <b>\u20AC${fmA(nextM)}</b> — \u20AC${fmA(Math.round(toNext))} to go (${monthsToNext} months at this pace)</div>`;
+  }
+  $('insights').innerHTML=h;
 }
 async function loadFromCloud(){
   const t=localStorage.getItem('ght');if(!t)return;
