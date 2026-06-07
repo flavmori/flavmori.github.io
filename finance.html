@@ -88,6 +88,7 @@ body{padding:12px 8px;font-size:12px}
 .sp{padding:14px}
 .sp .g2{grid-template-columns:1fr 1fr;gap:6px}
 #donut,#donutLegend,#risk{min-width:unset!important;flex:unset!important;width:100%!important;text-align:center}
+#risk{order:-1}
 }
 </style>
 </head>
@@ -125,9 +126,9 @@ body{padding:12px 8px;font-size:12px}
 </div>
 
 <div class="sec" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+<div id="risk" style="min-width:200px;flex:1"></div>
 <div id="donut" style="min-width:140px"></div>
 <div id="donutLegend" style="min-width:140px;flex:1"></div>
-<div id="risk" style="min-width:200px;flex:1"></div>
 </div>
 
 <div class="sec" style="position:relative">
@@ -440,15 +441,19 @@ function renderRisk(s,total){
   const bestEur=Math.round(total*bestY/100);
   const worstEur=Math.round(total*Math.abs(worstY)/100);
   $('risk').innerHTML=`
-    <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Risk Profile</div>
-    <div style="font-size:1.4em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
-    <div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div>
-    <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
-    <div class="risk-val">
-      Volatility: ${vol.toFixed(1)}%/yr<br>
-      Best year: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>
-      Worst year: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>
-      Risk exposure: ${riskPct}% · Safe: ${safePct}%
+    <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Risk Profile</div>
+    <div class="risk-row" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div style="min-width:120px">
+        <div style="font-size:1.4em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
+        <div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div>
+        <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
+      </div>
+      <div class="risk-val">
+        Volatility: ${vol.toFixed(1)}%/yr<br>
+        Best year: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>
+        Worst year: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>
+        Risk: ${riskPct}% · Safe: ${safePct}%
+      </div>
     </div>`;
 }
 // === PROJECTION ===
