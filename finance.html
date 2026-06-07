@@ -194,7 +194,7 @@ let hist=[];
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
-function fm(n){return Math.round(n).toLocaleString('it-IT')}
+function fm(n){const s=Math.round(n).toString();const r=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.');return r}
 let compact=false;
 function fmC(n){if(!n||n===0)return'';if(!compact)return'\u20AC'+fm(n);if(Math.abs(n)>=1000000)return'\u20AC'+(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return'\u20AC'+Math.round(n/1000)+'K';return'\u20AC'+Math.round(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
@@ -217,6 +217,7 @@ function init(){
   $('ghToken').value=localStorage.getItem('ght')||'';
   initProj();
   calc();rH();
+  autoSize();
 }
 
 function calc(){
@@ -226,7 +227,7 @@ function calc(){
   const invested=eq+bo,liquid=mm+cash;
 
   $('tot').textContent=total>0?'€'+fm(total):'-';
-  $('totD').textContent=total>0?`Invested €${fm(invested)} · Liquid €${fm(liquid)} · Satellite €${fm(sat)}`:'';
+  $('totD').textContent=total>0?`Invested 20AC${fm(invested)} 00B7 Liquid 20AC${fm(liquid)}${sat>0?' 00B7 Satellite 20AC'+fm(sat):''}`:'';
 
   // Derived targets (€)
   const tInv=T.inv/100*total, tLiq=T.liq/100*total, tSat=T.sat/100*total;
