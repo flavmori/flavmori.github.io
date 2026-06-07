@@ -687,7 +687,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init()});else{init()}
 window.addEventListener('resize',()=>{renderProj()});
 </script>
 </body>
