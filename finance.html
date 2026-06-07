@@ -677,6 +677,8 @@ function renderInsights(){
 }
 async function loadFromCloud(){
   const t=localStorage.getItem('ght');if(!t)return;
+  // Only load from cloud if no local data (new device/cleared)
+  if(localStorage.getItem('fs'))return;
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=d.s[k]||'';el.value=d.s[k]?String(d.s[k]):'';fmInput(el)});
@@ -687,7 +689,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH()}catch(e){}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init()});else{init()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
 window.addEventListener('resize',()=>{renderProj()});
 </script>
 </body>
