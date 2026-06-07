@@ -203,7 +203,7 @@ function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
 function getS(){let s={};KS.forEach(k=>{let v=$('s_'+k).value.trim();if(v.endsWith('M'))v=parseFloat(v)*1000000;else if(v.endsWith('K'))v=parseFloat(v)*1000;else v=parseFloat(v.replace(/\./g,'').replace(',','.'))||0;s[k]=v||0});return s}
-function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement){if(compact){if(v>=1000000)el.value=(v/1000000).toFixed(1)+'M';else if(v>=1000)el.value=Math.round(v/1000)+'K';else el.value=String(Math.round(v))}else{const s=Math.round(v).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}else if(v===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
+function fmInput(el){const v=parseFloat(el.value.replace(/[\.KM]/g,'').replace(',','.'))||0;if(el.value.endsWith('K'))var rv=parseFloat(el.value)*1000;else if(el.value.endsWith('M'))var rv=parseFloat(el.value)*1000000;else var rv=v;if(rv>0&&el!==document.activeElement){if(compact){if(rv>=1000000)el.value=(rv/1000000).toFixed(1)+'M';else if(rv>=1000)el.value=(rv/1000).toFixed(1).replace('.0','')+'K';else el.value=String(Math.round(rv))}else{const s=Math.round(rv).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}else if(rv===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
 
 function init(){
