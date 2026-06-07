@@ -130,6 +130,7 @@ input[type=number]{-moz-appearance:textfield}
 
 <div class="foot">
 <button class="btn btn-p" onclick="saveAll()">Save</button>
+<button class="btn btn-s" onclick="loadFromCloud()">Load</button>
 <button class="btn btn-s" onclick="openS()">Settings</button>
 <button class="btn btn-s" id="compactBtn" onclick="togCompact()">Precise</button>
 <a href="finance-guide.html" target="_blank" class="btn btn-s" style="text-decoration:none;display:inline-block">Guide</a>
@@ -676,9 +677,7 @@ function renderInsights(){
   $('insights').innerHTML=h;
 }
 async function loadFromCloud(){
-  const t=localStorage.getItem('ght');if(!t)return;
-  // Only load from cloud if no local data (new device/cleared)
-  if(localStorage.getItem('fs'))return;
+  const t=localStorage.getItem('ght');if(!t){$('ss').textContent='Set token in Settings first';return}
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
   if(d.s)KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=d.s[k]||'';el.value=d.s[k]?String(d.s[k]):'';fmInput(el)});
