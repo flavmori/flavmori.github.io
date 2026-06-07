@@ -20,7 +20,7 @@ input[type=number]{-moz-appearance:textfield}
 .irow:last-child{border:none}
 .irow label{font-size:.78em;color:#94a3b8;flex:1}
 .irow label small{opacity:.4}
-.irow input{font-family:'Inter',sans-serif;width:80px;padding:5px 7px;border-radius:4px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:.82em;text-align:right}
+.irow input{font-family:'Inter',sans-serif;width:7ch;min-width:50px;max-width:90px;padding:5px 6px;border-radius:4px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:.78em;text-align:right}
 .irow input:focus{outline:none;border-color:#2563eb}
 .arow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111827}
 .arow:last-child{border:none}
@@ -195,6 +195,7 @@ function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
 function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
+function autoSize(){document.querySelectorAll('.irow input').forEach(i=>{i.style.width=Math.max(5,String(i.value).length+1)+'ch'})}
 
 function init(){
   const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
@@ -355,6 +356,7 @@ function calc(){
 
   localStorage.setItem('fs',JSON.stringify(s));
   renderVisuals();
+  autoSize();
 }
 
 function openS(){$('sOv').style.display='block'}
