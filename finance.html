@@ -624,7 +624,13 @@ function saveAll(){
   else{$('ss').textContent='Saved locally (set token in Settings to sync)'}
 }
 function rH(){
-  let h='';[...hist].reverse().slice(0,10).forEach(e=>{h+=`<div><span>${e.d}</span><span>€${fm(e.t)}</span></div>`});
+  const rev=[...hist].reverse().slice(0,10);
+  let h='';rev.forEach((e,i)=>{
+    const prev=rev[i+1];
+    const delta=prev?(e.t-prev.t):0;
+    const ds=delta?` <span style="color:${delta>=0?'#10b981':'#ef4444'};font-size:.9em">${delta>=0?'+':''}${fmA(delta)}</span>`:'';
+    h+=`<div><span>${e.d}</span><span>\u20AC${fmA(e.t)}${ds}</span></div>`;
+  });
   $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';
 }
 async function loadFromCloud(){
