@@ -99,12 +99,10 @@ input[type=number]{-moz-appearance:textfield}
 
 <div class="sec">
 <div class="sec-h">Projection</div>
-<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
-<div id="projBtns"></div>
-<label style="font-size:.68em;opacity:.5;margin-left:auto;cursor:pointer"><input type="checkbox" id="projBtc" onchange="renderProj()"> Include BTC scenario</label>
-</div>
-<canvas id="projChart" style="width:100%;height:180px"></canvas>
-<div id="projInfo"></div>
+<div style="display:flex;gap:6px;margin-bottom:6px" id="projScBtns"></div>
+<div style="display:flex;gap:6px;margin-bottom:10px" id="projYrBtns"></div>
+<canvas id="projChart" style="width:100%;height:200px"></canvas>
+<div id="projInfo" class="proj-info"></div>
 </div>
 
 <div class="acts" id="acts"></div>
@@ -389,66 +387,63 @@ function renderRisk(s,total){
     <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
     <div class="risk-val">Volatility: ${vol.toFixed(1)}% / year<br>Worst year estimate: -${maxDD.toFixed(0)}%</div>`;
 }
-
 // === PROJECTION ===
-let projYears=10;
-function initProj(){
+let projYears=10,projSc=1;
+const SCENARIOS=[{name:'Pessimistic',eqR:4,boR:1,color:'#ef4444'},{name:'Base',eqR:8,boR:2.5,color:'#3b82f6'},{name:'Optimistic',eqR:12,boR:3.5,color:'#10b981'}];
+function initProj(){updProjBtns()}
+function updProjBtns(){
   const years=[5,10,15,20,30];
-  $('projBtns').innerHTML=years.map(y=>`<button class="proj-btn${y===projYears?' active':''}" onclick="setProj(${y})">${y}Y</button>`).join('');
-  renderProj();
+  $('projYrBtns').innerHTML=years.map(y=>`<button class="proj-btn${y===projYears?' active':''}" onclick="projYears=${y};updProjBtns();renderProj()">${y}Y</button>`).join('');
+  $('projScBtns').innerHTML=SCENARIOS.map((s,i)=>`<button class="proj-btn${i===projSc?' active':''}" onclick="projSc=${i};updProjBtns();renderProj()" style="border-color:${s.color}40;${i===projSc?'background:'+s.color+';color:#fff':''}">${s.name}</button>`).join('');
 }
-function setProj(y){projYears=y;document.querySelectorAll('.proj-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');renderProj()}
-
+function setProj(){}
 function renderProj(){
   const s=getS();
-  const total=KS.reduce((a,k)=>a+s[k],0);
-  const invested=s.eq+s.bo;
+  const invested=s.eq+s.bo+(s.sa>0?s.sa:0);
+  if(invested<=0){$('projInfo').innerHTML='';return}
   const mc=cfg.mc||400;
-  const inclBtc=$('projBtc').checked;
-  const wEq=(s.eq+s.bo>0)?s.eq/(s.eq+s.bo):0.8;
-  const scenarios=[
-    {name:'Pessimistic',rate:(wEq*4+(1-wEq)*1)/100,color:'#ef4444'},
-    {name:'Base',rate:(wEq*8+(1-wEq)*2.5)/100,color:'#3b82f6'},
-    {name:'Optimistic',rate:(wEq*12+(1-wEq)*3.5)/100,color:'#10b981'},
-  ];
-  if(inclBtc){
-    // BTC scenario: base + satellite gains (2.5x on 5% allocation over cycle)
-    const satPct=T.sat/100;
-    const btcBoost=satPct*1.5; // 5% allocation × ~150% gain avg over cycle = 7.5% annual boost simplified
-    scenarios.push({name:'Base + BTC',rate:scenarios[1].rate+btcBoost/projYears,color:'#f59e0b'});
+  const sc=SCENARIOS[projSc];
+  const eqW=invested>0?s.eq/invested:0.8;
+  const boW=invested>0?s.bo/invested:0.2;
+  const annualR=(eqW*sc.eqR+boW*sc.boR)/100;
+  const monthR=annualR/12;
+  const months=projYears*12;
+  let contribs=[invested],rets=[0],comp=[0];
+  let totalVal=invested,totalContrib=invested,totalRets=0;
+  for(let m=1;m<=months;m++){
+    const growth=totalVal*monthR;
+    const retOnContrib=totalContrib*monthR;
+    totalRets+=retOnContrib;
+    totalVal=totalVal+growth+mc;
+    totalContrib+=mc;
+    contribs.push(totalContrib);
+    rets.push(totalRets);
+    comp.push(totalVal-totalContrib-totalRets);
   }
   const c=$('projChart'),ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1;
-  const W=c.offsetWidth||700,H=180;
+  const W=c.offsetWidth||700,H=200;
   c.width=W*dpr;c.height=H*dpr;c.style.height=H+'px';ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  const pad={t:10,b:20,l:44,r:10};
-  const months=projYears*12;
-  const lines=scenarios.map(sc=>{
-    let vals=[invested];let v=invested;
-    for(let m=1;m<=months;m++){v=v*(1+sc.rate/12)+mc;vals.push(v)}
-    return vals;
-  });
-  const allVals=lines.flat();
-  const mn=Math.min(...allVals)*0.9,mx=Math.max(...allVals)*1.05;
+  const pad={t:10,b:22,l:44,r:10};
+  const mx=totalVal*1.05;
+  function yP(v){return pad.t+(1-v/mx)*(H-pad.t-pad.b)}
+  function xP(m){return pad.l+m*(W-pad.l-pad.r)/months}
   ctx.strokeStyle='#1e293b';ctx.lineWidth=0.5;
-  for(let i=0;i<4;i++){const y=pad.t+(H-pad.t-pad.b)*i/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='8px Inter';ctx.textAlign='right';ctx.fillText('€'+fm(mx-(mx-mn)*i/3),pad.l-4,y+3)}
-  lines.forEach((vals,si)=>{
-    ctx.strokeStyle=scenarios[si].color;ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.beginPath();
-    vals.forEach((v,i)=>{const x=pad.l+i*(W-pad.l-pad.r)/months;const y=pad.t+(1-(v-mn)/(mx-mn))*(H-pad.t-pad.b);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
-    ctx.stroke();
-  });
-  ctx.strokeStyle='#475569';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();
-  for(let m=0;m<=months;m++){const v=invested+mc*m;const x=pad.l+m*(W-pad.l-pad.r)/months;const y=pad.t+(1-(v-mn)/(mx-mn))*(H-pad.t-pad.b);m?ctx.lineTo(x,y):ctx.moveTo(x,y)}
-  ctx.stroke();ctx.setLineDash([]);
+  for(let i=0;i<5;i++){const y=pad.t+(H-pad.t-pad.b)*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='8px Inter';ctx.textAlign='right';ctx.fillText('\u20AC'+fm(Math.round(mx-mx*i/4)),pad.l-4,y+3)}
+  function area(getBot,getTop,col){ctx.beginPath();for(let m=0;m<=months;m++)ctx.lineTo(xP(m),yP(getTop(m)));for(let m=months;m>=0;m--)ctx.lineTo(xP(m),yP(getBot(m)));ctx.closePath();ctx.fillStyle=col;ctx.fill()}
+  area(m=>0,m=>contribs[m],'#334155');
+  area(m=>contribs[m],m=>contribs[m]+rets[m],sc.color+'55');
+  area(m=>contribs[m]+rets[m],m=>contribs[m]+rets[m]+comp[m],sc.color+'25');
+  ctx.strokeStyle=sc.color;ctx.lineWidth=2;ctx.beginPath();
+  for(let m=0;m<=months;m++){const v=contribs[m]+rets[m]+comp[m];m?ctx.lineTo(xP(m),yP(v)):ctx.moveTo(xP(m),yP(v))}ctx.stroke();
   ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='8px Inter';ctx.textAlign='center';
-  for(let y=0;y<=projYears;y+=Math.max(1,Math.floor(projYears/5))){const x=pad.l+(y*12)*(W-pad.l-pad.r)/months;ctx.fillText(y+'Y',x,H-4)}
-  const totalContrib=invested+mc*months;
-  let info=scenarios.map((sc,i)=>{
-    const final=lines[i][months];
-    const growth=final-totalContrib;
-    return `<div class="proj-card" style="border-color:${sc.color}30"><div class="pl">${sc.name}</div><div class="pv" style="color:${sc.color}">€${fm(Math.round(final))}</div><div class="pl">Growth: €${fm(Math.round(growth))}</div></div>`;
-  }).join('');
-  info+=`<div style="grid-column:1/-1;font-size:.68em;opacity:.3;margin-top:4px">Invested: €${fm(Math.round(invested))} today + €${fm(mc)}/month = €${fm(Math.round(totalContrib))} contributed. Dashed = contributions only.</div>`;
-  $('projInfo').innerHTML=info;
+  for(let y=0;y<=projYears;y+=Math.max(1,Math.floor(projYears/5)))ctx.fillText(y+'Y',xP(y*12),H-5);
+  const fC=contribs[months],fR=rets[months],fCo=comp[months],fT=fC+fR+fCo;
+  $('projInfo').innerHTML=`
+    <div class="proj-card"><div class="pl">Contributed</div><div class="pv" style="color:#94a3b8">\u20AC${fm(Math.round(fC))}</div><div class="pl">What you put in</div></div>
+    <div class="proj-card"><div class="pl">Returns</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fR))}</div><div class="pl">Market on your money</div></div>
+    <div class="proj-card"><div class="pl">Compound</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fCo))}</div><div class="pl">Returns on returns</div></div>
+    <div style="grid-column:1/-1;text-align:center;margin-top:6px;font-size:.85em;color:#f8fafc;font-weight:600">Total: \u20AC${fm(Math.round(fT))} in ${projYears} years</div>
+    <div style="grid-column:1/-1;font-size:.65em;opacity:.3">\u20AC${fm(Math.round(invested))} today + \u20AC${fm(mc)}/month. ${sc.name} scenario (${(annualR*100).toFixed(1)}%/yr).</div>`;
 }
 
 // Call from calc
