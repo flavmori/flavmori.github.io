@@ -48,7 +48,7 @@ input[type=number]{-moz-appearance:textfield}
 .donut{width:140px;height:140px;border-radius:50%;margin:0 auto 10px}
 .donut-legend{font-size:.68em;line-height:1.8;text-align:left}
 .donut-legend span{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
-.risk-bar{height:6px;background:#1e293b;border-radius:3px;margin:8px 0;position:relative;max-width:150px}
+.risk-bar{height:6px;background:#1e293b;border-radius:3px;margin:8px 0;position:relative;width:120px}
 .risk-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444)}
 .risk-dot{width:10px;height:10px;border-radius:50%;background:#f8fafc;border:2px solid #0b0f1a;position:absolute;top:-2px;transform:translateX(-50%)}
 .risk-labels{display:flex;justify-content:space-between;font-size:.6em;opacity:.3}
@@ -443,7 +443,7 @@ function renderRisk(s,total){
     <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Risk Profile</div>
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
       <div style="font-size:1.2em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
-      <div style="flex:1"><div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div><div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div></div>
+      <div><div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div><div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div></div>
     </div>
     <div class="risk-val">Volatility: ${vol.toFixed(1)}%/yr<br>Best: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>Worst: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>Risk: ${riskPct}% · Safe: ${safePct}%</div>`;
 }
