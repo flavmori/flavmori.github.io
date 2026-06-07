@@ -87,8 +87,9 @@ body{padding:12px 8px;font-size:12px}
 .btn{padding:6px 10px;font-size:.65em}
 .sp{padding:14px}
 .sp .g2{grid-template-columns:1fr 1fr;gap:6px}
-#donut,#donutLegend,#risk{min-width:unset!important;flex:unset!important;width:100%!important;text-align:center}
-#risk{order:-1}
+#donut,#donutLegend,#risk{min-width:unset!important;flex:unset!important;text-align:center}
+#risk{order:unset}
+.sec>[style*="gap:20px"]{flex-wrap:nowrap!important;overflow-x:auto!important;padding-bottom:6px}
 }
 </style>
 </head>
@@ -126,9 +127,9 @@ body{padding:12px 8px;font-size:12px}
 </div>
 
 <div class="sec" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-<div id="risk" style="min-width:200px;flex:1"></div>
 <div id="donut" style="min-width:140px"></div>
 <div id="donutLegend" style="min-width:140px;flex:1"></div>
+<div id="risk" style="min-width:240px;flex:1"></div>
 </div>
 
 <div class="sec" style="position:relative">
