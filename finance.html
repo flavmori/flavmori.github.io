@@ -130,7 +130,7 @@ input[type=number]{-moz-appearance:textfield}
 <div class="foot">
 <button class="btn btn-p" onclick="saveAll()">Save</button>
 <button class="btn btn-s" onclick="openS()">Settings</button>
-<button class="btn btn-s" id="compactBtn" onclick="togCompact()">Compact</button>
+<button class="btn btn-s" id="compactBtn" onclick="togCompact()">Precise</button>
 <a href="finance-guide.html" target="_blank" class="btn btn-s" style="text-decoration:none;display:inline-block">Guide</a>
 </div>
 <div class="sync" id="ss"></div>
@@ -196,7 +196,7 @@ let hist=[];
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return Math.round(n/1000)+'K';return String(Math.round(n))}const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-let compact=false;
+let compact=true;
 function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
