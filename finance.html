@@ -196,6 +196,7 @@ let hist=[];
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return Math.round(n/1000)+'K';return String(Math.round(n))}const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function fmA(n){const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 let compact=true;
 function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
@@ -271,9 +272,9 @@ function calc(){
     step++;
     const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
     const taxCostLiq=Math.round(sellAmt*(cfg.gEq/100/(1+cfg.gEq/100))*0.20);
-    acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (invested ${pInv}%, liquid ${pLiq}%)</span><span class="av neg">€${fm(sellAmt)} needed</span></div>`;
+    acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (invested ${pInv}%, liquid ${pLiq}%)</span><span class="av neg">€${fmA(sellAmt)} needed</span></div>`;
     acts+=`<div class="act-note">Option A (free): stop investing, let salary rebuild liquid over time.</div>`;
-    acts+=`<div class="act-note">Option B (now): sell €${fm(sellAmt)} from investments. Tax cost approx €${fm(taxCostLiq)}.</div>`;
+    acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} from investments. Tax cost approx €${fmA(taxCostLiq)}.</div>`;
   }
 
   // Step: Rebalance Equity/Bond ratio
@@ -285,9 +286,9 @@ function calc(){
     const gPct=actualEqR>idealEqR?cfg.gEq:cfg.gBo;
     const taxCost=Math.round(sellAmt*(gPct/100/(1+gPct/100))*0.20);
     const tranchesToFix=cfg.cap>0?Math.ceil(sellAmt/cfg.cap):99;
-    acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fm(sellAmt)} off</span></div>`;
+    acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fmA(sellAmt)} off</span></div>`;
     acts+=`<div class="act-note">Option A (free): invest next ${tranchesToFix} tranches 100% into ${to}. No tax, takes time.</div>`;
-    acts+=`<div class="act-note">Option B (now): sell €${fm(sellAmt)} ${from}, buy ${to}. Tax cost approx €${fm(taxCost)}.</div>`;
+    acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} ${from}, buy ${to}. Tax cost approx €${fmA(taxCost)}.</div>`;
   }
 
   // Step: Move Cash → Money Market (if surplus exists and MM below target)
@@ -295,7 +296,7 @@ function calc(){
     const mmNeed=Math.max(0,tMm-mm);
     if(mmNeed>50){
       step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(mmNeed))}</span></div>`;
+      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(Math.round(mmNeed))}</span></div>`;
       acts+=`<div class="act-note">Money Market is ${subMm}% of your liquid (target ${T.r_mm}%). Fill it before investing.</div>`;
     }
 
@@ -311,9 +312,9 @@ function calc(){
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
-      acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fm(toEq)} Equity + €${fm(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fm(amt)}</span></div>`;
-      const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fm(dynCap)} (x1.5). `:'';
-      acts+=`<div class="act-note">${capNote}You have €${fm(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fm(Math.round(investable-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
+      const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fmA(dynCap)} (x1.5). `:'';
+      acts+=`<div class="act-note">${capNote}You have €${fmA(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fmA(Math.round(investable-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
@@ -328,11 +329,11 @@ function calc(){
     const mmOff=mm-mmIdeal;
     if(mmOff>200){
       step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fm(Math.round(mmOff))}</span></div>`;
+      acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fmA(Math.round(mmOff))}</span></div>`;
       acts+=`<div class="act-note">Money Market is over its ${T.r_mm}% share of liquid. Move excess to cash accounts.</div>`;
     }else if(mmOff<-200&&cash>tCa){
       step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Cash → Money Market</span><span class="av" style="color:#f59e0b">€${fm(Math.round(-mmOff))}</span></div>`;
+      acts+=`<div class="act"><span><b>${step}.</b> Cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(Math.round(-mmOff))}</span></div>`;
       acts+=`<div class="act-note">Money Market is below its ${T.r_mm}% share. Move cash to earn yield.</div>`;
     }
   }
@@ -343,19 +344,19 @@ function calc(){
   if(saGap>100){
     step++;
     const perTranche=Math.round(saGap/nBuyTranches);
-    let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fm(p)} (€${fm(perTranche)})`).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fm(perTranche)}/tranche</span></div>`;
+    let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fmA(p)} (€${fmA(perTranche)})`).join(' | ');
+    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
     acts+=`<div class="act-note">${trancheNote}</div>`;
-    acts+=`<div class="act-note">Total budget: €${fm(Math.round(saGap))}. Buy each tranche when price reaches target.</div>`;
+    acts+=`<div class="act-note">Total budget: €${fmA(Math.round(saGap))}. Buy each tranche when price reaches target.</div>`;
   }else if(sat>tSat+100){
     step++;
     const nSellTranches=btc.sell.length;
     const pctEach=Math.floor(100/nSellTranches);
     let sellNote=btc.sell.map((p,i)=>{
       const pct=i<nSellTranches-1?pctEach:(100-(pctEach*(nSellTranches-1)));
-      return `T${i+1}: sell ${pct}% at €${fm(p)}`;
+      return `T${i+1}: sell ${pct}% at €${fmA(p)}`;
     }).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fm(Math.round(sat-tSat))} over target</span></div>`;
+    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
     acts+=`<div class="act-note">${sellNote}</div>`;
   }
 
@@ -582,7 +583,7 @@ function calcW(){
   if(remaining>0&&bo>0){
     const take=Math.min(remaining,bo);
     const tax=Math.round(take*(cfg.gBo/100/(1+cfg.gBo/100))*0.19);
-    steps.push({src:'Bond (Gov EUR)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}.`,color:'#10b981'});
+    steps.push({src:'Bond (Gov EUR)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fmA(tax)}.`,color:'#10b981'});
     remaining-=take;
   }
 
@@ -590,7 +591,7 @@ function calcW(){
   if(remaining>0&&eq>0){
     const take=Math.min(remaining,eq);
     const tax=Math.round(take*(cfg.gEq/100/(1+cfg.gEq/100))*0.20);
-    steps.push({src:'Equity (ACWI)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fm(tax)}. Avoid if possible.`,color:'#3b82f6'});
+    steps.push({src:'Equity (ACWI)',amt:take,note:`Sell order, 1-2 days. Tax on gain: approx €${fmA(tax)}. Avoid if possible.`,color:'#3b82f6'});
     remaining-=take;
   }
 
@@ -598,16 +599,16 @@ function calcW(){
   if(remaining>0&&sat>0){
     const take=Math.min(remaining,sat);
     const tax=Math.round(take*(cfg.gSa/100/(1+cfg.gSa/100))*0.21);
-    steps.push({src:'Satellite (BTC)',amt:take,note:`Sell on exchange, 1-3 days. Tax on gain: approx €${fm(tax)}.`,color:'#ef4444'});
+    steps.push({src:'Satellite (BTC)',amt:take,note:`Sell on exchange, 1-3 days. Tax on gain: approx €${fmA(tax)}.`,color:'#ef4444'});
     remaining-=take;
   }
 
   let h='';
   steps.forEach((s,i)=>{
-    h+=`<div class="act"><span><b>${i+1}.</b> ${s.src}</span><span class="av" style="color:${s.color}">€${fm(Math.round(s.amt))}</span></div>`;
+    h+=`<div class="act"><span><b>${i+1}.</b> ${s.src}</span><span class="av" style="color:${s.color}">€${fmA(Math.round(s.amt))}</span></div>`;
     h+=`<div class="act-note">${s.note}</div>`;
   });
-  if(remaining>0)h+=`<div class="act"><span class="neg">Not enough assets. Short €${fm(Math.round(remaining))}.</span><span></span></div>`;
+  if(remaining>0)h+=`<div class="act"><span class="neg">Not enough assets. Short €${fmA(Math.round(remaining))}.</span><span></span></div>`;
   $('wResult').innerHTML=h;
 }
 
