@@ -377,19 +377,25 @@ function renderDonut(s,total){
 function renderRisk(s,total){
   if(total<=0){$('risk').innerHTML='';return}
   const eq=s.eq/total,bo=s.bo/total,mm=s.mm/total,cash=(s.c1+s.c2+s.c3)/total,sat=s.sa/total;
-  // SRRI weighted (1-7)
   const srri=Math.round((eq*4+bo*3+mm*1+cash*1+sat*7)*10)/10;
-  // Volatility (annualized, simplified)
   const vol=Math.sqrt(Math.pow(eq*9.64,2)+Math.pow(bo*4.16,2)+Math.pow(mm*0.15,2)+Math.pow(sat*60,2));
-  // Max drawdown estimate (2x vol as rough proxy)
   const maxDD=vol*2;
   const srriFill=((srri-1)/6)*100;
+  // Invested vs safe ratio
+  const riskPct=((eq+bo+sat)*100).toFixed(0);
+  const safePct=((mm+cash)*100).toFixed(0);
+  // Worst case in €
+  const worstEur=Math.round(total*maxDD/100);
   $('risk').innerHTML=`
     <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Risk Profile</div>
     <div style="font-size:1.4em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
     <div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div>
     <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
-    <div class="risk-val">Volatility: ${vol.toFixed(1)}% / year<br>Worst year estimate: -${maxDD.toFixed(0)}%</div>`;
+    <div class="risk-val">
+      Volatility: ${vol.toFixed(1)}%/yr<br>
+      Worst year: -${maxDD.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>
+      Risk exposure: ${riskPct}% · Safe: ${safePct}%
+    </div>`;
 }
 // === PROJECTION ===
 let projYears=10,projSc=1,projFull=false,projReal=false;
@@ -403,7 +409,6 @@ function updProjUI(){
 }
 function togFull(){projFull=!projFull;$('togFullBtn').textContent=projFull?'Full Portfolio':'Investments Only';renderProj()}
 function togReal(){projReal=!projReal;$('togRealBtn').textContent=projReal?'Real (-2% infl.)':'Nominal';renderProj()}
-function setProj(){}
 function renderProj(){
   const s=getS();
   const invested=s.eq+s.bo;
