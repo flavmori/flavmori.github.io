@@ -228,7 +228,7 @@ function calc(){
   const invested=eq+bo,liquid=mm+cash;
 
   $('tot').textContent=total>0?'€'+fm(total):'-';
-  $('totD').textContent=total>0?`Invested 20AC${fm(invested)} 00B7 Liquid 20AC${fm(liquid)}${sat>0?' 00B7 Satellite 20AC'+fm(sat):''}`:'';
+  $('totD').textContent=total>0?'Invested \u20AC'+fm(invested)+' \u00B7 Liquid \u20AC'+fm(liquid)+(sat>0?' \u00B7 Satellite \u20AC'+fm(sat):''):'';
 
   // Derived targets (€)
   const tInv=T.inv/100*total, tLiq=T.liq/100*total, tSat=T.sat/100*total;
