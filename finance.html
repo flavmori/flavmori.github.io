@@ -196,15 +196,15 @@ function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
 let compact=false;
-function fmC(n){if(!compact)return'\u20AC'+fm(n);if(Math.abs(n)>=1000000)return'\u20AC'+(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return'\u20AC'+Math.round(n/1000)+'K';return'\u20AC'+Math.round(n)}
+function fmC(n){if(!n||n===0)return'';if(!compact)return'\u20AC'+fm(n);if(Math.abs(n)>=1000000)return'\u20AC'+(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return'\u20AC'+Math.round(n/1000)+'K';return'\u20AC'+Math.round(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
 function getS(){let s={};KS.forEach(k=>{const v=$('s_'+k).value.replace(/\./g,'').replace(',','.');s[k]=parseFloat(v)||0});return s}
-function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement)el.value=fm(v);el.style.width=Math.max(5,el.value.length+1)+'ch'}
+function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement)el.value=fm(v);else if(v===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
 
 function init(){
-  const s=J('fs')||{};KS.forEach(k=>{if(s[k]){$('s_'+k).value=fm(s[k])}});
+  const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=fm(s[k]);else $('s_'+k).value=''});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
   if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
