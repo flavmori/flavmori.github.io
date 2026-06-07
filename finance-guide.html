@@ -6,111 +6,134 @@
 <title>Portfolio Rebalancer — Guide</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;max-width:680px;margin:0 auto;padding:40px 24px;color:#1a1a2e;font-size:13.5px;line-height:1.7}
+body{font-family:'Segoe UI',sans-serif;max-width:680px;margin:0 auto;padding:40px 24px;color:#1a1a2e;font-size:13px;line-height:1.7}
 h1{font-size:1.4em;margin-bottom:4px}
 h2{font-size:1em;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #2563eb}
 h3{font-size:.9em;margin:14px 0 4px;color:#2563eb}
 p{margin:6px 0}
-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.88em}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.85em}
 th{text-align:left;padding:5px 7px;background:#f1f5f9;border:1px solid #e2e8f0;font-weight:600}
 td{padding:5px 7px;border:1px solid #e2e8f0}
 .f{background:#f8fafc;border-left:3px solid #2563eb;padding:8px 12px;margin:8px 0;font-family:monospace;font-size:.82em}
-ul{margin:6px 0 6px 18px}
+ul,ol{margin:6px 0 6px 18px}
 li{margin:3px 0}
 .n{background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:7px 10px;margin:8px 0;font-size:.82em}
-@media print{body{padding:16px;font-size:11.5px}h2{page-break-before:auto}}
+@media print{body{padding:16px;font-size:11px}h2{page-break-before:auto}}
 </style>
 </head>
 <body>
 <h1>Portfolio Rebalancer — Guide</h1>
-<p style="opacity:.5;font-size:.82em">Updated June 6, 2026</p>
+<p style="opacity:.5;font-size:.82em">Updated June 7, 2026</p>
 
-<h2>1. Portfolio Structure</h2>
+<h2>1. My Instruments</h2>
 <table>
-<tr><th>Level</th><th>Bucket</th><th>Default</th><th>What</th></tr>
-<tr><td rowspan="2">Invested (80%)</td><td>Equity</td><td>80% of invested</td><td>SPDR MSCI ACWI (IE00B44Z5B48)</td></tr>
-<tr><td>Bond</td><td>20% of invested</td><td>Amundi Prime Euro Gov (LU2089238898)</td></tr>
-<tr><td rowspan="2">Liquid (15%)</td><td>Money Market</td><td>60% of liquid</td><td>Amundi Smart Overnight CSH2 (LU1190417599)</td></tr>
-<tr><td>Cash</td><td>40% of liquid</td><td>Santander + Trade Republic + Other</td></tr>
-<tr><td>Satellite (5%)</td><td>BTC</td><td>100%</td><td>Bitcoin on Trade Republic</td></tr>
+<tr><th>Role</th><th>Instrument</th><th>ISIN</th><th>TER</th><th>Type</th></tr>
+<tr><td>Equity (80%)</td><td>SPDR MSCI ACWI (Acc)</td><td>IE00B44Z5B48</td><td>0.12%</td><td>Physical, Acc</td></tr>
+<tr><td>Bond (20%)</td><td>Amundi Prime Euro Gov (Acc)</td><td>LU2089238898</td><td>0.05%</td><td>Physical, Acc</td></tr>
+<tr><td>Money Market</td><td>Amundi Smart Overnight CSH2 (Acc)</td><td>LU1190417599</td><td>0.10%</td><td>Swap, Acc</td></tr>
+<tr><td>Satellite</td><td>Bitcoin (BTC)</td><td>—</td><td>—</td><td>Crypto</td></tr>
 </table>
-<p>All percentages are configurable in Settings. Each level must sum to 100%.</p>
+<p>Broker: Trade Republic. All accumulating (no dividends distributed). Total portfolio TER: 0.10%.</p>
 
-<h2>2. Target Calculation</h2>
+<h2>2. Historical Performance</h2>
+<table>
+<tr><th>Year</th><th>ACWI</th><th>Gov Bond</th><th>CSH2</th></tr>
+<tr><td>2022</td><td>-13.24%</td><td>-18.11%</td><td>+0.13%</td></tr>
+<tr><td>2023</td><td>+17.77%</td><td>+6.73%</td><td>+3.28%</td></tr>
+<tr><td>2024</td><td>+24.83%</td><td>+1.70%</td><td>+3.99%</td></tr>
+<tr><td>2025</td><td>+8.58%</td><td>+0.56%</td><td>+2.64%</td></tr>
+<tr><td>2026 YTD</td><td>+12.49%</td><td>+0.06%</td><td>+1.03%</td></tr>
+</table>
+<table>
+<tr><th></th><th>ACWI</th><th>Gov Bond</th><th>CSH2</th></tr>
+<tr><td>Volatility 1Y</td><td>9.64%</td><td>4.16%</td><td>0.15%</td></tr>
+<tr><td>Volatility 5Y</td><td>13.83%</td><td>6.16%</td><td>0.18%</td></tr>
+<tr><td>Max Drawdown 5Y</td><td>-20.52%</td><td>-21.51%</td><td>-0.51%</td></tr>
+<tr><td>SRRI (1-7)</td><td>4</td><td>3</td><td>1</td></tr>
+</table>
+
+<h2>3. Portfolio Structure</h2>
+<table>
+<tr><th>Level</th><th>Bucket</th><th>Default</th><th>Instrument</th></tr>
+<tr><td rowspan="2">Invested (80%)</td><td>Equity</td><td>80% of invested</td><td>ACWI</td></tr>
+<tr><td>Bond</td><td>20% of invested</td><td>Gov EUR</td></tr>
+<tr><td rowspan="2">Liquid (15%)</td><td>Money Market</td><td>60% of liquid</td><td>CSH2</td></tr>
+<tr><td>Cash</td><td>40% of liquid</td><td>Santander + TR + Other</td></tr>
+<tr><td>Satellite (5%)</td><td>BTC</td><td>100%</td><td>Bitcoin on TR</td></tr>
+</table>
+
+<h2>4. Decision Engine</h2>
+<p>Priority-ordered actions with explanations:</p>
+<ol>
+<li><b>Rebuild Liquidity</b> — if invested &gt; target AND liquid &lt; target. Two options: stop investing (free) or sell (tax cost shown).</li>
+<li><b>Rebalance Equity/Bond</b> — if ratio drifts &gt;5pts. Two options: future tranches 100% into underweight (free) or sell/buy (tax cost shown).</li>
+<li><b>Move Cash to Money Market</b> — if surplus exists and MM below sub-target.</li>
+<li><b>Invest Surplus</b> — excess liquidity into Equity+Bond, capped. Gap-weighted split. Dynamic cap x1.5 when market is down (gain% negative).</li>
+<li><b>Accumulate</b> — if everything is below target, wait for income.</li>
+<li><b>MM/Cash Rebalance</b> — at regime, fix 60/40 split within liquid.</li>
+<li><b>Satellite (BTC)</b> — buy in 3 tranches at target prices (€42K/€35K/€28K). Sell in 3 tranches (€80K/€95K/€110K, 33/33/34% split).</li>
+</ol>
+
+<h2>5. Risk Profile</h2>
 <div class="f">
-Equity target = Total x Invested% x Equity ratio%<br>
-Bond target = Total x Invested% x Bond ratio%<br>
-Money Market target = Total x Liquid% x MM ratio%<br>
-Cash target = Total x Liquid% x Cash ratio%<br>
-Satellite target = Total x Satellite%
+Portfolio SRRI = sum(weight_i x SRRI_i)<br>
+Portfolio Volatility = sqrt(sum((weight_i x vol_i)^2))<br>
+Worst year estimate = 2 x Portfolio Volatility
 </div>
+<p>Your current profile: SRRI 3.4/7, Volatility 11.5%, Worst year -23%.</p>
 
-<h2>3. Decision Engine (Actions)</h2>
-<p>When you update balances, the tool evaluates in priority order:</p>
+<h2>6. Projection</h2>
+<p>Three scenarios based on weighted returns of your instruments:</p>
+<table>
+<tr><th>Scenario</th><th>Equity return</th><th>Bond return</th><th>Note</th></tr>
+<tr><td>Pessimistic</td><td>4%</td><td>1%</td><td>Prolonged low growth</td></tr>
+<tr><td>Base</td><td>8%</td><td>2.5%</td><td>Historical average</td></tr>
+<tr><td>Optimistic</td><td>12%</td><td>3.5%</td><td>Bull market continues</td></tr>
+</table>
+<p>BTC scenario (toggle): adds satellite allocation gains (2.5x over cycle) distributed over the time horizon.</p>
 
-<h3>1. Rebuild Liquidity</h3>
-<p><b>When:</b> Invested > target + €500 AND Liquid < target - €500</p>
-<p><b>What:</b> Markets rallied, portfolio drifted too heavy. Shows two options: (A) stop investing and let salary rebuild liquid (free), or (B) sell investments (tax cost shown).</p>
+<h2>7. Tax Rules (Spain)</h2>
+<table>
+<tr><th>Gain bracket</th><th>Rate</th></tr>
+<tr><td>First €6,000</td><td>19%</td></tr>
+<tr><td>€6,000 — €50,000</td><td>21%</td></tr>
+<tr><td>Above €50,000</td><td>23%</td></tr>
+</table>
+<p>Tool uses ~20% as average estimate. Actual depends on total gains in the fiscal year.</p>
+<p>Money Market (CSH2) gains are also taxed as capital gains when sold.</p>
 
-<h3>2. Rebalance Equity/Bond</h3>
-<p><b>When:</b> Equity/Bond ratio drifts more than 5 percentage points from target</p>
-<p><b>What:</b> Shows two options: (A) invest next N tranches 100% into the underweight asset (free), or (B) sell overweight and buy underweight (tax cost shown).</p>
-
-<h3>3. Move Cash to Money Market</h3>
-<p><b>When:</b> Liquid > target (surplus exists) AND Money Market is below its sub-target</p>
-<p><b>What:</b> Fill MM before investing — it earns yield while you wait.</p>
-
-<h3>4. Invest Surplus</h3>
-<p><b>When:</b> Liquid > target by more than €300</p>
-<p><b>What:</b> Invest the surplus, capped at Investment Cap per session. Split between Equity and Bond based on which is more below target (gap-weighted, not fixed 80/20).</p>
-<p><b>Dynamic cap:</b> If your equity gain% is negative (market is down), the cap increases by 1.5x — you invest more when it's cheaper.</p>
-
-<h3>5. Accumulate</h3>
-<p><b>When:</b> Liquid below target AND Invested also below target</p>
-<p><b>What:</b> Don't invest. Wait for income to rebuild liquidity first.</p>
-
-<h3>6. MM/Cash Rebalance</h3>
-<p><b>When:</b> Liquid is approximately at target (within €500) but MM/Cash split is off by more than €200</p>
-<p><b>What:</b> Move between MM and Cash to maintain the 60/40 ratio within liquid.</p>
-
-<h3>7. Satellite (BTC)</h3>
-<p><b>Buy:</b> When satellite is below target by more than €100. Budget split into 3 equal tranches at price levels you set (default: €50K, €45K, €38K). Buy each tranche when BTC reaches that level.</p>
-<p><b>Sell:</b> When satellite is over target by more than €100. Sell in 3 tranches at price levels you set (default: €80K, €95K, €110K). 33/33/34% split.</p>
-
-<h2>4. Investment Cap</h2>
-<p>The cap limits how much you invest per session (default €2,500). This enforces DCA — you never deploy all surplus at once. The tool calculates how many tranches remain.</p>
-<p>When equity gain% is negative: cap x 1.5 (buy more when market is cheaper).</p>
-
-<h2>5. Tax Awareness</h2>
-<p>When selling is suggested, the tool estimates tax cost using:</p>
-<div class="f">Tax = Amount sold x (gain% / (100 + gain%)) x tax rate (19-21%)</div>
-<p>You set your unrealized gain% per asset in Settings (read from Trade Republic "Since buy" view).</p>
-
-<h2>6. I Need Cash</h2>
-<p>Enter an amount and the tool shows where to take it from, in priority order:</p>
+<h2>8. I Need Cash</h2>
+<p>Priority order for withdrawals:</p>
 <ol>
 <li>Cash above floor (free, instant)</li>
-<li>Cash emergency reserve (touches floor, rebuild after)</li>
-<li>Money Market (1-2 days, no tax)</li>
-<li>Bond (1-2 days, low tax)</li>
-<li>Equity (1-2 days, medium tax — avoid if possible)</li>
+<li>Cash emergency reserve (touches floor)</li>
+<li>Money Market (1-2 days, taxed as capital gain)</li>
+<li>Bond (1-2 days, taxed)</li>
+<li>Equity (1-2 days, taxed, avoid if possible)</li>
 <li>Satellite/BTC (1-3 days, highest tax)</li>
 </ol>
 
-<h2>7. Cloud Sync</h2>
-<p>Settings > GitHub Token. Save once, syncs automatically. Opening on a new device loads from cloud if token is present.</p>
-
-<h2>8. How to Use</h2>
+<h2>9. Settings Reference</h2>
 <ul>
-<li>Open every 1-2 weeks (or monthly)</li>
+<li><b>Investment Cap:</b> max per invest action (default €2,500)</li>
+<li><b>Monthly Contribution:</b> estimated monthly investment for projection (default €400)</li>
+<li><b>Unrealized gain %:</b> read from TR "Since buy" — used for tax estimates and dynamic cap</li>
+<li><b>BTC Tranches:</b> buy levels (€42K/€35K/€28K) and sell levels (€80K/€95K/€110K)</li>
+<li><b>GitHub Token:</b> for cross-device sync (gist scope)</li>
+</ul>
+
+<h2>10. How to Use</h2>
+<ul>
+<li>Open every 1-2 weeks</li>
 <li>Update balances from Trade Republic</li>
-<li>Update gain% from Trade Republic "Since buy"</li>
+<li>Update gain% from TR "Since buy"</li>
 <li>Follow the numbered Actions</li>
-<li>Click Save when done</li>
+<li>Click Save</li>
+<li>Use projection to motivate yourself (switch time horizons, toggle BTC)</li>
 </ul>
 
 <div class="n">
-<b>The tool suggests. You execute.</b> It does not connect to your broker or make trades. It uses math, not market sentiment. Systematic investing outperforms emotional decisions.
+<b>The tool suggests. You execute.</b> It calculates using math and historical data. It does not predict the future. Systematic investing outperforms emotional decisions over 10+ years.
 </div>
 </body>
 </html>
