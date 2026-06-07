@@ -615,9 +615,9 @@ function calcW(){
 
 function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
-  // Skip if same total as last snapshot
+  // Skip if all values identical to last snapshot
   const last=hist.length>0?hist[hist.length-1]:null;
-  if(last&&Math.round(last.t)===Math.round(total)&&last.d===new Date().toISOString().slice(0,10)){$('ss').textContent='No changes';return}
+  if(last&&last.s){const same=KS.every(k=>Math.round(s[k])===Math.round(last.s[k]||0));if(same){$('ss').textContent='No changes';return}}
   hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));
   hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});
   hist.sort((a,b)=>a.d.localeCompare(b.d));
