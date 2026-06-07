@@ -87,7 +87,10 @@ body{padding:12px 8px;font-size:12px}
 .btn{padding:6px 10px;font-size:.65em}
 .sp{padding:14px}
 .sp .g2{grid-template-columns:1fr 1fr;gap:6px}
-.sec>[style*="display:flex"]{flex-direction:column!important;align-items:center!important}
+.sec>[style*="display:flex"]{flex-direction:column-reverse!important;align-items:center!important}
+.sec>[style*="display:flex"]>[id="donut"]{order:2}
+.sec>[style*="display:flex"]>[id="donutLegend"]{order:3;text-align:center}
+.sec>[style*="display:flex"]>[id="risk"]{order:1;text-align:center;width:100%}
 }
 </style>
 </head>
@@ -132,7 +135,7 @@ body{padding:12px 8px;font-size:12px}
 
 <div class="sec" style="position:relative">
 <div class="sec-h">Projection</div>
-<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+<div style="display:flex;gap:5px;margin-bottom:10px;align-items:center;overflow-x:auto;white-space:nowrap;padding-bottom:4px">
 <span id="projScBtns" style="display:contents"></span>
 <span style="opacity:.15">|</span>
 <span id="projYrBtns" style="display:contents"></span>
