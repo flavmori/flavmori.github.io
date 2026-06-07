@@ -75,7 +75,7 @@ input[type=number]{-moz-appearance:textfield}
 
 <div id="app" style="display:block"><div class="w">
 <div class="total" id="tot">-</div>
-<div class="total-d" id="totD"><button class="proj-btn" id="compactBtn" onclick="togCompact()" style="margin-left:8px;font-size:.7em">Compact</button></div>
+<div class="total-d" id="totD"></div>
 
 <div class="sec">
 <div class="sec-h">Balances</div>
@@ -130,6 +130,7 @@ input[type=number]{-moz-appearance:textfield}
 <div class="foot">
 <button class="btn btn-p" onclick="saveAll()">Save</button>
 <button class="btn btn-s" onclick="openS()">Settings</button>
+<button class="btn btn-s" id="compactBtn" onclick="togCompact()">Compact</button>
 <a href="finance-guide.html" target="_blank" class="btn btn-s" style="text-decoration:none;display:inline-block">Guide</a>
 </div>
 <div class="sync" id="ss"></div>
