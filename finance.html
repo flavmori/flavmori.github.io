@@ -196,9 +196,9 @@ let hist=[];
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+let compact=true;
 function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return Math.round(n/1000)+'K';return String(Math.round(n))}const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 function fmA(n){const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-let compact=true;
 function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
@@ -370,6 +370,7 @@ function calc(){
 }
 
 function openS(){$('sOv').style.display='block'}
+function closeS(){$('sOv').style.display='none'}
 
 // === DONUT CHART ===
 function renderDonut(s,total){
@@ -534,7 +535,6 @@ function renderProj(){
 })();
 // Call from calc
 function renderVisuals(){const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);renderDonut(s,total);renderRisk(s,total);renderProj()}
-function closeS(){$('sOv').style.display='none'}
 function upT(){
   T={inv:+$('t_inv').value||0,liq:+$('t_liq').value||0,sat:+$('t_sat').value||0,r_eq:+$('r_eq').value||0,r_bo:+$('r_bo').value||0,r_mm:+$('r_mm').value||0,r_ca:+$('r_ca').value||0};
   $('m1').innerHTML=(T.inv+T.liq+T.sat)!==100?'<span class="neg">'+(T.inv+T.liq+T.sat)+'%</span>':'';
