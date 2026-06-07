@@ -80,15 +80,15 @@ input[type=number]{-moz-appearance:textfield}
 <div class="sec">
 <div class="sec-h">Balances</div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px;padding-top:4px">Invested</div>
-<div class="irow"><label>Equity <small>ACWI</small></label><input type="text" id="s_eq" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
-<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="text" id="s_bo" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Equity <small>ACWI</small></label><input type="text" id="s_eq" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="text" id="s_bo" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Liquid</div>
-<div class="irow"><label>Money Market <small>CSH2</small></label><input type="text" id="s_mm" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Santander</small></label><input type="text" id="s_c1" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="text" id="s_c2" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Other</small></label><input type="text" id="s_c3" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Money Market <small>CSH2</small></label><input type="text" id="s_mm" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Santander</small></label><input type="text" id="s_c1" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="text" id="s_c2" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Other</small></label><input type="text" id="s_c3" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Satellite</div>
-<div class="irow"><label>Satellite <small>BTC</small></label><input type="text" id="s_sa" inputmode="decimal" oninput="calc()" onfocus="var v=this.value;if(v.endsWith('K'))this.value=parseFloat(v)*1000;else if(v.endsWith('M'))this.value=parseFloat(v)*1000000;else this.value=v.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Satellite <small>BTC</small></label><input type="text" id="s_sa" inputmode="decimal" oninput="calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 </div>
 
 <div class="sec">
@@ -202,12 +202,12 @@ let compact=true;
 function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
-function getS(){let s={};KS.forEach(k=>{let v=$('s_'+k).value.trim();if(v.endsWith('M'))v=parseFloat(v)*1000000;else if(v.endsWith('K'))v=parseFloat(v)*1000;else v=parseFloat(v.replace(/\./g,'').replace(',','.'))||0;s[k]=v||0});return s}
-function fmInput(el){const v=parseFloat(el.value.replace(/[\.KM]/g,'').replace(',','.'))||0;if(el.value.endsWith('K'))var rv=parseFloat(el.value)*1000;else if(el.value.endsWith('M'))var rv=parseFloat(el.value)*1000000;else var rv=v;if(rv>0&&el!==document.activeElement){if(compact){if(rv>=1000000)el.value=(rv/1000000).toFixed(1)+'M';else if(rv>=1000)el.value=(rv/1000).toFixed(1).replace('.0','')+'K';else el.value=String(Math.round(rv))}else{const s=Math.round(rv).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}else if(rv===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
+function getS(){let s={};KS.forEach(k=>{const el=$('s_'+k);const raw=el.dataset.raw;if(raw)s[k]=parseFloat(raw)||0;else{let v=el.value.trim();if(v.endsWith('M'))s[k]=parseFloat(v)*1000000;else if(v.endsWith('K'))s[k]=parseFloat(v)*1000;else s[k]=parseFloat(v.replace(/\./g,'').replace(',','.'))||0}});return s}
+function fmInput(el){const raw=parseFloat(el.dataset.raw||el.value.replace(/[\.KM]/g,''))||0;if(raw>0&&el!==document.activeElement){el.dataset.raw=raw;if(compact){if(raw>=1000000)el.value=(raw/1000000).toFixed(1)+'M';else if(raw>=1000){const k=raw/1000;el.value=(k%1===0?k.toFixed(0):k.toFixed(1))+'K'}else el.value=String(Math.round(raw))}else{const s=Math.round(raw).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}else if(raw===0){el.value='';el.dataset.raw=''}el.style.width=Math.max(4,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
 
 function init(){
-  const s=J('fs')||{};KS.forEach(k=>{$('s_'+k).value=s[k]?String(Math.round(s[k])):'';fmInput($('s_'+k))});
+  const s=J('fs')||{};KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=s[k]||'';el.value=s[k]?String(s[k]):'';fmInput(el)});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
   if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
@@ -676,7 +676,7 @@ async function loadFromCloud(){
   const t=localStorage.getItem('ght');if(!t)return;
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
-  if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]?String(Math.round(d.s[k])):'';fmInput($('s_'+k))});
+  if(d.s)KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=d.s[k]||'';el.value=d.s[k]?String(d.s[k]):'';fmInput(el)});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_mc').value=cfg.mc||400;$('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0}
   if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
