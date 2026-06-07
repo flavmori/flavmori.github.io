@@ -78,19 +78,37 @@ li{margin:3px 0}
 <div class="f">
 Portfolio SRRI = sum(weight_i x SRRI_i)<br>
 Portfolio Volatility = sqrt(sum((weight_i x vol_i)^2))<br>
-Worst year estimate = 2 x Portfolio Volatility
+Best/Worst year estimate = +/- 2 x Portfolio Volatility
 </div>
-<p>Your current profile: SRRI 3.4/7, Volatility 11.5%, Worst year -23%.</p>
+<p>Shows: SRRI (1-7), volatility, best and worst year in % and EUR, risk exposure vs safe assets.</p>
+<p>SRRI values used: ACWI=4, Bond=3, MM=1, Cash=1, BTC=7.</p>
+<p>Volatility values: ACWI 9.64%, Bond 4.16%, MM 0.15%, BTC 60%.</p>
 
 <h2>6. Projection</h2>
-<p>Three scenarios based on weighted returns of your instruments:</p>
+<p>Interactive compound growth chart. Hover on the chart to see exact values at any point in time.</p>
+<p><b>Controls:</b></p>
+<ul>
+<li>Scenario buttons: Pessimistic (4%/1%) · Base (8%/2.5%) · Optimistic (12%/3.5%)</li>
+<li>Time horizon: 5Y · 10Y · 15Y · 20Y · 30Y</li>
+<li>Scope: "Investments Only" (ACWI+Bond) or "Full Portfolio" (includes MM at 2%, Cash at 0%, BTC flat)</li>
+<li>Inflation: "Nominal" or "Real (-2% inflation)" — subtracts 2% from all returns</li>
+</ul>
+<p><b>Stacked layers:</b></p>
+<ul>
+<li>Grey = your contributions (money you put in)</li>
+<li>Medium color = returns (market growth on your money)</li>
+<li>Light color = compound (returns on returns — the snowball effect)</li>
+</ul>
+<p><b>Growth breakdown:</b> shows how much each instrument contributed (Equity, Bond, MM).</p>
+<p><b>Rates used per scenario:</b></p>
 <table>
-<tr><th>Scenario</th><th>Equity return</th><th>Bond return</th><th>Note</th></tr>
-<tr><td>Pessimistic</td><td>4%</td><td>1%</td><td>Prolonged low growth</td></tr>
-<tr><td>Base</td><td>8%</td><td>2.5%</td><td>Historical average</td></tr>
-<tr><td>Optimistic</td><td>12%</td><td>3.5%</td><td>Bull market continues</td></tr>
+<tr><th>Scenario</th><th>Equity (ACWI)</th><th>Bond (Gov EUR)</th><th>MM (CSH2)</th></tr>
+<tr><td>Pessimistic</td><td>4%/yr</td><td>1%/yr</td><td>1.5%/yr</td></tr>
+<tr><td>Base</td><td>8%/yr</td><td>2.5%/yr</td><td>2%/yr</td></tr>
+<tr><td>Optimistic</td><td>12%/yr</td><td>3.5%/yr</td><td>3%/yr</td></tr>
 </table>
-<p>BTC scenario (toggle): adds satellite allocation gains (2.5x over cycle) distributed over the time horizon.</p>
+<p>BTC in "Full Portfolio" stays flat (unpredictable). When you sell BTC and reinvest in ACWI, update balances and projection recalculates.</p>
+<p><b>Hover:</b> move mouse over the chart to see Total, Contributed, Returns, and Compound at any year.</p>
 
 <h2>7. Tax Rules (Spain)</h2>
 <table>
