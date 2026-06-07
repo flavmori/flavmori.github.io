@@ -46,7 +46,7 @@ input[type=number]{-moz-appearance:textfield}
 .hl{max-height:100px;overflow-y:auto;font-size:.62em}
 .hl div{display:flex;justify-content:space-between;padding:2px 4px;border-bottom:1px solid #111827}
 .donut{width:140px;height:140px;border-radius:50%;margin:0 auto 10px}
-.donut-legend{font-size:.68em;line-height:1.8;text-align:center}
+.donut-legend{font-size:.68em;line-height:1.8;text-align:left}
 .donut-legend span{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
 .risk-bar{height:6px;background:#1e293b;border-radius:3px;margin:8px 0;position:relative}
 .risk-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444)}
@@ -79,16 +79,13 @@ body{padding:12px 8px;font-size:12px}
 .act-note{font-size:.62em}
 .proj-info{grid-template-columns:1fr 1fr 1fr}
 .proj-btn{padding:3px 6px;font-size:.6em}
-.donut{width:100px;height:100px;margin:0 auto}
+.donut{width:100px;height:100px}
 .donut-legend{font-size:.6em}
-.risk-val{font-size:.65em}
+.risk-val{font-size:.6em}
 .foot{flex-wrap:wrap;gap:6px}
 .btn{padding:6px 10px;font-size:.65em}
 .sp{padding:14px}
 .sp .g2{grid-template-columns:1fr 1fr;gap:6px}
-#donut,#donutLegend,#risk{min-width:unset!important;flex:unset!important;text-align:center}
-#risk{order:unset}
-.sec>[style*="gap:20px"]{flex-wrap:nowrap!important;overflow-x:auto!important;padding-bottom:6px}
 }
 </style>
 </head>
@@ -125,10 +122,12 @@ body{padding:12px 8px;font-size:12px}
 <div id="wResult"></div>
 </div>
 
-<div class="sec" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-<div id="donut" style="min-width:140px"></div>
-<div id="donutLegend" style="min-width:140px;flex:1"></div>
-<div id="risk" style="min-width:240px;flex:1"></div>
+<div class="sec">
+<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px" id="pieRow">
+<div id="donut"></div>
+<div id="donutLegend" style="flex:1"></div>
+</div>
+<div id="risk"></div>
 </div>
 
 <div class="sec" style="position:relative">
@@ -442,19 +441,11 @@ function renderRisk(s,total){
   const worstEur=Math.round(total*Math.abs(worstY)/100);
   $('risk').innerHTML=`
     <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Risk Profile</div>
-    <div class="risk-row" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <div style="min-width:120px">
-        <div style="font-size:1.4em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
-        <div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div>
-        <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
-      </div>
-      <div class="risk-val">
-        Volatility: ${vol.toFixed(1)}%/yr<br>
-        Best year: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>
-        Worst year: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>
-        Risk: ${riskPct}% · Safe: ${safePct}%
-      </div>
-    </div>`;
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+      <div style="font-size:1.2em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
+      <div style="flex:1"><div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div><div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div></div>
+    </div>
+    <div class="risk-val">Volatility: ${vol.toFixed(1)}%/yr · Best: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)}) · Worst: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)}) · Risk: ${riskPct}% · Safe: ${safePct}%</div>`;
 }
 // === PROJECTION ===
 let projYears=10,projSc=1,projFull=false,projReal=false;
