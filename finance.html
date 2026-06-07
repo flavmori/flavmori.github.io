@@ -639,13 +639,9 @@ function calcW(){
 
 function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
-  // Skip if all values identical to most recent snapshot (any date)
-  if(hist.length>0){const last=hist[hist.length-1];if(last.s){const same=KS.every(k=>Math.abs((s[k]||0)-(last.s[k]||0))<0.01);if(same){$('ss').textContent='No changes';return}}}
-  hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));
-  hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});
-  hist.sort((a,b)=>a.d.localeCompare(b.d));
-  localStorage.setItem('fh',JSON.stringify(hist));rH();
-  // Auto-sync to cloud
+  // Create snapshot only if values changed
+  if(hist.length>0){const last=hist[hist.length-1];if(last.s){const same=KS.every(k=>Math.abs((s[k]||0)-(last.s[k]||0))<0.01);if(!same){hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});hist.sort((a,b)=>a.d.localeCompare(b.d));localStorage.setItem('fh',JSON.stringify(hist));rH()}}}else{hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});localStorage.setItem('fh',JSON.stringify(hist));rH()}
+  // Always sync to cloud
   const t=localStorage.getItem('ght');
   if(t){const dev=localStorage.getItem('fin_dev')||'Unknown';fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify({s:getS(),T,cfg,btc,h:hist,dev,ts:new Date().toISOString()})}}})}).then(r=>{$('ss').textContent=r.ok?'Saved & synced':'Saved locally (sync failed)'}).catch(()=>{$('ss').textContent='Saved locally'})}
   else{$('ss').textContent='Saved locally (set token in Settings to sync)'}
