@@ -100,7 +100,11 @@ input[type=number]{-moz-appearance:textfield}
 <div class="sec">
 <div class="sec-h">Projection</div>
 <div style="display:flex;gap:6px;margin-bottom:6px" id="projScBtns"></div>
-<div style="display:flex;gap:6px;margin-bottom:10px" id="projYrBtns"></div>
+<div style="display:flex;gap:6px;margin-bottom:6px" id="projYrBtns"></div>
+<div style="display:flex;gap:6px;margin-bottom:10px">
+<button class="proj-btn" id="togFullBtn" onclick="togFull()">Investments Only</button>
+<button class="proj-btn" id="togRealBtn" onclick="togReal()">Nominal</button>
+</div>
 <canvas id="projChart" style="width:100%;height:200px"></canvas>
 <div id="projInfo" class="proj-info"></div>
 </div>
@@ -388,64 +392,91 @@ function renderRisk(s,total){
     <div class="risk-val">Volatility: ${vol.toFixed(1)}% / year<br>Worst year estimate: -${maxDD.toFixed(0)}%</div>`;
 }
 // === PROJECTION ===
-let projYears=10,projSc=1;
-const SCENARIOS=[{name:'Pessimistic',eqR:4,boR:1,color:'#ef4444'},{name:'Base',eqR:8,boR:2.5,color:'#3b82f6'},{name:'Optimistic',eqR:12,boR:3.5,color:'#10b981'}];
-function initProj(){updProjBtns()}
-function updProjBtns(){
+let projYears=10,projSc=1,projFull=false,projReal=false;
+const SCENARIOS=[{name:'Pessimistic',eqR:4,boR:1,mmR:1.5,color:'#ef4444'},{name:'Base',eqR:8,boR:2.5,mmR:2,color:'#3b82f6'},{name:'Optimistic',eqR:12,boR:3.5,mmR:3,color:'#10b981'}];
+const INFLATION=2;
+function initProj(){updProjUI()}
+function updProjUI(){
   const years=[5,10,15,20,30];
-  $('projYrBtns').innerHTML=years.map(y=>`<button class="proj-btn${y===projYears?' active':''}" onclick="projYears=${y};updProjBtns();renderProj()">${y}Y</button>`).join('');
-  $('projScBtns').innerHTML=SCENARIOS.map((s,i)=>`<button class="proj-btn${i===projSc?' active':''}" onclick="projSc=${i};updProjBtns();renderProj()" style="border-color:${s.color}40;${i===projSc?'background:'+s.color+';color:#fff':''}">${s.name}</button>`).join('');
+  $('projYrBtns').innerHTML=years.map(y=>`<button class="proj-btn${y===projYears?' active':''}" onclick="projYears=${y};updProjUI();renderProj()">${y}Y</button>`).join('');
+  $('projScBtns').innerHTML=SCENARIOS.map((s,i)=>`<button class="proj-btn${i===projSc?' active':''}" onclick="projSc=${i};updProjUI();renderProj()" style="border-color:${s.color}40;${i===projSc?'background:'+s.color+';color:#fff':''}">${s.name}</button>`).join('');
 }
+function togFull(){projFull=!projFull;$('togFullBtn').textContent=projFull?'Full Portfolio':'Investments Only';renderProj()}
+function togReal(){projReal=!projReal;$('togRealBtn').textContent=projReal?'Real (-2% infl.)':'Nominal';renderProj()}
 function setProj(){}
 function renderProj(){
   const s=getS();
-  const invested=s.eq+s.bo+(s.sa>0?s.sa:0);
-  if(invested<=0){$('projInfo').innerHTML='';return}
+  const invested=s.eq+s.bo;
+  if(invested<=0&&!projFull){$('projInfo').innerHTML='';return}
   const mc=cfg.mc||400;
   const sc=SCENARIOS[projSc];
-  const eqW=invested>0?s.eq/invested:0.8;
-  const boW=invested>0?s.bo/invested:0.2;
-  const annualR=(eqW*sc.eqR+boW*sc.boR)/100;
-  const monthR=annualR/12;
+  const infl=projReal?INFLATION:0;
+  // Rates per asset (adjusted for inflation if toggled)
+  const rEq=(sc.eqR-infl)/100/12;
+  const rBo=(sc.boR-infl)/100/12;
+  const rMm=(sc.mmR-infl)/100/12;
   const months=projYears*12;
-  let contribs=[invested],rets=[0],comp=[0];
-  let totalVal=invested,totalContrib=invested,totalRets=0;
+  // Starting values
+  let vEq=s.eq,vBo=s.bo,vMm=projFull?s.mm:0,vCash=projFull?(s.c1+s.c2+s.c3):0,vBtc=projFull?s.sa:0;
+  const startVal=vEq+vBo+vMm+vCash+vBtc;
+  let totalContrib=startVal;
+  // Monthly split of contribution (into equity/bond per ratio)
+  const eqRatio=T.r_eq/100,boRatio=T.r_bo/100;
+  // Track layers
+  let contribs=[startVal],returns=[0],compound=[0];
+  let cumRet=0,totalVal=startVal;
   for(let m=1;m<=months;m++){
-    const growth=totalVal*monthR;
-    const retOnContrib=totalContrib*monthR;
-    totalRets+=retOnContrib;
-    totalVal=totalVal+growth+mc;
+    // Growth
+    const gEq=vEq*rEq,gBo=vBo*rBo,gMm=vMm*rMm;
+    const totalGrowth=gEq+gBo+gMm;
+    // Split growth into "on contributions" vs "on returns"
+    const retOnContrib=totalContrib>0?totalGrowth*(totalContrib/totalVal):0;
+    cumRet+=retOnContrib;
+    // Apply growth
+    vEq+=gEq+mc*eqRatio;
+    vBo+=gBo+mc*boRatio;
+    vMm+=gMm;
+    // Cash/BTC stay flat (inflation-adjusted means they lose value in real terms but we show nominal flat)
     totalContrib+=mc;
+    totalVal=vEq+vBo+vMm+vCash+vBtc;
     contribs.push(totalContrib);
-    rets.push(totalRets);
-    comp.push(totalVal-totalContrib-totalRets);
+    returns.push(cumRet);
+    compound.push(Math.max(0,totalVal-totalContrib-cumRet));
   }
+  // Draw
   const c=$('projChart'),ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1;
   const W=c.offsetWidth||700,H=200;
   c.width=W*dpr;c.height=H*dpr;c.style.height=H+'px';ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  const pad={t:10,b:22,l:44,r:10};
-  const mx=totalVal*1.05;
+  const pad={t:10,b:22,l:48,r:10};
+  const mx=totalVal*1.08;
   function yP(v){return pad.t+(1-v/mx)*(H-pad.t-pad.b)}
   function xP(m){return pad.l+m*(W-pad.l-pad.r)/months}
+  // Grid
   ctx.strokeStyle='#1e293b';ctx.lineWidth=0.5;
   for(let i=0;i<5;i++){const y=pad.t+(H-pad.t-pad.b)*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.15)';ctx.font='8px Inter';ctx.textAlign='right';ctx.fillText('\u20AC'+fm(Math.round(mx-mx*i/4)),pad.l-4,y+3)}
-  function area(getBot,getTop,col){ctx.beginPath();for(let m=0;m<=months;m++)ctx.lineTo(xP(m),yP(getTop(m)));for(let m=months;m>=0;m--)ctx.lineTo(xP(m),yP(getBot(m)));ctx.closePath();ctx.fillStyle=col;ctx.fill()}
+  // Areas
+  function area(bot,top,col){ctx.beginPath();for(let m=0;m<=months;m++)ctx.lineTo(xP(m),yP(top(m)));for(let m=months;m>=0;m--)ctx.lineTo(xP(m),yP(bot(m)));ctx.closePath();ctx.fillStyle=col;ctx.fill()}
   area(m=>0,m=>contribs[m],'#334155');
-  area(m=>contribs[m],m=>contribs[m]+rets[m],sc.color+'55');
-  area(m=>contribs[m]+rets[m],m=>contribs[m]+rets[m]+comp[m],sc.color+'25');
+  area(m=>contribs[m],m=>contribs[m]+returns[m],sc.color+'50');
+  area(m=>contribs[m]+returns[m],m=>contribs[m]+returns[m]+compound[m],sc.color+'22');
+  // Top line
   ctx.strokeStyle=sc.color;ctx.lineWidth=2;ctx.beginPath();
-  for(let m=0;m<=months;m++){const v=contribs[m]+rets[m]+comp[m];m?ctx.lineTo(xP(m),yP(v)):ctx.moveTo(xP(m),yP(v))}ctx.stroke();
+  for(let m=0;m<=months;m++){const v=contribs[m]+returns[m]+compound[m];m?ctx.lineTo(xP(m),yP(v)):ctx.moveTo(xP(m),yP(v))}ctx.stroke();
+  // X labels
   ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='8px Inter';ctx.textAlign='center';
   for(let y=0;y<=projYears;y+=Math.max(1,Math.floor(projYears/5)))ctx.fillText(y+'Y',xP(y*12),H-5);
-  const fC=contribs[months],fR=rets[months],fCo=comp[months],fT=fC+fR+fCo;
+  // Info
+  const fC=contribs[months],fR=returns[months],fCo=compound[months],fT=fC+fR+fCo;
+  const growthPct=fC>0?((fT-fC)/fC*100).toFixed(0):0;
+  const retPct=fC>0?(fR/fC*100).toFixed(0):0;
+  const compPct=fC>0?(fCo/fC*100).toFixed(0):0;
   $('projInfo').innerHTML=`
-    <div class="proj-card"><div class="pl">Contributed</div><div class="pv" style="color:#94a3b8">\u20AC${fm(Math.round(fC))}</div><div class="pl">What you put in</div></div>
-    <div class="proj-card"><div class="pl">Returns</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fR))}</div><div class="pl">Market on your money</div></div>
-    <div class="proj-card"><div class="pl">Compound</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fCo))}</div><div class="pl">Returns on returns</div></div>
-    <div style="grid-column:1/-1;text-align:center;margin-top:6px;font-size:.85em;color:#f8fafc;font-weight:600">Total: \u20AC${fm(Math.round(fT))} in ${projYears} years</div>
-    <div style="grid-column:1/-1;font-size:.65em;opacity:.3">\u20AC${fm(Math.round(invested))} today + \u20AC${fm(mc)}/month. ${sc.name} scenario (${(annualR*100).toFixed(1)}%/yr).</div>`;
+    <div class="proj-card"><div class="pl">Contributed</div><div class="pv" style="color:#94a3b8">\u20AC${fm(Math.round(fC))}</div></div>
+    <div class="proj-card"><div class="pl">Returns</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fR))}</div><div class="pl">+${retPct}% on contributions</div></div>
+    <div class="proj-card"><div class="pl">Compound</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fCo))}</div><div class="pl">+${compPct}% snowball</div></div>
+    <div style="grid-column:1/-1;text-align:center;margin-top:6px;font-size:.9em;color:#f8fafc;font-weight:700">\u20AC${fm(Math.round(fT))} <span style="opacity:.4;font-weight:400">in ${projYears}Y</span> <span style="color:${sc.color}">+${growthPct}%</span></div>
+    <div style="grid-column:1/-1;font-size:.62em;opacity:.25">${projFull?'Full portfolio':'Investments only'} \u00B7 ${projReal?'Real (inflation adjusted)':'Nominal'} \u00B7 ${sc.name} ${((sc.eqR*eqRatio+sc.boR*boRatio)-infl).toFixed(1)}%/yr \u00B7 \u20AC${fm(mc)}/month</div>`;
 }
-
 // Call from calc
 function renderVisuals(){const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);renderDonut(s,total);renderRisk(s,total);renderProj()}
 function closeS(){$('sOv').style.display='none'}
