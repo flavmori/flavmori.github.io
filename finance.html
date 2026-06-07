@@ -445,7 +445,7 @@ function renderRisk(s,total){
       <div style="font-size:1.2em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
       <div style="flex:1"><div class="risk-bar"><div class="risk-fill" style="width:100%"></div><div class="risk-dot" style="left:${srriFill}%"></div></div><div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div></div>
     </div>
-    <div class="risk-val">Volatility: ${vol.toFixed(1)}%/yr · Best: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)}) · Worst: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)}) · Risk: ${riskPct}% · Safe: ${safePct}%</div>`;
+    <div class="risk-val">Volatility: ${vol.toFixed(1)}%/yr<br>Best: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>Worst: ${worstY.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>Risk: ${riskPct}% · Safe: ${safePct}%</div>`;
 }
 // === PROJECTION ===
 let projYears=10,projSc=1,projFull=false,projReal=false;
