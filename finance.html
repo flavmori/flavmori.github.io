@@ -384,16 +384,14 @@ function renderDonut(s,total){
   let grad='',cum=0;
   segs.forEach(s=>{const pct=s.val/total*100;grad+=`${s.color} ${cum}% ${cum+pct}%,`;cum+=pct});
   grad=grad.slice(0,-1);
-  const invPct=(invested/total*100).toFixed(1);
-  const liqPct=(liquid/total*100).toFixed(1);
-  const satPct=(sat/total*100).toFixed(1);
-  let legend=`<div style="margin-bottom:3px"><b>Invested ${invPct}%</b></div>`;
-  if(eq>0)legend+=`<div style="padding-left:10px"><span style="background:#3b82f6"></span>Equity ${(eq/total*100).toFixed(1)}%</div>`;
-  if(bo>0)legend+=`<div style="padding-left:10px"><span style="background:#10b981"></span>Bond ${(bo/total*100).toFixed(1)}%</div>`;
-  legend+=`<div style="margin-top:4px;margin-bottom:3px"><b>Liquid ${liqPct}%</b></div>`;
-  if(mm>0)legend+=`<div style="padding-left:10px"><span style="background:#f59e0b"></span>Money Market ${(mm/total*100).toFixed(1)}%</div>`;
-  if(cash>0)legend+=`<div style="padding-left:10px"><span style="background:#6b7280"></span>Cash ${(cash/total*100).toFixed(1)}%</div>`;
-  if(sat>0)legend+=`<div style="margin-top:4px"><b>Satellite ${satPct}%</b></div><div style="padding-left:10px"><span style="background:#ef4444"></span>BTC ${satPct}%</div>`;
+  const satPct=sat/total*100;
+  let legend=`<div style="margin-bottom:3px"><b>Invested ${fmP(invested/total*100)}</b></div>`;
+  if(eq>0)legend+=`<div style="padding-left:10px"><span style="background:#3b82f6"></span>Equity ${fmP(eq/total*100)}</div>`;
+  if(bo>0)legend+=`<div style="padding-left:10px"><span style="background:#10b981"></span>Bond ${fmP(bo/total*100)}</div>`;
+  legend+=`<div style="margin-top:4px;margin-bottom:3px"><b>Liquid ${fmP(liquid/total*100)}</b></div>`;
+  if(mm>0)legend+=`<div style="padding-left:10px"><span style="background:#f59e0b"></span>Money Market ${fmP(mm/total*100)}</div>`;
+  if(cash>0)legend+=`<div style="padding-left:10px"><span style="background:#6b7280"></span>Cash ${fmP(cash/total*100)}</div>`;
+  if(sat>0)legend+=`<div style="margin-top:4px"><b>Satellite ${fmP(satPct)}</b></div><div style="padding-left:10px"><span style="background:#ef4444"></span>BTC ${fmP(satPct)}</div>`;
   $('donut').innerHTML=`<div class="donut" style="background:conic-gradient(${grad});box-shadow:inset 0 0 0 35px #0b0f1a"></div><div class="donut-legend">${legend}</div>`;
 }
 
