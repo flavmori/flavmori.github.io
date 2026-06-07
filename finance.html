@@ -386,6 +386,9 @@ function renderRisk(s,total){
   const safePct=((mm+cash)*100).toFixed(0);
   // Worst case in €
   const worstEur=Math.round(total*maxDD/100);
+  // Best year estimate (same logic, upside)
+  const bestY=vol*2;
+  const bestEur=Math.round(total*bestY/100);
   $('risk').innerHTML=`
     <div style="font-size:.7em;opacity:.4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Risk Profile</div>
     <div style="font-size:1.4em;font-weight:700;color:#f8fafc">${srri.toFixed(1)}<span style="font-size:.5em;opacity:.4"> / 7</span></div>
@@ -393,6 +396,7 @@ function renderRisk(s,total){
     <div class="risk-labels"><span>Conservative</span><span>Aggressive</span></div>
     <div class="risk-val">
       Volatility: ${vol.toFixed(1)}%/yr<br>
+      Best year: +${bestY.toFixed(0)}% (+\u20AC${fm(bestEur)})<br>
       Worst year: -${maxDD.toFixed(0)}% (-\u20AC${fm(worstEur)})<br>
       Risk exposure: ${riskPct}% · Safe: ${safePct}%
     </div>`;
