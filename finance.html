@@ -69,6 +69,25 @@ input[type=number]{-moz-appearance:textfield}
 .sp input:focus{outline:none;border-color:#2563eb}
 .sp .msg{font-size:.65em;opacity:.35;margin-top:3px}
 .sp .sh{font-size:.68em;opacity:.3;margin:12px 0 6px;text-transform:uppercase}
+@media(max-width:600px){
+body{padding:12px 8px;font-size:12px}
+.total{font-size:1.6em}
+.irow{padding:5px 0}
+.irow label{font-size:.72em}
+.arow .r{font-size:.7em}
+.arow.sub{padding-left:10px}
+.act{font-size:.75em}
+.act-note{font-size:.62em}
+.proj-info{grid-template-columns:1fr 1fr 1fr}
+.proj-btn{padding:4px 7px;font-size:.65em}
+.donut{width:100px;height:100px}
+.donut-legend{font-size:.6em}
+.risk-val{font-size:.65em}
+.foot{flex-wrap:wrap;gap:6px}
+.btn{padding:6px 10px;font-size:.65em}
+.sp{padding:14px}
+.sp .g2{grid-template-columns:1fr 1fr;gap:6px}
+}
 </style>
 </head>
 <body>
@@ -183,7 +202,7 @@ input[type=number]{-moz-appearance:textfield}
 <div><label>Sell 3 (€)</label><input type="number" id="btc_s3" step="1000" oninput="saveB()"></div>
 </div>
 <div class="sh">Cloud Sync</div>
-<div><label>Device name</label><input type="text" id="devName" style="width:100%;margin-top:4px" onchange="localStorage.setItem('fin_dev',this.value)" placeholder="e.g. PC Work, Phone"></div>
+<div><label>Device name</label><input type="text" id="devName" style="width:100%;margin-top:4px" onchange="localStorage.setItem('fin_dev',this.value)" placeholder="e.g. Work PC, Phone"></div>
 <div style="margin-top:8px"><label>GitHub Token (for cross-device sync)</label><input type="text" id="ghToken" style="width:100%;margin-top:4px" onchange="localStorage.setItem('ght',this.value)" placeholder="ghp_..."></div>
 <button class="btn btn-s" style="margin-top:14px" onclick="closeS()">Close</button>
 </div></div>
