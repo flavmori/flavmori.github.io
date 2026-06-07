@@ -130,9 +130,11 @@ body{padding:12px 8px;font-size:12px}
 
 <div class="sec" style="position:relative">
 <div class="sec-h">Projection</div>
-<div style="display:flex;gap:6px;margin-bottom:6px" id="projScBtns"></div>
-<div style="display:flex;gap:6px;margin-bottom:6px" id="projYrBtns"></div>
-<div style="display:flex;gap:6px;margin-bottom:10px">
+<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+<span id="projScBtns" style="display:contents"></span>
+<span style="opacity:.15">|</span>
+<span id="projYrBtns" style="display:contents"></span>
+<span style="opacity:.15">|</span>
 <button class="proj-btn" id="togFullBtn" onclick="togFull()">Investments Only</button>
 <button class="proj-btn" id="togRealBtn" onclick="togReal()">Nominal</button>
 </div>
