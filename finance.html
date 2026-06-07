@@ -201,7 +201,7 @@ function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+
 function fmA(n){const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
-function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
+function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc();rH();autoSize()}
 function getS(){let s={};KS.forEach(k=>{const el=$('s_'+k);const raw=el.dataset.raw;if(raw)s[k]=parseFloat(raw)||0;else{let v=el.value.trim();if(v.endsWith('M'))s[k]=parseFloat(v)*1000000;else if(v.endsWith('K'))s[k]=parseFloat(v)*1000;else s[k]=parseFloat(v.replace(/\./g,'').replace(',','.'))||0}});return s}
 function fmInput(el){const raw=parseFloat(el.dataset.raw||el.value.replace(/[\.KM]/g,''))||0;if(raw>0&&el!==document.activeElement){el.dataset.raw=raw;if(compact){if(raw>=1000000)el.value=(raw/1000000).toFixed(1)+'M';else if(raw>=1000)el.value=Math.round(raw/1000)+'K';else el.value=String(Math.round(raw))}else{const s=Math.round(raw).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}}else if(raw===0){el.value='';el.dataset.raw=''}el.style.width=Math.max(4,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
