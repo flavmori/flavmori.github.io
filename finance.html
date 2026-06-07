@@ -80,15 +80,15 @@ input[type=number]{-moz-appearance:textfield}
 <div class="sec">
 <div class="sec-h">Balances</div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px;padding-top:4px">Invested</div>
-<div class="irow"><label>Equity <small>ACWI</small></label><input type="number" id="s_eq" step=".01" oninput="calc()"></div>
-<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="number" id="s_bo" step=".01" oninput="calc()"></div>
+<div class="irow"><label>Equity <small>ACWI</small></label><input type="text" id="s_eq" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="text" id="s_bo" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Liquid</div>
-<div class="irow"><label>Money Market <small>CSH2</small></label><input type="number" id="s_mm" step=".01" oninput="calc()"></div>
-<div class="irow"><label>Cash <small>Santander</small></label><input type="number" id="s_c1" step=".01" oninput="calc()"></div>
-<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="number" id="s_c2" step=".01" oninput="calc()"></div>
-<div class="irow"><label>Cash <small>Other</small></label><input type="number" id="s_c3" step=".01" oninput="calc()"></div>
+<div class="irow"><label>Money Market <small>CSH2</small></label><input type="text" id="s_mm" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Santander</small></label><input type="text" id="s_c1" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="text" id="s_c2" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Other</small></label><input type="text" id="s_c3" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Satellite</div>
-<div class="irow"><label>Satellite <small>BTC</small></label><input type="number" id="s_sa" step=".01" oninput="calc()"></div>
+<div class="irow"><label>Satellite <small>BTC</small></label><input type="text" id="s_sa" inputmode="decimal" oninput="calc()" onfocus="this.value=this.value.replace(/\./g,'')" onblur="fmInput(this)"></div>
 </div>
 
 <div class="sec">
@@ -195,11 +195,12 @@ let hist=[];
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function fm(n){return Math.round(n).toLocaleString('it-IT')}
-function getS(){let s={};KS.forEach(k=>s[k]=parseFloat($('s_'+k).value)||0);return s}
-function autoSize(){document.querySelectorAll('.irow input').forEach(i=>{i.style.width=Math.max(5,String(i.value).length+1)+'ch'})}
+function getS(){let s={};KS.forEach(k=>{const v=$('s_'+k).value.replace(/\./g,'').replace(',','.');s[k]=parseFloat(v)||0});return s}
+function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement)el.value=fm(v);el.style.width=Math.max(5,el.value.length+1)+'ch'}
+function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
 
 function init(){
-  const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=s[k]});
+  const s=J('fs')||{};KS.forEach(k=>{if(s[k]){$('s_'+k).value=fm(s[k])}});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
   if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
@@ -625,7 +626,7 @@ async function loadFromCloud(){
   const t=localStorage.getItem('ght');if(!t)return;
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
-  if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]||0});
+  if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]?fm(d.s[k]):0});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_mc').value=cfg.mc||400;$('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0}
   if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
