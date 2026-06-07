@@ -91,7 +91,11 @@ body{padding:12px 8px;font-size:12px}
 </head>
 <body>
 
-<div id="app" style="display:block"><div class="w">
+<div id="lock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:14px">
+<input type="text" id="pw" placeholder="Password" style="font-family:'Inter',sans-serif;padding:11px 18px;border-radius:6px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:1em;text-align:center;width:200px" onkeydown="if(event.key==='Enter')unlock()">
+<button onclick="unlock()" style="padding:9px 22px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:.85em;cursor:pointer;font-weight:500">Enter</button>
+</div>
+<div id="app" style="display:none"><div class="w">
 <div class="total" id="tot">-</div>
 <div class="total-d" id="totD"></div>
 
@@ -221,6 +225,7 @@ let hist=[];
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function unlock(){if($('pw').value==='bangbangflavmori'){localStorage.setItem('fa','1');$('lock').style.display='none';$('app').style.display='block';init();loadFromCloud()}}
 let compact=true;
 function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return Math.round(n/1000)+'K';return String(Math.round(n))}const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 function fmA(n){const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
@@ -706,7 +711,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH();$('ss').textContent='Loaded'+(d.dev?' from '+d.dev:'')+(d.ts?' ('+new Date(d.ts).toLocaleString()+')':'')}catch(e){}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
+if(localStorage.getItem('fa')==='1'){$('lock').style.display='none';$('app').style.display='block';if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}}
 window.addEventListener('resize',()=>{renderProj()});
 </script>
 </body>
