@@ -638,7 +638,10 @@ function rH(){
   $('hl').innerHTML=h||'<div style="opacity:.15;text-align:center">No data</div>';
   renderInsights();
 }
-function delSnap(d){if(!confirm('Delete snapshot '+d+'?'))return;hist=hist.filter(x=>x.d!==d);localStorage.setItem('fh',JSON.stringify(hist));rH()}
+function delSnap(d){if(!confirm('Delete snapshot '+d+'?'))return;hist=hist.filter(x=>x.d!==d);localStorage.setItem('fh',JSON.stringify(hist));
+  // Restore fields from most recent remaining snapshot
+  if(hist.length>0){const last=hist[hist.length-1];if(last.s){KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=last.s[k]||'';el.value=last.s[k]?String(last.s[k]):'';fmInput(el)});localStorage.setItem('fs',JSON.stringify(last.s));calc()}}
+  rH()}
 function renderInsights(){
   if(hist.length<2){$('insights').innerHTML='';return}
   const first=hist[0],last=hist[hist.length-1];
