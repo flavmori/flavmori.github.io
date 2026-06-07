@@ -92,6 +92,14 @@ input[type=number]{-moz-appearance:textfield}
 <div id="alloc"></div>
 </div>
 
+<div class="acts" id="acts"></div>
+
+<div class="sec">
+<div class="sec-h">I need cash</div>
+<div class="irow"><label>How much do you need?</label><input type="number" id="w_amt" step="100" oninput="calcW()"></div>
+<div id="wResult"></div>
+</div>
+
 <div class="sec" style="display:flex;gap:16px;flex-wrap:wrap">
 <div id="donut" style="flex:1;min-width:180px"></div>
 <div id="risk" style="flex:1;min-width:180px"></div>
@@ -107,14 +115,6 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 <canvas id="projChart" style="width:100%;height:200px"></canvas>
 <div id="projInfo" class="proj-info"></div>
-</div>
-
-<div class="acts" id="acts"></div>
-
-<div class="sec">
-<div class="sec-h">I need cash</div>
-<div class="irow"><label>How much do you need?</label><input type="number" id="w_amt" step="100" oninput="calcW()"></div>
-<div id="wResult"></div>
 </div>
 
 <div class="sec">
@@ -418,25 +418,22 @@ function renderProj(){
   const months=projYears*12;
   // Starting values
   let vEq=s.eq,vBo=s.bo,vMm=projFull?s.mm:0,vCash=projFull?(s.c1+s.c2+s.c3):0,vBtc=projFull?s.sa:0;
+  const startEq=vEq,startBo=vBo,startMm=vMm;
   const startVal=vEq+vBo+vMm+vCash+vBtc;
   let totalContrib=startVal;
-  // Monthly split of contribution (into equity/bond per ratio)
   const eqRatio=T.r_eq/100,boRatio=T.r_bo/100;
-  // Track layers
   let contribs=[startVal],returns=[0],compound=[0];
   let cumRet=0,totalVal=startVal;
+  let growthEq=0,growthBo=0,growthMm=0;
   for(let m=1;m<=months;m++){
-    // Growth
     const gEq=vEq*rEq,gBo=vBo*rBo,gMm=vMm*rMm;
+    growthEq+=gEq;growthBo+=gBo;growthMm+=gMm;
     const totalGrowth=gEq+gBo+gMm;
-    // Split growth into "on contributions" vs "on returns"
     const retOnContrib=totalContrib>0?totalGrowth*(totalContrib/totalVal):0;
     cumRet+=retOnContrib;
-    // Apply growth
     vEq+=gEq+mc*eqRatio;
     vBo+=gBo+mc*boRatio;
     vMm+=gMm;
-    // Cash/BTC stay flat (inflation-adjusted means they lose value in real terms but we show nominal flat)
     totalContrib+=mc;
     totalVal=vEq+vBo+vMm+vCash+vBtc;
     contribs.push(totalContrib);
@@ -475,6 +472,7 @@ function renderProj(){
     <div class="proj-card"><div class="pl">Returns</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fR))}</div><div class="pl">+${retPct}% on contributions</div></div>
     <div class="proj-card"><div class="pl">Compound</div><div class="pv" style="color:${sc.color}">\u20AC${fm(Math.round(fCo))}</div><div class="pl">+${compPct}% snowball</div></div>
     <div style="grid-column:1/-1;text-align:center;margin-top:6px;font-size:.9em;color:#f8fafc;font-weight:700">\u20AC${fm(Math.round(fT))} <span style="opacity:.4;font-weight:400">in ${projYears}Y</span> <span style="color:${sc.color}">+${growthPct}%</span></div>
+    <div style="grid-column:1/-1;font-size:.68em;opacity:.4;margin-top:8px">Growth breakdown: Equity +\u20AC${fm(Math.round(growthEq))}${growthBo>0?' \u00B7 Bond +\u20AC'+fm(Math.round(growthBo)):''}${growthMm>0?' \u00B7 MM +\u20AC'+fm(Math.round(growthMm)):''}</div>
     <div style="grid-column:1/-1;font-size:.62em;opacity:.25">${projFull?'Full portfolio':'Investments only'} \u00B7 ${projReal?'Real (inflation adjusted)':'Nominal'} \u00B7 ${sc.name} ${((sc.eqR*eqRatio+sc.boR*boRatio)-infl).toFixed(1)}%/yr \u00B7 \u20AC${fm(mc)}/month</div>`;
 }
 // Call from calc
