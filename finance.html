@@ -20,7 +20,7 @@ input[type=number]{-moz-appearance:textfield}
 .irow:last-child{border:none}
 .irow label{font-size:.78em;color:#94a3b8;flex:1}
 .irow label small{opacity:.4}
-.irow input{font-family:'Inter',sans-serif;width:100px;padding:5px 7px;border-radius:4px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:.82em;text-align:right}
+.irow input{font-family:'Inter',sans-serif;width:80px;padding:5px 7px;border-radius:4px;border:1px solid #1e293b;background:#0f172a;color:#f1f5f9;font-size:.82em;text-align:right}
 .irow input:focus{outline:none;border-color:#2563eb}
 .arow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111827}
 .arow:last-child{border:none}
@@ -240,11 +240,11 @@ function calc(){
 
   let a='';
   a+=`<div class="arow"><span class="l">Invested</span><span class="r">€${fm(invested)} <span class="mu">${pInv}% → ${T.inv}%</span> <span class="gap">${gapH(gInv)}</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Equity <small>ACWI</small></span><span class="r">€${fm(eq)} <span class="mu">${subEq}% / ${T.r_eq}%</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Bond <small>Gov EUR</small></span><span class="r">€${fm(bo)} <span class="mu">${subBo}% / ${T.r_bo}%</span></span></div>`;
-  a+=`<div class="arow"><span class="l">Liquid</span><span class="r">€${fm(liquid)} <span class="mu">${pLiq}% → ${T.liq}%</span> <span class="gap">${gapH(gLiq)}</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Money Market <small>CSH2</small></span><span class="r">€${fm(mm)} <span class="mu">${subMm}% / ${T.r_mm}%</span></span></div>`;
-  a+=`<div class="arow sub"><span class="l">Cash <small>Accounts</small></span><span class="r">€${fm(cash)} <span class="mu">${subCa}% / ${T.r_ca}%</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Equity</span><span class="r">\u20AC${fm(eq)} <span class="mu">${subEq}% / ${T.r_eq}%</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Bond</span><span class="r">\u20AC${fm(bo)} <span class="mu">${subBo}% / ${T.r_bo}%</span></span></div>`;
+  a+=`<div class="arow"><span class="l">Liquid</span><span class="r">\u20AC${fm(liquid)} <span class="mu">${pLiq}% \u2192 ${T.liq}%</span> <span class="gap">${gapH(gLiq)}</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Money Market</span><span class="r">\u20AC${fm(mm)} <span class="mu">${subMm}% / ${T.r_mm}%</span></span></div>`;
+  a+=`<div class="arow sub"><span class="l">Cash</span><span class="r">\u20AC${fm(cash)} <span class="mu">${subCa}% / ${T.r_ca}%</span></span></div>`;
   a+=`<div class="arow"><span class="l">Satellite</span><span class="r">€${fm(sat)} <span class="mu">${pSat}% → ${T.sat}%</span> <span class="gap">${gapH(gSat)}</span></span></div>`;
   $('alloc').innerHTML=a;
 
