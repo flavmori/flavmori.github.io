@@ -195,17 +195,17 @@ let hist=[];
 
 function $(id){return document.getElementById(id)}
 function J(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
-function fm(n){const s=Math.round(n).toString();const r=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.');return r}
+function fm(n){if(compact){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return Math.round(n/1000)+'K';return String(Math.round(n))}const s=Math.round(n).toString();return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 let compact=false;
-function fmC(n){if(!n||n===0)return'';if(!compact)return'\u20AC'+fm(n);if(Math.abs(n)>=1000000)return'\u20AC'+(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return'\u20AC'+Math.round(n/1000)+'K';return'\u20AC'+Math.round(n)}
+function fmC(n){if(!n||n===0)return'';return'\u20AC'+fm(n)}
 function fmP(n){return compact?Math.round(n)+'%':n.toFixed(1)+'%'}
 function togCompact(){compact=!compact;$('compactBtn').textContent=compact?'Precise':'Compact';calc()}
 function getS(){let s={};KS.forEach(k=>{const v=$('s_'+k).value.replace(/\./g,'').replace(',','.');s[k]=parseFloat(v)||0});return s}
-function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement)el.value=fm(v);else if(v===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
+function fmInput(el){const v=parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;if(v>0&&el!==document.activeElement){const s=Math.round(v).toString();el.value=s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}else if(v===0)el.value='';el.style.width=Math.max(4,el.value.length+1)+'ch'}
 function autoSize(){document.querySelectorAll('.irow input[id^="s_"]').forEach(fmInput)}
 
 function init(){
-  const s=J('fs')||{};KS.forEach(k=>{if(s[k])$('s_'+k).value=fm(s[k]);else $('s_'+k).value=''});
+  const s=J('fs')||{};KS.forEach(k=>{if(s[k]){const v=Math.round(s[k]).toString();$('s_'+k).value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}else $('s_'+k).value=''});
   T=J('ft')||T;cfg=J('fc')||cfg;btc=J('fb')||btc;hist=J('fh')||[];
   if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};
   $('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;
@@ -632,7 +632,7 @@ async function loadFromCloud(){
   const t=localStorage.getItem('ght');if(!t)return;
   try{const r=await fetch('https://api.github.com/gists/'+GID,{headers:{'Authorization':'token '+t}});if(!r.ok)return;
   const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
-  if(d.s)KS.forEach(k=>{$('s_'+k).value=d.s[k]?fm(d.s[k]):0});
+  if(d.s)KS.forEach(k=>{if(d.s[k]){const v=Math.round(d.s[k]).toString();$('s_'+k).value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}else $('s_'+k).value=''});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_mc').value=cfg.mc||400;$('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0}
   if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
