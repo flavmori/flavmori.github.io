@@ -299,103 +299,99 @@ function calc(){
   // Actions — numbered steps with explanations
   let acts='<div class="ah">Actions</div>';
   let step=0;
-
-  const surplus=liquid-tLiq;
   const idealEqR=T.r_eq/(T.r_eq+T.r_bo)*100;
   const actualEqR=invested>0?eq/invested*100:0;
   const eqBoDrift=invested>0?Math.abs(actualEqR-idealEqR):0;
+  const surplus=liquid-tLiq;              // + = excess liquidity to deploy ; - = below liquid target
 
-  // Step: Sell invested to rebuild liquidity (if invested over AND liquid under)
-  if(invested>tInv+500&&surplus<-500){
+  // We deploy the EXCESS liquidity in a clean cascade: (1) Invested, (2) Bitcoin, (3) what stays Liquid.
+  // Priority when excess isn't enough for all: Invested first, then Bitcoin (your rule 1a).
+  let investedNow=0, satNow=0;
+
+  // ============ CASE: liquidity is BELOW target (spent down) — rebuild, don't invest ============
+  if(surplus<-300){
     step++;
-    const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
-    acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (invested ${pInv}%, liquid ${pLiq}%)</span><span class="av neg">€${fmA(sellAmt)} needed</span></div>`;
-    acts+=`<div class="act-note">Option A (free): stop investing, let salary rebuild liquid over time.</div>`;
-    acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} from investments.</div>`;
-  }
-
-  // Step: Rebalance Equity/Bond ratio
-  if(eqBoDrift>5){
-    step++;
-    const from=actualEqR>idealEqR?'Equity':'Bond';
-    const to=actualEqR>idealEqR?'Bond':'Equity';
-    const sellAmt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
-    const tranchesToFix=cfg.cap>0?Math.ceil(sellAmt/cfg.cap):99;
-    acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fmA(sellAmt)} off</span></div>`;
-    acts+=`<div class="act-note">Option A (free): invest next ${tranchesToFix} tranches 100% into ${to}. No tax, takes time.</div>`;
-    acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} ${from}, buy ${to}.</div>`;
-  }
-
-  // Step: Invest the excess liquidity FIRST (priority) — split between Invested (Eq/Bo) and Satellite
-  let investedNow=0, satNow=0; // track what we deploy, to compute leftover liquidity
-  if(surplus>300){
-    // How much of the excess goes to Invested vs Satellite: by how far each is from its target %
-    const invGapTot=Math.max(0,tInv-invested);      // € still needed to reach invested target
-    const saGapNow=Math.max(0,tSat-sat);            // € still needed to reach satellite target
-    const totalGapNeed=invGapTot+saGapNow;
-    const toInvestedShare=totalGapNeed>0?surplus*invGapTot/totalGapNeed:surplus;
-    if(toInvestedShare>=300){
-      step++;
-      const dynCap=cfg.cap;
-      const amt=Math.min(toInvestedShare,dynCap);
-      investedNow=amt;
-      // Fill the biggest gap first: if you're underweight Equity, new money goes to Equity until back on ratio (and vice versa)
-      const eqG=Math.max(0,tEq-eq), boG=Math.max(0,tBo-bo);
-      const invGap=eqG+boG;
-      let toEq,toBo;
-      if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
-      else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
-      acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
-      acts+=`<div class="act-note">You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite). New money fills the underweight side first.${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
+    if(invested>tInv+500){
+      const sellAmt=Math.round(Math.min(invested-tInv,Math.abs(surplus)));
+      acts+=`<div class="act"><span><b>${step}.</b> Rebuild liquidity (liquid ${pLiq}% vs ${T.liq}%)</span><span class="av neg">€${fmA(sellAmt)}</span></div>`;
+      acts+=`<div class="act-note">You're below your safety buffer. Option A (free): let salary rebuild it. Option B (now): sell €${fmA(sellAmt)} from investments.</div>`;
+    }else{
+      acts+=`<div class="act"><span><b>${step}.</b> Accumulate — don't invest yet</span><span class="av mu">—</span></div>`;
+      acts+=`<div class="act-note">Liquidity is below your ${T.liq}% safety buffer (now ${pLiq}%). Build it back from income before investing.</div>`;
     }
-  }else if(surplus<-500&&invested<=tInv){
-    // Liquid below target, invested also below — accumulate
-    step++;
-    acts+=`<div class="act"><span><b>${step}.</b> Accumulate</span><span class="av mu">—</span></div>`;
-    acts+=`<div class="act-note">Liquidity is below target (${pLiq}% vs ${T.liq}%). Wait for income before investing.</div>`;
+  }
+  // ============ CASE: excess liquidity to DEPLOY (cascade: Invested -> Bitcoin -> Liquid) ============
+  else if(surplus>300){
+    let pot=surplus;                                  // money available to deploy
+    const invGapTot=Math.max(0,tInv-invested);        // € needed to reach Invested target
+    const saGap=Math.max(0,tSat-sat);                 // € needed to reach Bitcoin target
+
+    // (1) INVESTED first — up to what's needed, capped per-move
+    const toInvest=Math.min(pot,invGapTot,cfg.cap);
+    if(toInvest>=100){
+      step++;
+      investedNow=toInvest;
+      pot-=toInvest;
+      // fill the underweight side of Eq/Bo first (rule 2)
+      const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo),g=eqG+boG;
+      let toEq,toBo;
+      if(g>0){toEq=Math.round(toInvest*eqG/g);toBo=toInvest-toEq}
+      else{toEq=Math.round(toInvest*T.r_eq/100);toBo=toInvest-toEq}
+      acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(toInvest)}</span></div>`;
+      const extra=invGapTot>cfg.cap?` Invested gap is €${fmA(Math.round(invGapTot))}; capped at €${fmA(cfg.cap)}/move.`:'';
+      acts+=`<div class="act-note">Of your €${fmA(Math.round(surplus))} excess liquidity. New money fills the underweight side first.${extra}</div>`;
+    }
+
+    // (2) BITCOIN next — with whatever excess remains
+    if(saGap>100 && pot>=50){
+      step++;
+      const budget=Math.round(Math.min(pot,saGap));
+      satNow=budget;
+      pot-=budget;
+      const perTranche=Math.round(saGap/btc.buy.length);
+      const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
+      const trancheNote=btc.buy.map((p,i)=>{const hit=btcPrice>0&&btcPrice<=p;return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: €${fmA(p)} (€${fmA(perTranche)})${hit?' \u2190 BUY NOW':''}</span>`}).join(' | ');
+      acts+=`<div class="act"><span><b>${step}.</b> Buy Bitcoin${bp}</span><span class="av" style="color:#ef4444">€${fmA(budget)}</span></div>`;
+      acts+=`<div class="act-note">${trancheNote}</div>`;
+      acts+=`<div class="act-note">Target gap €${fmA(Math.round(saGap))}${budget<saGap?` \u00B7 only €${fmA(budget)} fundable now (invested came first)`:''}. Buy each tranche when BTC reaches its target price.</div>`;
+    }else if(sat>tSat+100){
+      step++;
+      const pctEach=Math.floor(100/btc.sell.length);
+      const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
+      const sellNote=btc.sell.map((p,i)=>{const pct=i<btc.sell.length-1?pctEach:(100-pctEach*(btc.sell.length-1));const hit=btcPrice>0&&btcPrice>=p;return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: sell ${pct}% at €${fmA(p)}${hit?' \u2190 SELL NOW':''}</span>`}).join(' | ');
+      acts+=`<div class="act"><span><b>${step}.</b> Bitcoin — take profit${bp}</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
+      acts+=`<div class="act-note">${sellNote}</div>`;
+    }
+  }
+  // ============ CASE: liquid roughly on target — just fix internal ratios if drifted ============
+  else{
+    if(eqBoDrift>5){
+      step++;
+      const from=actualEqR>idealEqR?'Equity':'Bond', to=actualEqR>idealEqR?'Bond':'Equity';
+      const sellAmt=Math.round(Math.abs(eq-(idealEqR/100)*invested));
+      acts+=`<div class="act"><span><b>${step}.</b> Rebalance invested (${Math.round(actualEqR)}/${Math.round(100-actualEqR)} vs ${T.r_eq}/${T.r_bo})</span><span class="av" style="color:#a78bfa">€${fmA(sellAmt)}</span></div>`;
+      acts+=`<div class="act-note">Option A (free): put your next contributions into ${to}. Option B (now): move €${fmA(sellAmt)} from ${from} to ${to}.</div>`;
+    }
+    if(sat>tSat+100){
+      step++;
+      const pctEach=Math.floor(100/btc.sell.length);
+      const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
+      const sellNote=btc.sell.map((p,i)=>{const pct=i<btc.sell.length-1?pctEach:(100-pctEach*(btc.sell.length-1));const hit=btcPrice>0&&btcPrice>=p;return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: sell ${pct}% at €${fmA(p)}${hit?' \u2190 SELL NOW':''}</span>`}).join(' | ');
+      acts+=`<div class="act"><span><b>${step}.</b> Bitcoin — take profit${bp}</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
+      acts+=`<div class="act-note">${sellNote}</div>`;
+    }
   }
 
-  // Step: Satellite — funded from its share of the excess liquidity (no double-counting with Invest step)
-  const saGap=Math.max(0,tSat-sat);
-  const nBuyTranches=btc.buy.length;
-  if(saGap>100){
-    step++;
-    const surplusNow=Math.max(0,liquid-tLiq);
-    const eqGnow=Math.max(0,tEq-eq),boGnow=Math.max(0,tBo-bo);
-    const gapAll=eqGnow+boGnow+saGap;
-    const saBudgetNow=Math.round(gapAll>0?Math.min(saGap,surplusNow*saGap/gapAll):0);
-    satNow=saBudgetNow;
-    const perTranche=Math.round(saGap/nBuyTranches);
-    const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
-    let trancheNote=btc.buy.map((p,i)=>{const hit=btcPrice>0&&btcPrice<=p;return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: €${fmA(p)} (€${fmA(perTranche)})${hit?' \u2190 BUY NOW':''}</span>`}).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)${bp}</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
-    acts+=`<div class="act-note">${trancheNote}</div>`;
-    acts+=`<div class="act-note">Target gap €${fmA(Math.round(saGap))} \u00B7 fundable now from excess liquidity: €${fmA(saBudgetNow)}. Buy each tranche when BTC reaches its target price.</div>`;
-  }else if(sat>tSat+100){
-    step++;
-    const nSellTranches=btc.sell.length;
-    const pctEach=Math.floor(100/nSellTranches);
-    const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
-    let sellNote=btc.sell.map((p,i)=>{
-      const pct=i<nSellTranches-1?pctEach:(100-(pctEach*(nSellTranches-1)));
-      const hit=btcPrice>0&&btcPrice>=p;
-      return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: sell ${pct}% at €${fmA(p)}${hit?' \u2190 SELL NOW':''}</span>`;
-    }).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit${bp}</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
-    acts+=`<div class="act-note">${sellNote}</div>`;
-  }
-
-  // Step: Money Market / Cash split — LAST, on the liquidity that REMAINS after investing + satellite
+  // ============ Always LAST: how to split the liquidity that REMAINS between Money Market and Cash ============
   {
-    const liqLeft=Math.max(0,liquid-investedNow-satNow); // what stays liquid after steps above
-    // ideal MM within the remaining liquid, using your MM/Cash target ratio
+    const liqLeft=Math.max(0,liquid-investedNow-satNow);
     const mmTargetLeft=T.r_mm/100*liqLeft;
     const mmOffLeft=mm-mmTargetLeft;
     if(mmOffLeft<-200&&cash>200){
       step++;
       const moveAmt=Math.round(Math.min(-mmOffLeft,cash));
       acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(moveAmt)}</span></div>`;
-      acts+=`<div class="act-note">Optional: of the €${fmA(Math.round(liqLeft))} you keep liquid (after investing), Money Market should be ~${T.r_mm}%. Moving it earns more yield — your call.</div>`;
+      acts+=`<div class="act-note">Optional: of the €${fmA(Math.round(liqLeft))} you keep liquid, Money Market should be ~${T.r_mm}%. Moving it earns more yield — your call.</div>`;
     }else if(mmOffLeft>200){
       step++;
       acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fmA(Math.round(mmOffLeft))}</span></div>`;
