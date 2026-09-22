@@ -326,24 +326,24 @@ function calc(){
     acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} ${from}, buy ${to}.</div>`;
   }
 
-  // Step: Invest the excess liquidity FIRST (priority) — split between Invested (Eq/Bo) and Satellite by their gaps
+  // Step: Invest the excess liquidity FIRST (priority) — split between Invested (Eq/Bo) and Satellite
   let investedNow=0, satNow=0; // track what we deploy, to compute leftover liquidity
   if(surplus>300){
-    const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
-    const saGapNow=Math.max(0,tSat-sat);
-    const totalGapNeed=eqG+boG+saGapNow;
-    const toInvestedShare=totalGapNeed>0?surplus*(eqG+boG)/totalGapNeed:surplus;
+    // How much of the excess goes to Invested vs Satellite: by how far each is from its target %
+    const invGapTot=Math.max(0,tInv-invested);      // € still needed to reach invested target
+    const saGapNow=Math.max(0,tSat-sat);            // € still needed to reach satellite target
+    const totalGapNeed=invGapTot+saGapNow;
+    const toInvestedShare=totalGapNeed>0?surplus*invGapTot/totalGapNeed:surplus;
     if(toInvestedShare>=300){
       step++;
       const dynCap=cfg.cap;
       const amt=Math.min(toInvestedShare,dynCap);
       investedNow=amt;
-      const invGap=eqG+boG;
-      let toEq,toBo;
-      if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
-      else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
+      // Split the NEW money by the target Equity/Bond ratio (simple + never fights the rebalance step)
+      const toEq=Math.round(amt*T.r_eq/100);
+      const toBo=amt-toEq;
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
-      acts+=`<div class="act-note">You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite).${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act-note">You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite). Split ${T.r_eq}/${T.r_bo} per your target.${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
