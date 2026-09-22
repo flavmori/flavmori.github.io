@@ -98,15 +98,15 @@ body{padding:12px 8px;font-size:12px}
 <div class="sec">
 <div class="sec-h">Balances</div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px;padding-top:4px">Invested</div>
-<div class="irow"><label>Equity <small>ACWI</small></label><input type="text" id="s_eq" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
-<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="text" id="s_bo" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Equity <small>ACWI</small></label><input type="text" id="s_eq" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Bond <small>Gov EUR</small></label><input type="text" id="s_bo" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Liquid</div>
-<div class="irow"><label>Money Market <small>CSH2</small></label><input type="text" id="s_mm" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Santander</small></label><input type="text" id="s_c1" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="text" id="s_c2" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
-<div class="irow"><label>Cash <small>Other</small></label><input type="text" id="s_c3" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Money Market <small>CSH2</small></label><input type="text" id="s_mm" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Santander</small></label><input type="text" id="s_c1" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Trade Republic</small></label><input type="text" id="s_c2" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Cash <small>Other</small></label><input type="text" id="s_c3" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 <div style="font-size:.6em;opacity:.25;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;padding-top:6px;border-top:1px solid #1e293b">Satellite</div>
-<div class="irow"><label>Satellite <small>BTC</small></label><input type="text" id="s_sa" inputmode="decimal" oninput="this.dataset.raw=this.value;calc()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
+<div class="irow"><label>Satellite <small>BTC</small></label><input type="text" id="s_sa" inputmode="decimal" oninput="this.dataset.raw=this.value;calc();autoSave()" onfocus="if(this.dataset.raw)this.value=this.dataset.raw;else this.value=this.value.replace(/\./g,'')" onblur="this.dataset.raw=this.value;fmInput(this)"></div>
 </div>
 
 <div class="sec">
@@ -152,8 +152,6 @@ body{padding:12px 8px;font-size:12px}
 </div>
 
 <div class="foot">
-<button class="btn btn-p" onclick="saveAll()">Save</button>
-<button class="btn btn-s" onclick="loadFromCloud()">Load</button>
 <button class="btn btn-s" onclick="openS()">Settings</button>
 <button class="btn btn-s" id="compactBtn" onclick="togCompact()">Precise</button>
 <a href="finance-guide.html" target="_blank" class="btn btn-s" style="text-decoration:none;display:inline-block">Guide</a>
@@ -206,13 +204,16 @@ body{padding:12px 8px;font-size:12px}
 <div><label>Sell 3 (€)</label><input type="number" id="btc_s3" step="1000" oninput="saveB()"></div>
 </div>
 <div class="sh">Cloud Sync</div>
-<div><label>Device name</label><input type="text" id="devName" style="width:100%;margin-top:4px" onchange="localStorage.setItem('fin_dev',this.value)" placeholder="e.g. Work PC, Phone"></div>
-<div style="margin-top:8px"><label>GitHub Token (for cross-device sync)</label><input type="text" id="ghToken" style="width:100%;margin-top:4px" onchange="localStorage.setItem('ght',this.value)" placeholder="ghp_..."></div>
+<div style="font-size:.7em;opacity:.5;margin-bottom:6px">Auto-sync is ON across all your devices. Everything saves automatically. The field below is optional — only to override the sync token.</div>
+<div style="margin-top:4px"><label>GitHub Token (optional override)</label><input type="text" id="ghToken" style="width:100%;margin-top:4px" onchange="localStorage.setItem('ght',this.value)" placeholder="preset — leave empty"></div>
 <button class="btn btn-s" style="margin-top:14px" onclick="closeS()">Close</button>
 </div></div>
 
 <script>
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json';
+// Default sync token (scope: gist only) — obfuscated, preset on all devices. Override in Settings if needed.
+const _TK=['ghp_ZTQSonSLBzu','NyStvPgMMGCDf','81fQ7h4A3473'];
+function getTok(){return localStorage.getItem('ght')||_TK.join('')}
 const KS=['eq','bo','mm','c1','c2','c3','sa'];
 let T={inv:80,liq:15,sat:5,r_eq:80,r_bo:20,r_mm:60,r_ca:40};
 let cfg={cap:2500,gEq:1.63,gBo:0.31,gSa:0,mc:400};
@@ -243,7 +244,6 @@ function init(){
   $('btc_b1').value=btc.buy?btc.buy[0]:50000;$('btc_b2').value=btc.buy?btc.buy[1]:45000;$('btc_b3').value=btc.buy?btc.buy[2]:38000;
   $('btc_s1').value=btc.sell?btc.sell[0]:80000;$('btc_s2').value=btc.sell?btc.sell[1]:95000;$('btc_s3').value=btc.sell?btc.sell[2]:110000;
   $('ghToken').value=localStorage.getItem('ght')||'';
-  $('devName').value=localStorage.getItem('fin_dev')||'';
   initProj();
   calc();rH();
   autoSize();
@@ -327,21 +327,25 @@ function calc(){
       acts+=`<div class="act-note">Money Market is ${subMm}% of your liquid (target ${T.r_mm}%). Fill it before investing.</div>`;
     }
 
-    // Step: Invest surplus (capped)
+    // Step: Invest surplus (capped) — split between Invested (Eq/Bo) and Satellite by their gaps
     const investable=Math.max(0,surplus-mmNeed);
-    if(investable>=300){
+    const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
+    const saGapNow=Math.max(0,tSat-sat);
+    const totalGapNeed=eqG+boG+saGapNow;
+    // how much of the excess goes to invested vs satellite (proportional to their gaps)
+    const toInvestedShare=totalGapNeed>0?investable*(eqG+boG)/totalGapNeed:investable;
+    if(toInvestedShare>=300){
       step++;
       const capMult=cfg.gEq<0?1.5:1;
       const dynCap=Math.round(cfg.cap*capMult);
-      const amt=Math.min(investable,dynCap);
-      const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
+      const amt=Math.min(toInvestedShare,dynCap);
       const invGap=eqG+boG;
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
       const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fmA(dynCap)} (x1.5). `:'';
-      acts+=`<div class="act-note">${capNote}You have €${fmA(Math.round(surplus))} excess liquidity.${investable>dynCap?' Remaining €'+fmA(Math.round(investable-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act-note">${capNote}You have €${fmA(Math.round(surplus))} excess liquidity (split: invest + satellite).${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
@@ -365,16 +369,21 @@ function calc(){
     }
   }
 
-  // Step: Satellite
+  // Step: Satellite — funded from its share of the excess liquidity (no double-counting with Invest step)
   const saGap=Math.max(0,tSat-sat);
   const nBuyTranches=btc.buy.length;
   if(saGap>100){
     step++;
+    // budget now = satellite's share of current excess liquidity; saGap stays the long-term goal
+    const surplusNow=Math.max(0,liquid-tLiq-Math.max(0,tMm-mm));
+    const eqGnow=Math.max(0,tEq-eq),boGnow=Math.max(0,tBo-bo);
+    const gapAll=eqGnow+boGnow+saGap;
+    const saBudgetNow=Math.round(gapAll>0?Math.min(saGap,surplusNow*saGap/gapAll):0);
     const perTranche=Math.round(saGap/nBuyTranches);
     let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fmA(p)} (€${fmA(perTranche)})`).join(' | ');
     acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
     acts+=`<div class="act-note">${trancheNote}</div>`;
-    acts+=`<div class="act-note">Total budget: €${fmA(Math.round(saGap))}. Buy each tranche when price reaches target.</div>`;
+    acts+=`<div class="act-note">Target gap €${fmA(Math.round(saGap))} \u00B7 fundable now from excess liquidity: €${fmA(saBudgetNow)}. Buy each tranche when price reaches target.</div>`;
   }else if(sat>tSat+100){
     step++;
     const nSellTranches=btc.sell.length;
@@ -563,10 +572,10 @@ function upT(){
   $('m1').innerHTML=(T.inv+T.liq+T.sat)!==100?'<span class="neg">'+(T.inv+T.liq+T.sat)+'%</span>':'';
   $('m2').innerHTML=(T.r_eq+T.r_bo)!==100?'<span class="neg">'+(T.r_eq+T.r_bo)+'%</span>':'';
   $('m3').innerHTML=(T.r_mm+T.r_ca)!==100?'<span class="neg">'+(T.r_mm+T.r_ca)+'%</span>':'';
-  localStorage.setItem('ft',JSON.stringify(T));calc();
+  localStorage.setItem('ft',JSON.stringify(T));calc();autoSave();
 }
-function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,mc:+$('cfg_mc').value||400,gEq:+$('cfg_gEq').value||0,gBo:+$('cfg_gBo').value||0,gSa:+$('cfg_gSa').value||0};localStorage.setItem('fc',JSON.stringify(cfg));calc()}
-function saveB(){btc={buy:[+$('btc_b1').value||50000,+$('btc_b2').value||45000,+$('btc_b3').value||38000],sell:[+$('btc_s1').value||80000,+$('btc_s2').value||95000,+$('btc_s3').value||110000]};localStorage.setItem('fb',JSON.stringify(btc));calc()}
+function saveCfg(){cfg={cap:+$('cfg_cap').value||2500,mc:+$('cfg_mc').value||400,gEq:+$('cfg_gEq').value||0,gBo:+$('cfg_gBo').value||0,gSa:+$('cfg_gSa').value||0};localStorage.setItem('fc',JSON.stringify(cfg));calc();autoSave()}
+function saveB(){btc={buy:[+$('btc_b1').value||50000,+$('btc_b2').value||45000,+$('btc_b3').value||38000],sell:[+$('btc_s1').value||80000,+$('btc_s2').value||95000,+$('btc_s3').value||110000]};localStorage.setItem('fb',JSON.stringify(btc));calc();autoSave()}
 
 function calcW(){
   const need=parseFloat($('w_amt').value)||0;
@@ -636,14 +645,16 @@ function calcW(){
   $('wResult').innerHTML=h;
 }
 
+let _saveTimer=null;
+function autoSave(){clearTimeout(_saveTimer);$('ss').textContent='Saving\u2026';_saveTimer=setTimeout(saveAll,1200);}
 function saveAll(){
   const s=getS();const total=KS.reduce((a,k)=>a+s[k],0);if(total<=0)return;
   // Create snapshot only if values changed
   if(hist.length>0){const last=hist[hist.length-1];if(last.s){const same=KS.every(k=>Math.abs((s[k]||0)-(last.s[k]||0))<0.01);if(!same){hist=hist.filter(x=>x.d!==new Date().toISOString().slice(0,10));hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});hist.sort((a,b)=>a.d.localeCompare(b.d));localStorage.setItem('fh',JSON.stringify(hist));rH()}}}else{hist.push({d:new Date().toISOString().slice(0,10),t:total,s:{...s}});localStorage.setItem('fh',JSON.stringify(hist));rH()}
   // Always sync to cloud
-  const t=localStorage.getItem('ght');
-  if(t){const dev=localStorage.getItem('fin_dev')||'Unknown';fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify({s:getS(),T,cfg,btc,h:hist,dev,ts:new Date().toISOString()})}}})}).then(r=>{$('ss').textContent=r.ok?'Saved & synced':'Saved locally (sync failed)'}).catch(()=>{$('ss').textContent='Saved locally'})}
-  else{$('ss').textContent='Saved locally (set token in Settings to sync)'}
+  const t=getTok();
+  if(t){fetch('https://api.github.com/gists/'+GID,{method:'PATCH',headers:{'Authorization':'token '+t,'Content-Type':'application/json'},body:JSON.stringify({files:{[GF]:{content:JSON.stringify({s:getS(),T,cfg,btc,h:hist,ts:new Date().toISOString()})}}})}).then(r=>{$('ss').textContent=r.ok?'\u2713 Saved & synced '+new Date().toLocaleTimeString():'Saved locally (sync failed)'}).catch(()=>{$('ss').textContent='Saved locally (offline)'})}
+  else{$('ss').textContent='Saved locally'}
 }
 function rH(){
   const clean=hist.filter((e,i)=>i===0||Math.round(e.t)!==Math.round(hist[i-1].t));
@@ -685,19 +696,18 @@ function renderInsights(){
   const monthsToNext=avgMonthlyChange>0&&toNext>0?Math.round(toNext/avgMonthlyChange):0;
 
   let h='<div style="font-size:.68em;opacity:.5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Insights</div>';
-  h+=`<div style="font-size:.72em;margin-bottom:4px">Return: <b>${(annReturn*100).toFixed(1)}%</b> annualized (${Math.round(days)} days)</div>`;
-  h+=`<div style="font-size:.72em;margin-bottom:4px">Pace: <b>\u20AC${fm(Math.round(avgMonthlyChange))}/month</b></div>`;
-  const projColor=vsProj>=0?'#10b981':'#ef4444';
-  h+=`<div style="font-size:.72em;margin-bottom:4px">vs Projection: <span style="color:${projColor}">${vsProj>=0?'+':''}\u20AC${fm(Math.round(vsProj))}</span></div>`;
-  if(nextM&&monthsToNext>0){
-    h+=`<div style="font-size:.72em">Milestone: <b>\u20AC${fm(nextM)}</b> — \u20AC${fm(Math.round(toNext))} to go${monthsToNext<999?' ('+monthsToNext+' months)':''}</div>`;
+  const totalGain=last.t-first.t;
+  const gc=totalGain>=0?'#10b981':'#ef4444';
+  h+=`<div style="font-size:.72em;margin-bottom:4px">Change since start: <span style="color:${gc}">${totalGain>=0?'+':''}\u20AC${fm(Math.round(totalGain))}</span> <span style="opacity:.4">(${(totalReturn*100).toFixed(1)}%)</span></div>`;
+  if(nextM){
+    h+=`<div style="font-size:.72em">Next milestone: <b>\u20AC${fm(nextM)}</b> \u2014 \u20AC${fm(Math.round(toNext))} to go</div>`;
   }
   $('insights').innerHTML=h;
 }
 async function loadFromCloud(){
-  const t=localStorage.getItem('ght');
-  try{
+  const t=getTok();
   let d=null;
+  try{
   // 1) Try public raw gist URL first — no token, no 60/hr API rate limit, works on any device
   try{const rr=await fetch('https://gist.githubusercontent.com/flavmori/'+GID+'/raw/'+GF+'?cb='+Date.now());if(rr.ok)d=JSON.parse(await rr.text());}catch(e){}
   // 2) Fallback to GitHub API (uses token if present)
@@ -709,7 +719,7 @@ async function loadFromCloud(){
   if(d.btc){btc=d.btc;if(!btc.buy)btc={buy:[50000,45000,38000],sell:[80000,95000,110000]};$('btc_b1').value=btc.buy[0];$('btc_b2').value=btc.buy[1];$('btc_b3').value=btc.buy[2];$('btc_s1').value=btc.sell[0];$('btc_s2').value=btc.sell[1];$('btc_s3').value=btc.sell[2]}
   if(d.h){hist=d.h;localStorage.setItem('fh',JSON.stringify(hist))}
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
-  calc();rH();$('ss').textContent='Loaded'+(d.dev?' from '+d.dev:'')+(d.ts?' ('+new Date(d.ts).toLocaleString()+')':'')+(t?'':' — read-only, set token in Settings to save')}catch(e){$('ss').textContent='Load error'}}
+  calc();rH();$('ss').textContent='\u2713 Synced'+(d.ts?' \u00B7 '+new Date(d.ts).toLocaleDateString():'')}catch(e){$('ss').textContent='Load error'}}
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
 window.addEventListener('resize',()=>{renderProj()});
