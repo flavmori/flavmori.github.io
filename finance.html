@@ -319,6 +319,7 @@ function calc(){
   }
 
   // Step: Invest the excess liquidity FIRST (priority) — split between Invested (Eq/Bo) and Satellite by their gaps
+  let investedNow=0, satNow=0; // track what we deploy, to compute leftover liquidity
   if(surplus>300){
     const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
     const saGapNow=Math.max(0,tSat-sat);
@@ -329,6 +330,7 @@ function calc(){
       const capMult=cfg.gEq<0?1.5:1;
       const dynCap=Math.round(cfg.cap*capMult);
       const amt=Math.min(toInvestedShare,dynCap);
+      investedNow=amt;
       const invGap=eqG+boG;
       let toEq,toBo;
       if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
@@ -344,30 +346,16 @@ function calc(){
     acts+=`<div class="act-note">Liquidity is below target (${pLiq}% vs ${T.liq}%). Wait for income before investing.</div>`;
   }
 
-  // Step: Money Market / Cash split — informational, on the liquidity you keep (never blocks investing)
-  {
-    const mmOff=mm-tMm; // vs the € target for MM within total liquid target
-    if(mmOff<-200&&cash>tCa+200){
-      step++;
-      const moveAmt=Math.round(Math.min(-mmOff,cash-tCa));
-      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(moveAmt)}</span></div>`;
-      acts+=`<div class="act-note">Optional: of the cash you keep liquid, Money Market is ${subMm}% (target ${T.r_mm}%). Moving it earns more yield — your call.</div>`;
-    }else if(mmOff>200){
-      step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fmA(Math.round(mmOff))}</span></div>`;
-      acts+=`<div class="act-note">Optional: Money Market is above its ${T.r_mm}% share of liquid.</div>`;
-    }
-  }
   // Step: Satellite — funded from its share of the excess liquidity (no double-counting with Invest step)
   const saGap=Math.max(0,tSat-sat);
   const nBuyTranches=btc.buy.length;
   if(saGap>100){
     step++;
-    // budget now = satellite's share of current excess liquidity; saGap stays the long-term goal
     const surplusNow=Math.max(0,liquid-tLiq);
     const eqGnow=Math.max(0,tEq-eq),boGnow=Math.max(0,tBo-bo);
     const gapAll=eqGnow+boGnow+saGap;
     const saBudgetNow=Math.round(gapAll>0?Math.min(saGap,surplusNow*saGap/gapAll):0);
+    satNow=saBudgetNow;
     const perTranche=Math.round(saGap/nBuyTranches);
     let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fmA(p)} (€${fmA(perTranche)})`).join(' | ');
     acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
@@ -383,6 +371,24 @@ function calc(){
     }).join(' | ');
     acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
     acts+=`<div class="act-note">${sellNote}</div>`;
+  }
+
+  // Step: Money Market / Cash split — LAST, on the liquidity that REMAINS after investing + satellite
+  {
+    const liqLeft=Math.max(0,liquid-investedNow-satNow); // what stays liquid after steps above
+    // ideal MM within the remaining liquid, using your MM/Cash target ratio
+    const mmTargetLeft=T.r_mm/100*liqLeft;
+    const mmOffLeft=mm-mmTargetLeft;
+    if(mmOffLeft<-200&&cash>200){
+      step++;
+      const moveAmt=Math.round(Math.min(-mmOffLeft,cash));
+      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(moveAmt)}</span></div>`;
+      acts+=`<div class="act-note">Optional: of the €${fmA(Math.round(liqLeft))} you keep liquid (after investing), Money Market should be ~${T.r_mm}%. Moving it earns more yield — your call.</div>`;
+    }else if(mmOffLeft>200){
+      step++;
+      acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fmA(Math.round(mmOffLeft))}</span></div>`;
+      acts+=`<div class="act-note">Optional: Money Market is above its ${T.r_mm}% share of the €${fmA(Math.round(liqLeft))} you keep liquid.</div>`;
+    }
   }
 
   if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
