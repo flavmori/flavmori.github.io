@@ -318,22 +318,12 @@ function calc(){
     acts+=`<div class="act-note">Option B (now): sell €${fmA(sellAmt)} ${from}, buy ${to}. Tax cost approx €${fmA(taxCost)}.</div>`;
   }
 
-  // Step: Move Cash → Money Market (if surplus exists and MM below target)
+  // Step: Invest the excess liquidity FIRST (priority) — split between Invested (Eq/Bo) and Satellite by their gaps
   if(surplus>300){
-    const mmNeed=Math.max(0,tMm-mm);
-    if(mmNeed>50){
-      step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(Math.round(mmNeed))}</span></div>`;
-      acts+=`<div class="act-note">Money Market is ${subMm}% of your liquid (target ${T.r_mm}%). Fill it before investing.</div>`;
-    }
-
-    // Step: Invest surplus (capped) — split between Invested (Eq/Bo) and Satellite by their gaps
-    const investable=Math.max(0,surplus-mmNeed);
     const eqG=Math.max(0,tEq-eq),boG=Math.max(0,tBo-bo);
     const saGapNow=Math.max(0,tSat-sat);
     const totalGapNeed=eqG+boG+saGapNow;
-    // how much of the excess goes to invested vs satellite (proportional to their gaps)
-    const toInvestedShare=totalGapNeed>0?investable*(eqG+boG)/totalGapNeed:investable;
+    const toInvestedShare=totalGapNeed>0?surplus*(eqG+boG)/totalGapNeed:surplus;
     if(toInvestedShare>=300){
       step++;
       const capMult=cfg.gEq<0?1.5:1;
@@ -345,7 +335,7 @@ function calc(){
       else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
       const capNote=capMult>1?`Market is down (${cfg.gEq}%). Cap increased to €${fmA(dynCap)} (x1.5). `:'';
-      acts+=`<div class="act-note">${capNote}You have €${fmA(Math.round(surplus))} excess liquidity (split: invest + satellite).${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act-note">${capNote}You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite).${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
@@ -354,28 +344,27 @@ function calc(){
     acts+=`<div class="act-note">Liquidity is below target (${pLiq}% vs ${T.liq}%). Wait for income before investing.</div>`;
   }
 
-  // Priority 3: MM/Cash rebalance (only when liquid is AT target, not when surplus exists)
-  if(surplus>-500&&surplus<=300&&liquid>0){
-    const mmIdeal=T.r_mm/100*tLiq;
-    const mmOff=mm-mmIdeal;
-    if(mmOff>200){
+  // Step: Money Market / Cash split — informational, on the liquidity you keep (never blocks investing)
+  {
+    const mmOff=mm-tMm; // vs the € target for MM within total liquid target
+    if(mmOff<-200&&cash>tCa+200){
+      step++;
+      const moveAmt=Math.round(Math.min(-mmOff,cash-tCa));
+      acts+=`<div class="act"><span><b>${step}.</b> Move cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(moveAmt)}</span></div>`;
+      acts+=`<div class="act-note">Optional: of the cash you keep liquid, Money Market is ${subMm}% (target ${T.r_mm}%). Moving it earns more yield — your call.</div>`;
+    }else if(mmOff>200){
       step++;
       acts+=`<div class="act"><span><b>${step}.</b> Money Market → Cash</span><span class="av mu">€${fmA(Math.round(mmOff))}</span></div>`;
-      acts+=`<div class="act-note">Money Market is over its ${T.r_mm}% share of liquid. Move excess to cash accounts.</div>`;
-    }else if(mmOff<-200&&cash>tCa){
-      step++;
-      acts+=`<div class="act"><span><b>${step}.</b> Cash → Money Market</span><span class="av" style="color:#f59e0b">€${fmA(Math.round(-mmOff))}</span></div>`;
-      acts+=`<div class="act-note">Money Market is below its ${T.r_mm}% share. Move cash to earn yield.</div>`;
+      acts+=`<div class="act-note">Optional: Money Market is above its ${T.r_mm}% share of liquid.</div>`;
     }
   }
-
   // Step: Satellite — funded from its share of the excess liquidity (no double-counting with Invest step)
   const saGap=Math.max(0,tSat-sat);
   const nBuyTranches=btc.buy.length;
   if(saGap>100){
     step++;
     // budget now = satellite's share of current excess liquidity; saGap stays the long-term goal
-    const surplusNow=Math.max(0,liquid-tLiq-Math.max(0,tMm-mm));
+    const surplusNow=Math.max(0,liquid-tLiq);
     const eqGnow=Math.max(0,tEq-eq),boGnow=Math.max(0,tBo-bo);
     const gapAll=eqGnow+boGnow+saGap;
     const saBudgetNow=Math.round(gapAll>0?Math.min(saGap,surplusNow*saGap/gapAll):0);
