@@ -94,6 +94,7 @@ body{padding:12px 8px;font-size:12px}
 <div id="app"><div class="w">
 <div class="total" id="tot">-</div>
 <div class="total-d" id="totD"></div>
+<div id="btcLive" style="text-align:center;font-size:.72em;margin-bottom:20px;color:#f59e0b;letter-spacing:.03em"></div>
 
 <div class="sec">
 <div class="sec-h">Balances</div>
@@ -207,9 +208,20 @@ body{padding:12px 8px;font-size:12px}
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json';
 // Live BTC price in EUR (CoinGecko). Populated on load; used to flag which buy/sell targets are reached.
 let btcPrice=0;
+function renderBtcLive(){
+  const el=document.getElementById('btcLive'); if(!el)return;
+  if(btcPrice>0){
+    let extra='';
+    try{const nextBuy=(btc.buy||[]).filter(p=>btcPrice>p).sort((a,b)=>b-a)[0]; if(nextBuy)extra=' \u00B7 above buy target \u20AC'+fm(nextBuy);
+      const hitBuy=(btc.buy||[]).find(p=>btcPrice<=p); if(hitBuy)extra=' \u00B7 \u2193 at buy target \u20AC'+fm(hitBuy);
+      const hitSell=(btc.sell||[]).find(p=>btcPrice>=p); if(hitSell)extra=' \u00B7 \u2191 SELL target \u20AC'+fm(hitSell)+' reached';
+    }catch(e){}
+    el.innerHTML='\u20BF BTC \u20AC'+fm(btcPrice)+extra;
+  }else el.innerHTML='';
+}
 function fetchBtc(){
   fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur')
-    .then(r=>r.json()).then(d=>{if(d&&d.bitcoin&&d.bitcoin.eur){btcPrice=d.bitcoin.eur;calc()}}).catch(()=>{});
+    .then(r=>r.json()).then(d=>{if(d&&d.bitcoin&&d.bitcoin.eur){btcPrice=d.bitcoin.eur;renderBtcLive();calc()}}).catch(()=>{});
 }
 // Default sync token (scope: gist only) — obfuscated, preset on all devices. Override in Settings if needed.
 const _TK=['ghp_ZTQSonSLBzu','NyStvPgMMGCDf','81fQ7h4A3473'];
