@@ -116,6 +116,7 @@ body{padding:12px 8px;font-size:12px}
 </div>
 
 <div class="acts" id="acts"></div>
+<div class="sec" id="afterSec" style="display:none"><div class="sec-h">After your actions</div><div id="allocAfter"></div></div>
 
 <div class="sec">
 <div class="sec-h">I need cash</div>
@@ -306,7 +307,7 @@ function calc(){
 
   // We deploy the EXCESS liquidity in a clean cascade: (1) Invested, (2) Bitcoin, (3) what stays Liquid.
   // Priority when excess isn't enough for all: Invested first, then Bitcoin (your rule 1a).
-  let investedNow=0, satNow=0;
+  let investedNow=0, satNow=0, newEq=0, newBo=0;
 
   // ============ CASE: liquidity is BELOW target (spent down) — rebuild, don't invest ============
   if(surplus<-300){
@@ -337,6 +338,7 @@ function calc(){
       let toEq,toBo;
       if(g>0){toEq=Math.round(toInvest*eqG/g);toBo=toInvest-toEq}
       else{toEq=Math.round(toInvest*T.r_eq/100);toBo=toInvest-toEq}
+      newEq=toEq;newBo=toBo;
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(toInvest)}</span></div>`;
       const extra=invGapTot>cfg.cap?` Invested gap is €${fmA(Math.round(invGapTot))}; capped at €${fmA(cfg.cap)}/move.`:'';
       acts+=`<div class="act-note">Of your €${fmA(Math.round(surplus))} excess liquidity. New money fills the underweight side first.${extra}</div>`;
@@ -401,6 +403,36 @@ function calc(){
 
   if(step===0)acts+=`<div class="act"><span class="mu">All on target. Nothing to do.</span><span></span></div>`;
   $('acts').innerHTML=acts;
+
+  // ===== "After your actions" mirror — portfolio if you execute all suggestions =====
+  {
+    const aEq=eq+newEq, aBo=bo+newBo, aSat=sat+satNow;
+    const deployed=investedNow+satNow;
+    const aLiq=Math.max(0,liquid-deployed);
+    // split remaining liquid toward MM/Cash target ratio (visual only)
+    const aMm=Math.round(aLiq*T.r_mm/100), aCash=aLiq-aMm;
+    const aInv=aEq+aBo, aTot=aInv+aLiq+aSat;
+    const hasActions=(investedNow>0||satNow>0);
+    if(hasActions&&aTot>0){
+      const pI=Math.round(aInv/aTot*100),pL=Math.round(aLiq/aTot*100),pS=Math.round(aSat/aTot*100);
+      const sEq=aInv>0?Math.round(aEq/aInv*100):0,sBo=aInv>0?Math.round(aBo/aInv*100):0;
+      const sMm=aLiq>0?Math.round(aMm/aLiq*100):0,sCa=aLiq>0?Math.round(aCash/aLiq*100):0;
+      const onT=(p,t)=>Math.abs(p-t)<=1?'<span style="color:#10b981">\u2713</span>':'';
+      let h='';
+      h+=`<div class="arow"><span class="l">Invested</span><span class="r">${fmC(aInv)} <span class="mu">${pI}% / ${T.inv}%</span> ${onT(pI,T.inv)}</span></div>`;
+      h+=`<div class="arow sub"><span class="l">Equity</span><span class="r">${fmC(aEq)} <span class="mu">${sEq}% / ${T.r_eq}%</span> ${onT(sEq,T.r_eq)}</span></div>`;
+      h+=`<div class="arow sub"><span class="l">Bond</span><span class="r">${fmC(aBo)} <span class="mu">${sBo}% / ${T.r_bo}%</span> ${onT(sBo,T.r_bo)}</span></div>`;
+      h+=`<div class="arow"><span class="l">Liquid</span><span class="r">${fmC(aLiq)} <span class="mu">${pL}% / ${T.liq}%</span> ${onT(pL,T.liq)}</span></div>`;
+      h+=`<div class="arow sub"><span class="l">Money Market</span><span class="r">${fmC(aMm)} <span class="mu">${sMm}% / ${T.r_mm}%</span></span></div>`;
+      h+=`<div class="arow sub"><span class="l">Cash</span><span class="r">${fmC(aCash)} <span class="mu">${sCa}% / ${T.r_ca}%</span></span></div>`;
+      h+=`<div class="arow"><span class="l">Satellite</span><span class="r">${fmC(aSat)} <span class="mu">${pS}% / ${T.sat}%</span> ${onT(pS,T.sat)}</span></div>`;
+      h+=`<div class="act-note" style="margin-top:6px">Total €${fmA(Math.round(aTot))} \u2014 unchanged. This is where you'd land if you execute all the actions above.</div>`;
+      $('allocAfter').innerHTML=h;
+      $('afterSec').style.display='block';
+    }else{
+      $('afterSec').style.display='none';
+    }
+  }
 
   localStorage.setItem('fs',JSON.stringify(s));
   renderVisuals();
