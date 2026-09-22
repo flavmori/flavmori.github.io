@@ -696,8 +696,13 @@ function renderInsights(){
 }
 async function loadFromCloud(){
   const t=localStorage.getItem('ght');
-  try{const hdr=t?{'Authorization':'token '+t}:{};const r=await fetch('https://api.github.com/gists/'+GID,{headers:hdr});if(!r.ok){$('ss').textContent='Load failed (HTTP '+r.status+')';return}
-  const g=await r.json();if(!g.files[GF])return;const d=JSON.parse(g.files[GF].content);
+  try{
+  let d=null;
+  // 1) Try public raw gist URL first — no token, no 60/hr API rate limit, works on any device
+  try{const rr=await fetch('https://gist.githubusercontent.com/flavmori/'+GID+'/raw/'+GF+'?cb='+Date.now());if(rr.ok)d=JSON.parse(await rr.text());}catch(e){}
+  // 2) Fallback to GitHub API (uses token if present)
+  if(!d){const hdr=t?{'Authorization':'token '+t}:{};const r=await fetch('https://api.github.com/gists/'+GID,{headers:hdr});if(!r.ok){$('ss').textContent='Load failed (HTTP '+r.status+')';return}const g=await r.json();if(!g.files[GF])return;d=JSON.parse(g.files[GF].content);}
+  if(!d)return;
   if(d.s)KS.forEach(k=>{const el=$('s_'+k);el.dataset.raw=d.s[k]||'';el.value=d.s[k]?String(d.s[k]):'';fmInput(el)});
   if(d.T){T=d.T;$('t_inv').value=T.inv;$('t_liq').value=T.liq;$('t_sat').value=T.sat;$('r_eq').value=T.r_eq;$('r_bo').value=T.r_bo;$('r_mm').value=T.r_mm;$('r_ca').value=T.r_ca}
   if(d.cfg){cfg=d.cfg;$('cfg_cap').value=cfg.cap;$('cfg_mc').value=cfg.mc||400;$('cfg_gEq').value=cfg.gEq||0;$('cfg_gBo').value=cfg.gBo||0;$('cfg_gSa').value=cfg.gSa||0}
