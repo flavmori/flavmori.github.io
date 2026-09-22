@@ -339,11 +339,14 @@ function calc(){
       const dynCap=cfg.cap;
       const amt=Math.min(toInvestedShare,dynCap);
       investedNow=amt;
-      // Split the NEW money by the target Equity/Bond ratio (simple + never fights the rebalance step)
-      const toEq=Math.round(amt*T.r_eq/100);
-      const toBo=amt-toEq;
+      // Fill the biggest gap first: if you're underweight Equity, new money goes to Equity until back on ratio (and vice versa)
+      const eqG=Math.max(0,tEq-eq), boG=Math.max(0,tBo-bo);
+      const invGap=eqG+boG;
+      let toEq,toBo;
+      if(invGap>0){toEq=Math.round(amt*eqG/invGap);toBo=amt-toEq}
+      else{toEq=Math.round(amt*T.r_eq/100);toBo=amt-toEq}
       acts+=`<div class="act"><span><b>${step}.</b> Invest: €${fmA(toEq)} Equity + €${fmA(toBo)} Bond</span><span class="av" style="color:#3b82f6">€${fmA(amt)}</span></div>`;
-      acts+=`<div class="act-note">You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite). Split ${T.r_eq}/${T.r_bo} per your target.${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
+      acts+=`<div class="act-note">You have €${fmA(Math.round(surplus))} excess liquidity to deploy (invest + satellite). New money fills the underweight side first.${toInvestedShare>dynCap?' Remaining €'+fmA(Math.round(toInvestedShare-dynCap))+' for next time.':''}</div>`;
     }
   }else if(surplus<-500&&invested<=tInv){
     // Liquid below target, invested also below — accumulate
