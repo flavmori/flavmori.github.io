@@ -211,6 +211,12 @@ body{padding:12px 8px;font-size:12px}
 
 <script>
 const GID='17fedcdc8ee90458b9513999b55a4813',GF='finance.json';
+// Live BTC price in EUR (CoinGecko). Populated on load; used to flag which buy/sell targets are reached.
+let btcPrice=0;
+function fetchBtc(){
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur')
+    .then(r=>r.json()).then(d=>{if(d&&d.bitcoin&&d.bitcoin.eur){btcPrice=d.bitcoin.eur;calc()}}).catch(()=>{});
+}
 // Default sync token (scope: gist only) — obfuscated, preset on all devices. Override in Settings if needed.
 const _TK=['ghp_ZTQSonSLBzu','NyStvPgMMGCDf','81fQ7h4A3473'];
 function getTok(){return localStorage.getItem('ght')||_TK.join('')}
@@ -357,19 +363,22 @@ function calc(){
     const saBudgetNow=Math.round(gapAll>0?Math.min(saGap,surplusNow*saGap/gapAll):0);
     satNow=saBudgetNow;
     const perTranche=Math.round(saGap/nBuyTranches);
-    let trancheNote=btc.buy.map((p,i)=>`T${i+1}: €${fmA(p)} (€${fmA(perTranche)})`).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
+    const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
+    let trancheNote=btc.buy.map((p,i)=>{const hit=btcPrice>0&&btcPrice<=p;return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: €${fmA(p)} (€${fmA(perTranche)})${hit?' \u2190 BUY NOW':''}</span>`}).join(' | ');
+    acts+=`<div class="act"><span><b>${step}.</b> Buy Satellite (BTC)${bp}</span><span class="av" style="color:#ef4444">€${fmA(perTranche)}/tranche</span></div>`;
     acts+=`<div class="act-note">${trancheNote}</div>`;
-    acts+=`<div class="act-note">Target gap €${fmA(Math.round(saGap))} \u00B7 fundable now from excess liquidity: €${fmA(saBudgetNow)}. Buy each tranche when price reaches target.</div>`;
+    acts+=`<div class="act-note">Target gap €${fmA(Math.round(saGap))} \u00B7 fundable now from excess liquidity: €${fmA(saBudgetNow)}. Buy each tranche when BTC reaches its target price.</div>`;
   }else if(sat>tSat+100){
     step++;
     const nSellTranches=btc.sell.length;
     const pctEach=Math.floor(100/nSellTranches);
+    const bp=btcPrice>0?' \u00B7 BTC now €'+fmA(btcPrice):'';
     let sellNote=btc.sell.map((p,i)=>{
       const pct=i<nSellTranches-1?pctEach:(100-(pctEach*(nSellTranches-1)));
-      return `T${i+1}: sell ${pct}% at €${fmA(p)}`;
+      const hit=btcPrice>0&&btcPrice>=p;
+      return `<span style="${hit?'color:#10b981;font-weight:600':''}">T${i+1}: sell ${pct}% at €${fmA(p)}${hit?' \u2190 SELL NOW':''}</span>`;
     }).join(' | ');
-    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
+    acts+=`<div class="act"><span><b>${step}.</b> Satellite — take profit${bp}</span><span class="pos">+€${fmA(Math.round(sat-tSat))} over target</span></div>`;
     acts+=`<div class="act-note">${sellNote}</div>`;
   }
 
@@ -716,7 +725,7 @@ async function loadFromCloud(){
   localStorage.setItem('ft',JSON.stringify(T));localStorage.setItem('fc',JSON.stringify(cfg));localStorage.setItem('fb',JSON.stringify(btc));
   calc();rH();$('ss').textContent='\u2713 Synced'+(d.ts?' \u00B7 '+new Date(d.ts).toLocaleDateString():'')}catch(e){$('ss').textContent='Load error'}}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud()});else{init();loadFromCloud()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();loadFromCloud();fetchBtc()});else{init();loadFromCloud();fetchBtc()}
 window.addEventListener('resize',()=>{renderProj()});
 </script>
 </body>
